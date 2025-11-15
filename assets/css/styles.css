@@ -43,32 +43,28 @@
 }
 
 html {
-    overflow: hidden;
-    height: 100%;
-    width: 100%;
     position: fixed;
     inset: 0;
+    overflow: hidden;
     background-color: var(--bg);
-    /* Ensure background extends beyond viewport on iOS */
     min-height: 100vh;
     min-height: -webkit-fill-available;
-    /* Force full coverage on iOS including safe areas */
     -webkit-overflow-scrolling: touch;
 }
 
 body {
-    padding: 60px 40px;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding-top: max(60px, env(safe-area-inset-top));
     padding-bottom: max(60px, env(safe-area-inset-bottom));
     padding-left: max(40px, env(safe-area-inset-left));
     padding-right: max(40px, env(safe-area-inset-right));
-    height: 100vh;
-    height: 100dvh; /* Use dynamic viewport height for mobile */
-    min-height: -webkit-fill-available; /* Ensure full coverage on iOS */
-    width: 100vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 100dvh;
+    min-height: -webkit-fill-available;
+    overflow: hidden;
     background-color: var(--bg);
     color: var(--fg);
     font-family: "Family", system-ui, -apple-system, sans-serif;
@@ -76,10 +72,6 @@ body {
     line-height: 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow: hidden;
-    position: fixed;
-    inset: 0;
-    /* no theme fade on switch */
 }
 
 /* Force background extension into safe areas on iOS */
@@ -89,11 +81,34 @@ body::before {
     inset: 0;
     background-color: var(--bg);
     z-index: -1;
-    /* Extend into safe areas */
-    top: calc(-1 * env(safe-area-inset-top, 0px));
-    bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
-    left: calc(-1 * env(safe-area-inset-left, 0px));
-    right: calc(-1 * env(safe-area-inset-right, 0px));
+    /* Extend into safe areas with extra margin */
+    top: calc(-100px - env(safe-area-inset-top, 0px));
+    bottom: calc(-100px - env(safe-area-inset-bottom, 0px));
+    left: calc(-100px - env(safe-area-inset-left, 0px));
+    right: calc(-100px - env(safe-area-inset-right, 0px));
+}
+
+/* Additional layer for iOS Safari bar coverage */
+html::before {
+    content: '';
+    position: fixed;
+    top: -100px;
+    left: 0;
+    right: 0;
+    height: calc(100px + env(safe-area-inset-top, 0px));
+    background-color: var(--bg);
+    z-index: -2;
+}
+
+html::after {
+    content: '';
+    position: fixed;
+    bottom: -100px;
+    left: 0;
+    right: 0;
+    height: calc(100px + env(safe-area-inset-bottom, 0px));
+    background-color: var(--bg);
+    z-index: -2;
 }
 
 main {
@@ -148,14 +163,13 @@ p {
     color: var(--fg-strong);
 }
 
-/* Buttons - Reset to default browser styling */
+/* Buttons - Default browser styling with visibility fixes */
 button {
     all: revert;
     cursor: pointer;
     transition: all 0.3s ease;
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
     touch-action: manipulation; /* Optimize touch interactions */
-    border-radius: 0; /* Square hard edge on all platforms */
 }
 
 button:focus {
@@ -169,7 +183,6 @@ button:hover {
 button.active {
     background-color: var(--fg-strong);
     color: var(--bg);
-    border-radius: 0;
 }
 
 /* Active state for mobile touch */
@@ -178,8 +191,13 @@ button:active {
     transform: scale(0.98);
 }
 
-/* Button text color in dark mode */
-[data-theme="dark"] button {
+/* Fix button visibility in dark mode - use light text */
+[data-theme="dark"] button:not(.active) {
+    color: var(--fg);
+}
+
+[data-theme="dark"] button.active {
+    background-color: var(--fg-strong);
     color: #000000;
 }
 
@@ -242,117 +260,7 @@ button:active {
     object-position: center;
 }
 
-/* Book covers should show the full cover */
-.content-items[data-mode="read"] .content-item img {
-    object-fit: contain;
-    background: transparent;
-}
-
-.content-items[data-mode="read"] .content-item {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-/* Different formations for each content type */
-
-/* READ - Books: Closer together positioning */
-.content-items[data-mode="read"] .content-item:nth-child(1) {
-    top: 8%;
-    left: calc(50% - 200px);
-    transform: rotate(-11deg);
-}
-
-.content-items[data-mode="read"] .content-item:nth-child(2) {
-    top: 6%;
-    left: calc(50% - 110px);
-    transform: rotate(7deg);
-}
-
-.content-items[data-mode="read"] .content-item:nth-child(3) {
-    top: 6%;
-    right: calc(50% - 110px);
-    transform: rotate(-2deg);
-}
-
-.content-items[data-mode="read"] .content-item:nth-child(4) {
-    top: 8%;
-    right: calc(50% - 200px);
-    transform: rotate(9deg);
-}
-
-.content-items[data-mode="read"] .content-item:nth-child(5) {
-    bottom: 50px;
-    left: calc(50% - 200px);
-    transform: rotate(8deg);
-}
-
-.content-items[data-mode="read"] .content-item:nth-child(6) {
-    bottom: 30px;
-    left: calc(50% - 110px);
-    transform: rotate(-4deg);
-}
-
-.content-items[data-mode="read"] .content-item:nth-child(7) {
-    bottom: 30px;
-    right: calc(50% - 110px);
-    transform: rotate(2deg);
-}
-
-.content-items[data-mode="read"] .content-item:nth-child(8) {
-    bottom: 50px;
-    right: calc(50% - 200px);
-    transform: rotate(-9deg);
-}
-
-/* WRITE - Letters: Moved further from main content */
-.content-items[data-mode="write"] .content-item:nth-child(1) {
-    top: 8%;
-    left: calc(50% - 240px);
-    transform: rotate(-8deg);
-}
-
-.content-items[data-mode="write"] .content-item:nth-child(2) {
-    top: 6%;
-    left: calc(50% - 130px);
-    transform: rotate(3deg);
-}
-
-.content-items[data-mode="write"] .content-item:nth-child(3) {
-    top: 6%;
-    right: calc(50% - 130px);
-    transform: rotate(-10deg);
-}
-
-.content-items[data-mode="write"] .content-item:nth-child(4) {
-    top: 8%;
-    right: calc(50% - 240px);
-    transform: rotate(5deg);
-}
-
-.content-items[data-mode="write"] .content-item:nth-child(5) {
-    bottom: 50px;
-    left: calc(50% - 240px);
-    transform: rotate(6deg);
-}
-
-.content-items[data-mode="write"] .content-item:nth-child(6) {
-    bottom: 30px;
-    left: calc(50% - 130px);
-    transform: rotate(-3deg);
-}
-
-.content-items[data-mode="write"] .content-item:nth-child(7) {
-    bottom: 30px;
-    right: calc(50% - 130px);
-    transform: rotate(9deg);
-}
-
-.content-items[data-mode="write"] .content-item:nth-child(8) {
-    bottom: 50px;
-    right: calc(50% - 240px);
-    transform: rotate(-7deg);
-}
+/* Album positioning for listen mode */
 
 /* LISTEN - Albums: Moved further from main content */
 .content-items[data-mode="listen"] .content-item:nth-child(1) {
