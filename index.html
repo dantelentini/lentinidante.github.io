@@ -29,10 +29,10 @@
             <a href="http://thingsivechangedmymindon.com" target="_blank" id="write-link">thingsivechangedmymindon.com</a>
         </div>
         <p>
-            I'm a Growth Hacker. In my past, I<br>
+            I'm a <a href="https://dollarhomepage.com/" target="_blank" id="growth-hacker-link" class="growth-hacker-link">Growth Hacker</a>. In my past, I<br>
             left college, made <span class="white">tiktoks</span> and joined<br>
             <span class="white">startups</span>— all of which led me to SF,<br>
-            where I'm now at <span class="white-bold">Founders, Inc.</span>
+            where I'm now at <a href="https://f.inc/" target="_blank" class="white-bold">Founders, Inc.</a>
         </p>
         <div class="signature">
          MSHF,<br>
@@ -146,9 +146,15 @@
             pendingTheme = 'dark';
             syncSystemChrome('dark');
             playDarkModeSfx();
+            
             themeTransitionTimer = setTimeout(() => {
                 cancelPendingTheme({ stopAudio: false });
                 applyTheme('dark', { skipAudio: true });
+                
+                // Start flashing with dark mode audio BPM after theme is applied
+                if (typeof startGrowthHackerFlash !== 'undefined') {
+                    startGrowthHackerFlash(118);
+                }
             }, DARK_MODE_DELAY_MS);
         }
 
@@ -191,6 +197,7 @@
         const darkToggle = document.getElementById('dark-mode-toggle');
         const readLink = document.getElementById('read-link');
         const writeLink = document.getElementById('write-link');
+        const growthHackerLink = document.getElementById('growth-hacker-link');
 
         let currentMode = null;
         let currentlyPlaying = null;
@@ -423,8 +430,25 @@
             currentlyPlaying = null;
             currentPlayingElement = null;
             stopDanceStyleFluctuation();
+            stopGrowthHackerFlash();
             if (updateSession) {
                 updateMediaSessionPlaybackState('none');
+            }
+        }
+
+        // Growth Hacker flash control - works in both light and dark mode
+        function startGrowthHackerFlash(bpm) {
+            if (growthHackerLink) {
+                // Flash in sync with music - one flash per beat
+                const flashDuration = (60 / bpm); // Duration for one beat in seconds
+                growthHackerLink.style.setProperty('--flash-duration', `${flashDuration}s`);
+                growthHackerLink.classList.add('flashing');
+            }
+        }
+
+        function stopGrowthHackerFlash() {
+            if (growthHackerLink) {
+                growthHackerLink.classList.remove('flashing');
             }
         }
 
@@ -649,6 +673,7 @@
                     audioPlayer.pause();
                     updateMediaSessionPlaybackState('paused');
                     stopDanceStyleFluctuation();
+                    stopGrowthHackerFlash();
                     // When paused, stop spinning and restore CSS rotation
                     restorePlaybackVisual(element);
                 } else {
@@ -662,6 +687,7 @@
                                 const danceSpeed = (240 / bpm); // 4 beats in seconds
                                 contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
                                 startDanceStyleFluctuation(bpm);
+                                startGrowthHackerFlash(bpm);
                             }
                             // When playing, add spinning class and dim slightly
                             if (element) {
@@ -693,6 +719,7 @@
                 contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
                 // Start dancing immediately when new track plays
                 startDanceStyleFluctuation(bpm);
+                startGrowthHackerFlash(bpm);
             }
 
             // Find track info for Media Session API
@@ -727,6 +754,11 @@
                     // Update Media Session API (for lock screen controls, notifications)
                     updateMediaSession(trackInfo);
                     
+                    // Start growth hacker flash if we have track info
+                    if (trackInfo && trackInfo.bpm) {
+                        startGrowthHackerFlash(trackInfo.bpm);
+                    }
+                    
                     // Visual feedback for successful playback - add spinning animation and dim slightly
                     if (element) {
                         element.classList.add('spinning');
@@ -739,6 +771,9 @@
                             currentlyPlaying = audioSrc;
                             currentPlayingElement = element;
                             updateMediaSession(trackInfo);
+                            if (trackInfo && trackInfo.bpm) {
+                                startGrowthHackerFlash(trackInfo.bpm);
+                            }
                             if (element) {
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
@@ -823,12 +858,18 @@
             if (pendingTheme === 'dark') {
                 cancelPendingTheme();
                 applyTheme('light', { force: true });
+                stopGrowthHackerFlash();
                 return;
             }
 
             const next = currentTheme === 'dark' ? 'light' : 'dark';
 
             if (next === 'dark') {
+                // Close listen tab if open
+                if (currentMode === 'listen') {
+                    hideContent();
+                }
+                
                 if (audioPlayer && !audioPlayer.paused) {
                     clearCurrentPlayingState({ resetAudio: true });
                 }
@@ -836,6 +877,7 @@
             } else {
                 cancelPendingTheme();
                 applyTheme('light', { force: currentTheme === 'light' });
+                stopGrowthHackerFlash();
             }
         });
 
@@ -897,3 +939,6 @@
     </script>
 </body>
 </html>
+
+
+
