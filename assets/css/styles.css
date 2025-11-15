@@ -140,6 +140,7 @@ h1 {
     font-size: 2.2em;
     color: var(--fg-strong);
     margin-bottom: 0.3em;
+    
 }
 
 p {
@@ -278,49 +279,65 @@ button:active {
 .content-items[data-mode="listen"] .content-item:nth-child(1) {
     top: 8%;
     left: calc(50% - 240px);
+    --item-rotation: -6deg;
     transform: rotate(-6deg);
+    animation-delay: 0s;
 }
 
 .content-items[data-mode="listen"] .content-item:nth-child(2) {
     top: 6%;
     left: calc(50% - 130px);
+    --item-rotation: 1deg;
     transform: rotate(1deg);
+    animation-delay: 0.4s;
 }
 
 .content-items[data-mode="listen"] .content-item:nth-child(3) {
     top: 6%;
     right: calc(50% - 130px);
+    --item-rotation: -4deg;
     transform: rotate(-4deg);
+    animation-delay: 0.8s;
 }
 
 .content-items[data-mode="listen"] .content-item:nth-child(4) {
     top: 8%;
     right: calc(50% - 240px);
+    --item-rotation: 8deg;
     transform: rotate(8deg);
+    animation-delay: 1.2s;
 }
 
 .content-items[data-mode="listen"] .content-item:nth-child(5) {
     bottom: 50px;
     left: calc(50% - 240px);
+    --item-rotation: 7deg;
     transform: rotate(7deg);
+    animation-delay: 1.6s;
 }
 
 .content-items[data-mode="listen"] .content-item:nth-child(6) {
     bottom: 30px;
     left: calc(50% - 130px);
+    --item-rotation: -3deg;
     transform: rotate(-3deg);
+    animation-delay: 2.0s;
 }
 
 .content-items[data-mode="listen"] .content-item:nth-child(7) {
     bottom: 30px;
     right: calc(50% - 130px);
+    --item-rotation: 5deg;
     transform: rotate(5deg);
+    animation-delay: 2.4s;
 }
 
 .content-items[data-mode="listen"] .content-item:nth-child(8) {
     bottom: 50px;
     right: calc(50% - 240px);
+    --item-rotation: -5deg;
     transform: rotate(-5deg);
+    animation-delay: 2.8s;
 }
 
 /* Spin in place animation for playing album */
@@ -335,12 +352,32 @@ button:active {
 
 .content-item.spinning {
     animation: spinInPlace 8s linear infinite;
+    animation-delay: 0s !important;
+}
+
+/* Dancing side-to-side animation for non-spinning albums */
+@keyframes danceSideToSide {
+    0%, 100% {
+        transform: translateX(0) rotate(var(--item-rotation, 0deg));
+    }
+    25% {
+        transform: translateX(-8px) rotate(calc(var(--item-rotation, 0deg) - 2deg));
+    }
+    75% {
+        transform: translateX(8px) rotate(calc(var(--item-rotation, 0deg) + 2deg));
+    }
+}
+
+/* Only dance when a song is playing */
+.content-items:has(.spinning) .content-item:not(.spinning) {
+    animation: danceSideToSide 3s ease-in-out infinite;
 }
 
 /* Hover effects for content items (not spinning) */
 .content-item:not(.spinning):hover {
     transform: scale(1.05) rotate(0deg) !important;
     z-index: 10;
+    animation-play-state: paused;
 }
 
 
