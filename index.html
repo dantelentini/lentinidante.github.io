@@ -207,6 +207,8 @@
         let audioUnlocked = false;
         let hasClickedListenBefore = false;
         let isReturningFromBackground = false;
+        let lastButtonClickTime = 0;
+        let isProcessingButtonClick = false;
         
         // Unlock audio on first user interaction (for autoplay policies)
         function unlockAudio() {
@@ -238,47 +240,85 @@
             }
         });
 
-        // Button event listeners
-        readBtn.addEventListener('click', (e) => {
+        // Track touch to prevent ghost clicks on mobile
+        let lastTouchTime = 0;
+        
+        // Prevent ghost clicks after touch events
+        function preventGhostClick(e) {
+            const now = Date.now();
+            if (e.type === 'click' && (now - lastTouchTime) < 400) {
+                e.stopPropagation();
+                e.preventDefault();
+                return true;
+            }
+            if (e.type === 'touchend' || e.type === 'touchstart') {
+                lastTouchTime = now;
+            }
+            return false;
+        }
+        
+        // Debounce function to prevent rapid button clicks
+        function debounceButtonClick(callback, delay = 300) {
+            return function(e) {
+                // Prevent ghost clicks on mobile
+                if (preventGhostClick(e)) return;
+                
+                const now = Date.now();
+                if (isProcessingButtonClick || (now - lastButtonClickTime) < delay) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    return;
+                }
+                lastButtonClickTime = now;
+                isProcessingButtonClick = true;
+                
+                try {
+                    callback(e);
+                } finally {
+                    setTimeout(() => {
+                        isProcessingButtonClick = false;
+                    }, 100);
+                }
+            };
+        }
+
+        // Button event handlers
+        function handleReadButton(e) {
             e.stopPropagation();
             e.preventDefault();
             
             if (currentMode === 'read' && isButtonActive) {
-                // If same button is clicked and active, deactivate it
                 hideContent();
             } else {
                 isButtonActive = true;
                 showContent('read');
             }
-        });
-        writeBtn.addEventListener('click', (e) => {
+        }
+        
+        function handleWriteButton(e) {
             e.stopPropagation();
             e.preventDefault();
             
             if (currentMode === 'write' && isButtonActive) {
-                // If same button is clicked and active, deactivate it
                 hideContent();
             } else {
                 isButtonActive = true;
                 showContent('write');
             }
-        });
-        listenBtn.addEventListener('click', (e) => {
+        }
+        
+        function handleListenButton(e) {
             e.stopPropagation();
             e.preventDefault();
             
             if (currentMode === 'listen' && isButtonActive) {
-                // If same button is clicked and active, deactivate it
                 hideContent();
             } else {
-                // Don't auto-play if returning from background to prevent spam
                 const shouldAutoPlay = !hasClickedListenBefore && !isReturningFromBackground;
                 
                 isButtonActive = true;
                 showContent('listen');
                 
-                // Auto-play track-1 only on the very first click (and not when returning from background)
-                // Call playAudio synchronously just like tapping an album (works on iOS)
                 if (shouldAutoPlay) {
                     hasClickedListenBefore = true;
                     const firstAlbum = contentItems.querySelector('.content-item:first-child');
@@ -288,43 +328,57 @@
                     }
                 }
             }
-        });
+        }
+        
+        // Button event listeners with debouncing
+        // On mobile, use touchend to avoid ghost clicks; on desktop, use click
+        if (isMobile) {
+            readBtn.addEventListener('touchend', debounceButtonClick(handleReadButton));
+            writeBtn.addEventListener('touchend', debounceButtonClick(handleWriteButton));
+            listenBtn.addEventListener('touchend', debounceButtonClick(handleListenButton));
+        } else {
+            readBtn.addEventListener('click', debounceButtonClick(handleReadButton));
+            writeBtn.addEventListener('click', debounceButtonClick(handleWriteButton));
+            listenBtn.addEventListener('click', debounceButtonClick(handleListenButton));
+        }
 
         let hoverTimeout = null;
 
-        // Hover event listeners
-        readBtn.addEventListener('mouseenter', () => {
-            if (hoverTimeout) clearTimeout(hoverTimeout);
-            if (!isButtonActive) {
-                showContent('read');
-            }
-        });
-        writeBtn.addEventListener('mouseenter', () => {
-            if (hoverTimeout) clearTimeout(hoverTimeout);
-            if (!isButtonActive) {
-                showContent('write');
-            }
-        });
-        listenBtn.addEventListener('mouseenter', () => {
-            if (hoverTimeout) clearTimeout(hoverTimeout);
-            if (!isButtonActive) {
-                showContent('listen');
-            }
-        });
-
-        // Mouse leave events to hide content when not hovering (only if no button is active)
-        [readBtn, writeBtn, listenBtn].forEach(btn => {
-            btn.addEventListener('mouseleave', () => {
+        // Hover event listeners - ONLY on non-mobile devices to prevent conflicts with touch
+        if (!isMobile) {
+            readBtn.addEventListener('mouseenter', () => {
+                if (hoverTimeout) clearTimeout(hoverTimeout);
                 if (!isButtonActive) {
-                    if (hoverTimeout) clearTimeout(hoverTimeout);
-                    hoverTimeout = setTimeout(() => {
-                        if (!isHoveringAnyButton() && !isButtonActive) {
-                            hideContent();
-                        }
-                    }, 150);
+                    showContent('read');
                 }
             });
-        });
+            writeBtn.addEventListener('mouseenter', () => {
+                if (hoverTimeout) clearTimeout(hoverTimeout);
+                if (!isButtonActive) {
+                    showContent('write');
+                }
+            });
+            listenBtn.addEventListener('mouseenter', () => {
+                if (hoverTimeout) clearTimeout(hoverTimeout);
+                if (!isButtonActive) {
+                    showContent('listen');
+                }
+            });
+
+            // Mouse leave events to hide content when not hovering (only if no button is active)
+            [readBtn, writeBtn, listenBtn].forEach(btn => {
+                btn.addEventListener('mouseleave', () => {
+                    if (!isButtonActive) {
+                        if (hoverTimeout) clearTimeout(hoverTimeout);
+                        hoverTimeout = setTimeout(() => {
+                            if (!isHoveringAnyButton() && !isButtonActive) {
+                                hideContent();
+                            }
+                        }, 150);
+                    }
+                });
+            });
+        }
 
         // Click outside to deactivate button mode
         document.addEventListener('click', (e) => {
@@ -381,19 +435,30 @@
                     contentItem.dataset.bpm = item.bpm;
                     contentItem.innerHTML = `<img src="${item.image}" alt="${item.title}" title="${item.title}">`;
                     
-                    contentItem.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        playAudio(item.audio, contentItem, item.bpm);
-                        isButtonActive = true;
-                    });
+                    let albumTouchHandled = false;
                     
-                    contentItem.addEventListener('touchend', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        playAudio(item.audio, contentItem, item.bpm);
-                        isButtonActive = true;
-                    });
+                    // On mobile, use touchend; on desktop, use click
+                    if (isMobile) {
+                        contentItem.addEventListener('touchend', (e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            
+                            // Prevent duplicate touches
+                            if (albumTouchHandled) return;
+                            albumTouchHandled = true;
+                            setTimeout(() => { albumTouchHandled = false; }, 300);
+                            
+                            playAudio(item.audio, contentItem, item.bpm);
+                            isButtonActive = true;
+                        });
+                    } else {
+                        contentItem.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            playAudio(item.audio, contentItem, item.bpm);
+                            isButtonActive = true;
+                        });
+                    }
                     
                     contentItems.appendChild(contentItem);
                     
