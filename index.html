@@ -1,916 +1,573 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" id="apple-status-bar">
-    <meta name="theme-color" content="#0064e6" id="theme-color-meta">
-    <title>Dante Lentini</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
-</head>
-<body>
-    <main>
-        <canvas id="starfield" style="position:fixed;inset:0;z-index:0;pointer-events:none;display:none"></canvas>
-        
-        <!-- Content Display Areas -->
-        <div class="content-grid" style="z-index:1">
-            <div class="content-items" id="content-items">
-                <!-- Content will be dynamically populated here -->
-            </div>
-        </div>
-        
-        <h1>Hi,</h1>
-        <p>
-            I like to <button id="read-btn">read</button>, <button id="write-btn">write</button>, and <button id="listen-btn">listen</button>.
-        </p>
-        <div class="text-links">
-            <a href="http://thebooksireadinsteadofgoingtocollege.com" target="_blank" id="read-link">thebooksireadinsteadofgoingtocollege.com</a>
-            <a href="http://thingsivechangedmymindon.com" target="_blank" id="write-link">thingsivechangedmymindon.com</a>
-        </div>
-        <p>
-            I'm a Growth Hacker. In my past, I<br>
-            left college, made <span class="white">tiktoks</span> and joined<br>
-            <span class="white">startups</span>— all of which led me to SF,<br>
-            where I'm now at <span class="white-bold">Founders, Inc.</span>
-        </p>
-        <div class="signature">
-         MSHF,<br>
-            Dante Lentini
-        </div>
-        <nav class="social-links">
-            <a href="mailto:dantelentinics@gmail.com">Email</a>
-            <a href="https://linkedin.com/in/dantelentini" target="_blank">LinkedIn</a>
-            <a href="https://x.com/dantelentini" target="_blank">X</a>
-            <a href="momsaidhavefun.pdf" target="_blank"><3</a>
-            <a href="#" id="dark-mode-toggle">dark-mode.exe</a>
-        </nav>
-    </main>
+/* Fonts */
+@font-face {
+    font-family: 'Family';
+    src: url('../fonts/family-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Family';
+    src: url('../fonts/family-bold.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Caveat';
+    src: url(https://fonts.gstatic.com/s/caveat/v18/WnznHAc5bAfYB2QRah7pcpNvOx-pjfJ9eIWpYT5Kmgq3sw.woff2) format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+/* Theme */
+:root {
+    --bg: #0064e6;
+    --fg: #c2f6ff;
+    --fg-muted: rgba(255, 255, 255, 0.9);
+    --fg-strong: #ffffff;
+    --surface-raised: rgba(255, 255, 255, 0.08);
+    --surface-hover: rgba(255, 255, 255, 0.2);
+    --content-border: rgba(255, 255, 255, 0.2);
+    --content-border-strong: rgba(255, 255, 255, 0.4);
+    --content-shadow: rgba(0, 17, 51, 0.35);
+    --content-shadow-strong: rgba(0, 17, 51, 0.55);
+    --button-active-fg: #0064e6;
+    --link-color: #ffffff;
+    color-scheme: light;
+}
+
+[data-theme="dark"] {
+    --bg: #000000;
+    --fg: #c8d1dc;
+    --fg-muted: rgba(255, 255, 255, 0.85);
+    --fg-strong: #ffffff;
+    --surface-raised: rgba(255, 255, 255, 0.08);
+    --surface-hover: rgba(255, 255, 255, 0.24);
+    --content-border: rgba(255, 255, 255, 0.08);
+    --content-border-strong: rgba(255, 255, 255, 0.2);
+    --content-shadow: rgba(0, 0, 0, 0.65);
+    --content-shadow-strong: rgba(0, 0, 0, 0.85);
+    --button-active-fg: #000000;
+    --link-color: #ffffff;
+    color-scheme: dark;
+}
+
+/* Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background-color: var(--bg);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: max(60px, env(safe-area-inset-top));
+    padding-bottom: max(60px, env(safe-area-inset-bottom));
+    padding-left: max(40px, env(safe-area-inset-left));
+    padding-right: max(40px, env(safe-area-inset-right));
+    height: 100dvh;
+    min-height: -webkit-fill-available;
+    overflow: hidden;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: "Family", system-ui, -apple-system, sans-serif;
+    font-size: 20px;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force background extension into safe areas on iOS */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg);
+    z-index: -1;
+    /* Extend into safe areas with extra margin */
+    top: calc(-100px - env(safe-area-inset-top, 0px));
+    bottom: calc(-100px - env(safe-area-inset-bottom, 0px));
+    left: calc(-100px - env(safe-area-inset-left, 0px));
+    right: calc(-100px - env(safe-area-inset-right, 0px));
+}
+
+/* Additional layer for iOS Safari bar coverage */
+html::before {
+    content: '';
+    position: fixed;
+    top: -100px;
+    left: 0;
+    right: 0;
+    height: calc(100px + env(safe-area-inset-top, 0px));
+    background-color: var(--bg);
+    z-index: -2;
+}
+
+html::after {
+    content: '';
+    position: fixed;
+    bottom: -100px;
+    left: 0;
+    right: 0;
+    height: calc(100px + env(safe-area-inset-bottom, 0px));
+    background-color: var(--bg);
+    z-index: -2;
+}
+
+main {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+/* Typography */
+h1 {
+    font-size: 2.2em;
+    color: var(--fg-strong);
+    margin-bottom: 0.3em;
     
-    <!-- Audio element for music playback -->
-    <audio id="audio-player" preload="metadata" crossorigin="anonymous" playsinline></audio>
+}
+
+p {
+    margin-bottom: 0.2em;
+    line-height: 1.4;
+}
+
+.white {
+    color: var(--fg-strong);
+}
+
+.white-bold {
+    color: var(--fg-strong);
+    font-weight: bold;
+}
+
+/* Signature */
+.signature {
+    margin: 1em 0 0.5em;
+    font-family: 'Caveat', cursive;
+    font-size: 1.2em;
+    line-height: 1.3;
+    color: var(--fg-strong);
+}
+
+/* Social Links */
+.social-links {
+    display: flex;
+    gap: 12px;
+}
+
+.social-links a {
+    font-size: 18px;
+    color: var(--fg);
+    text-decoration: underline;
+}
+
+.social-links a:hover {
+    color: var(--fg-strong);
+}
+
+/* Buttons - Default browser styling with visibility fixes */
+button {
+    all: revert;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    touch-action: manipulation; /* Optimize touch interactions */
+}
+
+button:focus {
+    outline: none;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+button.active {
+    background-color: var(--fg-strong);
+    color: var(--button-active-fg);
+}
+
+/* Active state for mobile touch */
+button:active {
+    opacity: 0.6;
+}
+
+/* Fix button visibility in dark mode - use light text */
+[data-theme="dark"] button:not(.active) {
+    color: var(--fg);
+}
+
+/* Content Grid */
+.content-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.content-items {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.content-items.active {
+    display: block;
+    opacity: 1;
+}
+
+.content-items.fade-out {
+    opacity: 0;
+}
+
+.content-item {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: all;
+    box-shadow: 0 8px 32px var(--content-shadow);
+    border: 2px solid var(--content-border);
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    touch-action: manipulation; /* Optimize touch interactions */
+    will-change: transform, opacity; /* Optimize for animations */
+    backface-visibility: hidden; /* Prevent flickering on mobile */
+}
+
+.content-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 48px var(--content-shadow-strong);
+    border-color: var(--content-border-strong);
+}
+
+.content-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Album positioning for listen mode */
+
+/* LISTEN - Albums: Moved further from main content */
+.content-items[data-mode="listen"] .content-item:nth-child(1) {
+    top: 8%;
+    left: calc(50% - 240px);
+    --item-rotation: -6deg;
+    transform: rotate(-6deg);
+    animation-delay: 0s;
+}
+
+.content-items[data-mode="listen"] .content-item:nth-child(2) {
+    top: 6%;
+    left: calc(50% - 130px);
+    --item-rotation: 1deg;
+    transform: rotate(1deg);
+    animation-delay: 0.4s;
+}
+
+.content-items[data-mode="listen"] .content-item:nth-child(3) {
+    top: 6%;
+    right: calc(50% - 130px);
+    --item-rotation: -4deg;
+    transform: rotate(-4deg);
+    animation-delay: 0.8s;
+}
+
+.content-items[data-mode="listen"] .content-item:nth-child(4) {
+    top: 8%;
+    right: calc(50% - 240px);
+    --item-rotation: 8deg;
+    transform: rotate(8deg);
+    animation-delay: 1.2s;
+}
+
+.content-items[data-mode="listen"] .content-item:nth-child(5) {
+    bottom: 50px;
+    left: calc(50% - 240px);
+    --item-rotation: 7deg;
+    transform: rotate(7deg);
+    animation-delay: 1.6s;
+}
+
+.content-items[data-mode="listen"] .content-item:nth-child(6) {
+    bottom: 30px;
+    left: calc(50% - 130px);
+    --item-rotation: -3deg;
+    transform: rotate(-3deg);
+    animation-delay: 2.0s;
+}
+
+.content-items[data-mode="listen"] .content-item:nth-child(7) {
+    bottom: 30px;
+    right: calc(50% - 130px);
+    --item-rotation: 5deg;
+    transform: rotate(5deg);
+    animation-delay: 2.4s;
+}
+
+.content-items[data-mode="listen"] .content-item:nth-child(8) {
+    bottom: 50px;
+    right: calc(50% - 240px);
+    --item-rotation: -5deg;
+    transform: rotate(-5deg);
+    animation-delay: 2.8s;
+}
+
+/* Spin in place animation for playing album */
+@keyframes spinInPlace {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.content-item.spinning {
+    animation: spinInPlace 8s linear infinite;
+    animation-delay: 0s !important;
+}
+
+/* SMOOTH - Hypnotic flow, natural groove */
+@keyframes danceSmooth {
+    0% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1);
+    }
+    15% {
+        transform: translate(-6px, -2px) rotate(calc(var(--item-rotation, 0deg) - 3deg)) scale(1.02);
+    }
+    35% {
+        transform: translate(-8px, 0) rotate(calc(var(--item-rotation, 0deg) - 2deg)) scale(1);
+    }
+    50% {
+        transform: translate(0, 2px) rotate(var(--item-rotation, 0deg)) scale(0.98);
+    }
+    65% {
+        transform: translate(8px, 0) rotate(calc(var(--item-rotation, 0deg) + 2deg)) scale(1);
+    }
+    85% {
+        transform: translate(6px, -2px) rotate(calc(var(--item-rotation, 0deg) + 3deg)) scale(1.02);
+    }
+    100% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1);
+    }
+}
+
+/* JUMP - Bouncing to the beat with realistic physics */
+@keyframes danceJump {
+    0%, 10% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    15% {
+        transform: translate(0, -20px) rotate(calc(var(--item-rotation, 0deg) - 3deg)) scale(1.02, 1.08);
+    }
+    20% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1.05, 0.95);
+    }
+    25%, 30% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    35%, 45% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    50% {
+        transform: translate(0, -20px) rotate(calc(var(--item-rotation, 0deg) + 3deg)) scale(1.02, 1.08);
+    }
+    55% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1.05, 0.95);
+    }
+    60%, 65% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    70%, 75% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    80% {
+        transform: translate(0, -14px) rotate(var(--item-rotation, 0deg)) scale(1.01, 1.05);
+    }
+    85% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1.03, 0.97);
+    }
+    90%, 100% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+}
+
+/* HYPE MODE - Lean/bounce towards the playing track */
+@keyframes hypeLeft {
+    0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
+    25% { transform: translate(15px, -8px) rotate(calc(var(--item-rotation, 0deg) + 8deg)) scale(1.08); }
+    50% { transform: translate(12px, 0) rotate(calc(var(--item-rotation, 0deg) + 5deg)) scale(1.02); }
+    75% { transform: translate(15px, -8px) rotate(calc(var(--item-rotation, 0deg) + 8deg)) scale(1.08); }
+}
+
+@keyframes hypeRight {
+    0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
+    25% { transform: translate(-15px, -8px) rotate(calc(var(--item-rotation, 0deg) - 8deg)) scale(1.08); }
+    50% { transform: translate(-12px, 0) rotate(calc(var(--item-rotation, 0deg) - 5deg)) scale(1.02); }
+    75% { transform: translate(-15px, -8px) rotate(calc(var(--item-rotation, 0deg) - 8deg)) scale(1.08); }
+}
+
+@keyframes hypeUp {
+    0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
+    25% { transform: translate(0, 12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
+    50% { transform: translate(0, 8px) rotate(var(--item-rotation, 0deg)) scale(1.02); }
+    75% { transform: translate(0, 12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
+}
+
+@keyframes hypeDown {
+    0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
+    25% { transform: translate(0, -12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
+    50% { transform: translate(0, -8px) rotate(var(--item-rotation, 0deg)) scale(1.02); }
+    75% { transform: translate(0, -12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
+}
+
+/* Hype mode active */
+.content-items.hype-mode .content-item:not(.spinning) {
+    animation-duration: 1s !important;
+    animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    animation-delay: 0s !important;
+}
+
+.content-items.hype-mode .content-item.hype-left {
+    animation-name: hypeLeft !important;
+}
+
+.content-items.hype-mode .content-item.hype-right {
+    animation-name: hypeRight !important;
+}
+
+.content-items.hype-mode .content-item.hype-up {
+    animation-name: hypeUp !important;
+}
+
+.content-items.hype-mode .content-item.hype-down {
+    animation-name: hypeDown !important;
+}
+
+/* Only dance when a song is playing - default styles */
+.content-items:has(.spinning) .content-item:not(.spinning) {
+    animation-duration: var(--dance-duration, 2s);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-iteration-count: infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Dance style variations - all albums sync together */
+.content-items[data-dance-style="smooth"] .content-item:not(.spinning) {
+    animation-name: danceSmooth;
+    animation-timing-function: ease-in-out;
+}
+
+.content-items[data-dance-style="jump"] .content-item:not(.spinning) {
+    animation-name: danceJump;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects for content items (not spinning) */
+.content-item:not(.spinning):hover {
+    transform: scale(1.05) rotate(0deg) !important;
+    z-index: 10;
+    animation-play-state: paused;
+}
+
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    body {
+        padding: 40px 20px;
+        padding-top: max(40px, env(safe-area-inset-top));
+        padding-bottom: max(40px, env(safe-area-inset-bottom));
+        padding-left: max(20px, env(safe-area-inset-left));
+        padding-right: max(20px, env(safe-area-inset-right));
+    }
     
-    <script>
-        // Theme init
-        const rootEl = document.documentElement;
-        let themeColorMeta = document.querySelector('meta[name="theme-color"]');
-        const appleStatusBarMeta = document.getElementById('apple-status-bar');
-        const THEME_KEY = 'theme-preference';
-        const THEME_COLORS = { light: '#0064e6', dark: '#000000' };
-        const DARK_MODE_DELAY_MS = 6300;
-        const sfx = new Audio('assets/audio/dark-mode.mp3');
-        sfx.preload = 'auto';
-        sfx.crossOrigin = 'anonymous';
-        sfx.volume = 1.0;
-        const starCanvas = document.getElementById('starfield');
-        if (starCanvas) starCanvas.style.display = 'none';
-        let currentTheme = null;
-        let pendingTheme = null;
-        let themeTransitionTimer = null;
-        applyTheme('light', { skipAudio: true });
-        function syncSystemChrome(theme = 'light') {
-            const color = THEME_COLORS[theme] || THEME_COLORS.light;
-            const statusStyle = theme === 'dark' ? 'black' : 'default';
-            
-            if (themeColorMeta) {
-                themeColorMeta.content = color;
-            }
-            
-            if (appleStatusBarMeta) {
-                appleStatusBarMeta.content = statusStyle;
-            }
-            
-            // Force repaint
-            setTimeout(() => {
-                if (themeColorMeta) themeColorMeta.content = color;
-                if (appleStatusBarMeta) appleStatusBarMeta.content = statusStyle;
-            }, 10);
-        }
+    /* Improve touch targets on mobile */
+    .content-item {
+        width: 130px;
+        height: 130px;
+    }
+    
+}
 
-        function applyTheme(theme, options = {}) {
-            const next = theme === 'dark' ? 'dark' : 'light';
-            const { skipAudio = false, force = false } = options;
-            if (!force && currentTheme === next) {
-                return;
-            }
+@media (max-width: 480px) {
+    body {
+        padding: 30px 15px;
+        padding-top: max(30px, env(safe-area-inset-top));
+        padding-bottom: max(30px, env(safe-area-inset-bottom));
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+    
+    /* Even larger touch targets on very small screens */
+    .content-item {
+        width: 140px;
+        height: 140px;
+    }
+    
+}
 
-            currentTheme = next;
+/* Text Links */
+.text-links {
+    height: 20px;
+    margin: 0;
+    position: relative;
+    width: 100%;
+}
 
-            if (next === 'dark') {
-                rootEl.setAttribute('data-theme', 'dark');
-                if (starCanvas) starCanvas.style.display = 'block';
-            } else {
-                rootEl.removeAttribute('data-theme');
-                if (starCanvas) starCanvas.style.display = 'none';
-            }
+.text-links a {
+    position: absolute;
+    left: -6px;
+    top: 0;
+    font-size: 12px;
+    font-family: 'Courier New', 'Monaco', monospace;
+    font-weight: 500;
+    color: var(--link-color);
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    padding: 3px 6px;
+    border-radius: 3px;
+    background: var(--surface-raised);
+    line-height: 1.2;
+    white-space: nowrap;
+}
 
-            syncSystemChrome(next);
+.text-links a.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
 
-            if (!skipAudio) {
-                if (next === 'dark') {
-                    playDarkModeSfx();
-                } else {
-                    stopDarkModeSfx();
-                }
-            }
-        }
-
-        function playDarkModeSfx() {
-            try {
-                sfx.currentTime = 0;
-                sfx.play().catch(() => {});
-            } catch (_) {}
-        }
-
-        function stopDarkModeSfx() {
-            try {
-                sfx.pause();
-                sfx.currentTime = 0;
-            } catch (_) {}
-        }
-
-        function cancelPendingTheme(options = {}) {
-            const { stopAudio = true } = options;
-            if (themeTransitionTimer) {
-                clearTimeout(themeTransitionTimer);
-                themeTransitionTimer = null;
-            }
-            if (stopAudio && pendingTheme === 'dark') {
-                stopDarkModeSfx();
-            }
-            pendingTheme = null;
-        }
-
-        function startDarkModeTransition() {
-            cancelPendingTheme();
-            pendingTheme = 'dark';
-            syncSystemChrome('dark');
-            playDarkModeSfx();
-            themeTransitionTimer = setTimeout(() => {
-                cancelPendingTheme({ stopAudio: false });
-                applyTheme('dark', { skipAudio: true });
-            }, DARK_MODE_DELAY_MS);
-        }
-
-        
-        // Initialize Audio Context for better browser compatibility
-        let audioContext = null;
-        function initAudioContext() {
-            if (!audioContext) {
-                try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    audioContext = new AudioContext();
-                } catch (e) {
-                    // Web Audio API not supported
-                }
-            }
-            // Resume if suspended (for autoplay policies)
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-        }
-
-        // Content data - only listen has visual content
-        const listenData = [
-            { image: 'assets/images/albums/album-01.jpg', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
-            { image: 'assets/images/albums/album-02.jpg', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 140 },
-            { image: 'assets/images/albums/album-03.jpg', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
-            { image: 'assets/images/albums/album-04.jpg', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 119 },
-            { image: 'assets/images/albums/album-05.jpg', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 138 },
-            { image: 'assets/images/albums/album-06.jpg', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
-            { image: 'assets/images/albums/album-07.jpg', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 128 },
-            { image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 97 }
-        ];
-
-        // DOM elements
-        const readBtn = document.getElementById('read-btn');
-        const writeBtn = document.getElementById('write-btn');
-        const listenBtn = document.getElementById('listen-btn');
-        const contentItems = document.getElementById('content-items');
-        const audioPlayer = document.getElementById('audio-player');
-        const darkToggle = document.getElementById('dark-mode-toggle');
-        const readLink = document.getElementById('read-link');
-        const writeLink = document.getElementById('write-link');
-
-        let currentMode = null;
-        let currentlyPlaying = null;
-        let currentPlayingElement = null;
-        let isButtonActive = false;
-        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        let audioUnlocked = false;
-        let hasClickedListenBefore = false;
-        
-        // Unlock audio on first user interaction (for autoplay policies)
-        function unlockAudio() {
-            if (!audioUnlocked) {
-                initAudioContext();
-                audioUnlocked = true;
-                // Remove listener after first unlock
-                document.removeEventListener('touchstart', unlockAudio);
-                document.removeEventListener('click', unlockAudio);
-            }
-        }
-        
-        // Add listeners for audio unlock
-        document.addEventListener('touchstart', unlockAudio, { once: true });
-        document.addEventListener('click', unlockAudio, { once: true });
-
-        // Button event listeners
-        readBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            if (currentMode === 'read' && isButtonActive) {
-                // If same button is clicked and active, deactivate it
-                hideContent();
-            } else {
-                isButtonActive = true;
-                showContent('read');
-            }
-        });
-        writeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            if (currentMode === 'write' && isButtonActive) {
-                // If same button is clicked and active, deactivate it
-                hideContent();
-            } else {
-                isButtonActive = true;
-                showContent('write');
-            }
-        });
-        listenBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            if (currentMode === 'listen' && isButtonActive) {
-                // If same button is clicked and active, deactivate it
-                hideContent();
-            } else {
-                isButtonActive = true;
-                showContent('listen');
-                
-                // Auto-play track-1 only on the very first click - DIRECT like dark mode
-                if (!hasClickedListenBefore) {
-                    hasClickedListenBefore = true;
-                    
-                    // Direct play - exact same pattern as dark mode
-                    try {
-                        const track = listenData[0];
-                        audioPlayer.src = track.audio;
-                        audioPlayer.currentTime = 0;
-                        audioPlayer.play().catch(() => {});
-                        
-                        // Set up visuals and state after play starts
-                        const firstAlbum = contentItems.querySelector('.content-item:first-child');
-                        if (firstAlbum) {
-                            currentlyPlaying = track.audio;
-                            currentPlayingElement = firstAlbum;
-                            firstAlbum.classList.add('spinning');
-                            firstAlbum.style.opacity = '0.8';
-                        }
-                        
-                        // Set BPM and start dancing
-                        const danceSpeed = (240 / track.bpm);
-                        contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
-                        startDanceStyleFluctuation(track.bpm);
-                    } catch (_) {}
-                }
-            }
-        });
-
-        let hoverTimeout = null;
-
-        // Hover event listeners
-        readBtn.addEventListener('mouseenter', () => {
-            if (hoverTimeout) clearTimeout(hoverTimeout);
-            if (!isButtonActive) {
-                showContent('read');
-            }
-        });
-        writeBtn.addEventListener('mouseenter', () => {
-            if (hoverTimeout) clearTimeout(hoverTimeout);
-            if (!isButtonActive) {
-                showContent('write');
-            }
-        });
-        listenBtn.addEventListener('mouseenter', () => {
-            if (hoverTimeout) clearTimeout(hoverTimeout);
-            if (!isButtonActive) {
-                showContent('listen');
-            }
-        });
-
-        // Mouse leave events to hide content when not hovering (only if no button is active)
-        [readBtn, writeBtn, listenBtn].forEach(btn => {
-            btn.addEventListener('mouseleave', () => {
-                if (!isButtonActive) {
-                    if (hoverTimeout) clearTimeout(hoverTimeout);
-                    hoverTimeout = setTimeout(() => {
-                        if (!isHoveringAnyButton() && !isButtonActive) {
-                            hideContent();
-                        }
-                    }, 150);
-                }
-            });
-        });
-
-        // Click outside to deactivate button mode
-        document.addEventListener('click', (e) => {
-            // Don't hide content if clicking on album items, dark mode button, or any social links
-            if (e.target.closest('.content-item') || 
-                e.target.closest('#dark-mode-toggle') || 
-                e.target.closest('.social-links') ||
-                e.target === darkToggle ||
-                darkToggle.contains(e.target)) {
-                return;
-            }
-            
-            // If clicking outside buttons, deactivate
-            if (!readBtn.contains(e.target) && !writeBtn.contains(e.target) && !listenBtn.contains(e.target)) {
-                isButtonActive = false;
-                if (!isHoveringAnyButton()) {
-                    hideContent();
-                }
-            }
-        });
-
-        function isHoveringAnyButton() {
-            return readBtn.matches(':hover') || writeBtn.matches(':hover') || listenBtn.matches(':hover');
-        }
-
-        function showContent(mode) {
-            // Remove active class from all buttons
-            [readBtn, writeBtn, listenBtn].forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to current button
-            document.getElementById(mode + '-btn').classList.add('active');
-
-            // Update current mode
-            currentMode = mode;
-
-            // Hide all links first
-            readLink.classList.remove('visible');
-            writeLink.classList.remove('visible');
-
-            // Show appropriate link for read or write
-            if (mode === 'read') {
-                readLink.classList.add('visible');
-            } else if (mode === 'write') {
-                writeLink.classList.add('visible');
-            }
-
-            // For listen mode, show the album content
-            if (mode === 'listen') {
-                contentItems.innerHTML = '';
-
-                listenData.forEach((item, index) => {
-                    const contentItem = document.createElement('div');
-                    contentItem.className = 'content-item';
-                    contentItem.dataset.bpm = item.bpm;
-                    contentItem.innerHTML = `<img src="${item.image}" alt="${item.title}" title="${item.title}">`;
-                    
-                    contentItem.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        playAudio(item.audio, contentItem, item.bpm);
-                        isButtonActive = true;
-                    });
-                    
-                    contentItem.addEventListener('touchend', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        playAudio(item.audio, contentItem, item.bpm);
-                        isButtonActive = true;
-                    });
-                    
-                    contentItems.appendChild(contentItem);
-                    
-                    // If this track is currently playing, restore spinning state
-                    if (currentlyPlaying === item.audio && !audioPlayer.paused) {
-                        contentItem.classList.add('spinning');
-                        contentItem.style.opacity = '0.8';
-                        currentPlayingElement = contentItem;
-                    }
-                });
-
-                contentItems.setAttribute('data-mode', 'listen');
-                contentItems.classList.add('active');
-            } else {
-                contentItems.classList.remove('active');
-            }
-        }
-
-        function fadeOutContent(durationMs = 600) {
-            if (!contentItems.classList.contains('active')) return;
-            contentItems.classList.add('fade-out');
-            setTimeout(() => {
-                hideContent();
-                contentItems.classList.remove('fade-out');
-            }, durationMs);
-        }
-
-        function hideContent() {
-            contentItems.classList.remove('active');
-            [readBtn, writeBtn, listenBtn].forEach(btn => btn.classList.remove('active'));
-            readLink.classList.remove('visible');
-            writeLink.classList.remove('visible');
-            currentMode = null;
-            isButtonActive = false;
-        }
-
-        function restorePlaybackVisual(element) {
-            if (!element) return;
-            element.classList.remove('spinning');
-            element.style.opacity = '';
-            element.style.transform = '';
-        }
-
-        function clearCurrentPlayingState(options = {}) {
-            const { resetAudio = false, updateSession = true } = options;
-            if (resetAudio) {
-                audioPlayer.pause();
-                audioPlayer.currentTime = 0;
-            }
-            restorePlaybackVisual(currentPlayingElement);
-            currentlyPlaying = null;
-            currentPlayingElement = null;
-            stopDanceStyleFluctuation();
-            if (updateSession) {
-                updateMediaSessionPlaybackState('none');
-            }
-        }
-
-        // Advanced dance system with coordination patterns
-        let currentDanceStyle = 'smooth';
-        let currentCoordMode = 'independent'; // 'independent', 'sync', 'mirror', 'pairs', 'wave'
-        let styleChangeTimeout = null;
-        let coordChangeTimeout = null;
-        let hypeTimeout = null;
-        let hypeInterval = null;
-        
-        function setCoordinationMode(mode) {
-            currentCoordMode = mode;
-            const albums = contentItems.querySelectorAll('.content-item:not(.spinning)');
-            
-            if (mode === 'sync') {
-                // All dance in perfect sync - no delay
-                albums.forEach(album => {
-                    album.style.animationDelay = '0s';
-                });
-            } else if (mode === 'mirror') {
-                // Left side mirrors right side
-                albums.forEach((album, index) => {
-                    if (index < 4) {
-                        // Top row - left mirrors right
-                        const mirrorIndex = 3 - index;
-                        album.style.animationDelay = `${mirrorIndex * 0.2}s`;
-                    } else {
-                        // Bottom row - left mirrors right
-                        const mirrorIndex = 7 - index;
-                        album.style.animationDelay = `${mirrorIndex * 0.2}s`;
-                    }
-                });
-            } else if (mode === 'pairs') {
-                // Adjacent pairs hop together - mad funny and vibey
-                albums.forEach((album, index) => {
-                    // Pairs: 0&1, 2&3, 4&5, 6&7
-                    const pairGroup = Math.floor(index / 2);
-                    album.style.animationDelay = `${pairGroup * 0.25}s`;
-                });
-            } else if (mode === 'wave') {
-                // Smooth wave pattern for swaying
-                albums.forEach((album, index) => {
-                    album.style.animationDelay = `${index * 0.12}s`;
-                });
-            } else {
-                // Independent - each has unique offset
-                albums.forEach((album, index) => {
-                    album.style.animationDelay = `${index * 0.15}s`;
-                });
-            }
-        }
-        
-        function triggerHypeMode() {
-            // Find the spinning album position
-            const spinningAlbum = contentItems.querySelector('.content-item.spinning');
-            if (!spinningAlbum) return;
-            
-            const spinningIndex = Array.from(contentItems.children).indexOf(spinningAlbum);
-            const albums = contentItems.querySelectorAll('.content-item:not(.spinning)');
-            
-            // Determine direction for each album to lean towards the spinning one
-            albums.forEach((album, idx) => {
-                // Remove previous hype classes
-                album.classList.remove('hype-left', 'hype-right', 'hype-up', 'hype-down');
-                
-                // Find actual index in all albums
-                const actualIndex = Array.from(contentItems.children).indexOf(album);
-                
-                // Determine direction to lean based on position relative to spinning album
-                if (actualIndex < spinningIndex) {
-                    // Album is to the left, lean right towards it
-                    album.classList.add('hype-right');
-                } else if (actualIndex > spinningIndex) {
-                    // Album is to the right, lean left towards it
-                    album.classList.add('hype-left');
-                }
-                
-                // Add vertical lean based on row
-                if (actualIndex < 4 && spinningIndex >= 4) {
-                    album.classList.add('hype-down');
-                } else if (actualIndex >= 4 && spinningIndex < 4) {
-                    album.classList.add('hype-up');
-                }
-            });
-            
-            // Activate hype mode
-            contentItems.classList.add('hype-mode');
-            
-            // Deactivate after 4 seconds
-            if (hypeTimeout) clearTimeout(hypeTimeout);
-            hypeTimeout = setTimeout(() => {
-                contentItems.classList.remove('hype-mode');
-                albums.forEach(album => {
-                    album.classList.remove('hype-left', 'hype-right', 'hype-up', 'hype-down');
-                });
-            }, 4000);
-        }
-        
-        function scheduleRandomHype(bpm) {
-            // Schedule next hype moment randomly (every 24-48 beats)
-            const baseBeats = 24 + Math.floor(Math.random() * 24);
-            const duration = ((60 / bpm) * 1000) * baseBeats;
-            hypeInterval = setTimeout(() => {
-                triggerHypeMode();
-                scheduleRandomHype(bpm);
-            }, duration);
-        }
-        
-        function cycleCoordinationMode(bpm) {
-            // Cycle through coordination modes with smart transitions
-            const modes = ['independent', 'sync', 'pairs', 'mirror', 'wave'];
-            
-            // Pick next mode randomly but not the same as current
-            let nextMode;
-            do {
-                nextMode = modes[Math.floor(Math.random() * modes.length)];
-            } while (nextMode === currentCoordMode);
-            
-            setCoordinationMode(nextMode);
-            
-            // Stay in each mode for 12-24 beats
-            const baseBeats = 12 + Math.floor(Math.random() * 12);
-            const duration = ((60 / bpm) * 1000) * baseBeats;
-            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), duration);
-        }
-        
-        function switchDanceStyle(bpm) {
-            // Alternate between smooth and jump
-            currentDanceStyle = currentDanceStyle === 'smooth' ? 'jump' : 'smooth';
-            contentItems.setAttribute('data-dance-style', currentDanceStyle);
-            
-            // Random duration: 12-24 beats
-            const baseBeats = 12 + Math.floor(Math.random() * 12);
-            const duration = ((60 / bpm) * 1000) * baseBeats;
-            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), duration);
-        }
-        
-        function startDanceStyleFluctuation(bpm) {
-            // Stop any existing timeouts
-            if (styleChangeTimeout) {
-                clearTimeout(styleChangeTimeout);
-                styleChangeTimeout = null;
-            }
-            if (coordChangeTimeout) {
-                clearTimeout(coordChangeTimeout);
-                coordChangeTimeout = null;
-            }
-            if (hypeInterval) {
-                clearTimeout(hypeInterval);
-                hypeInterval = null;
-            }
-            if (hypeTimeout) {
-                clearTimeout(hypeTimeout);
-                hypeTimeout = null;
-            }
-            
-            // Start with smooth and independent mode
-            currentDanceStyle = 'smooth';
-            currentCoordMode = 'independent';
-            contentItems.setAttribute('data-dance-style', 'smooth');
-            setCoordinationMode('independent');
-            
-            // Schedule first dance style switch
-            const styleBeats = 12 + Math.floor(Math.random() * 12);
-            const styleDuration = ((60 / bpm) * 1000) * styleBeats;
-            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), styleDuration);
-            
-            // Schedule first coordination mode switch
-            const coordBeats = 16 + Math.floor(Math.random() * 16);
-            const coordDuration = ((60 / bpm) * 1000) * coordBeats;
-            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), coordDuration);
-            
-            // Schedule first hype moment
-            scheduleRandomHype(bpm);
-        }
-        
-        function stopDanceStyleFluctuation() {
-            if (styleChangeTimeout) {
-                clearTimeout(styleChangeTimeout);
-                styleChangeTimeout = null;
-            }
-            if (coordChangeTimeout) {
-                clearTimeout(coordChangeTimeout);
-                coordChangeTimeout = null;
-            }
-            if (hypeInterval) {
-                clearTimeout(hypeInterval);
-                hypeInterval = null;
-            }
-            if (hypeTimeout) {
-                clearTimeout(hypeTimeout);
-                hypeTimeout = null;
-            }
-            contentItems.classList.remove('hype-mode');
-            contentItems.removeAttribute('data-dance-style');
-            currentDanceStyle = 'smooth';
-            currentCoordMode = 'independent';
-        }
-
-        function playAudio(audioSrc, element, bpm) {
-            if (pendingTheme === 'dark') {
-                return;
-            }
-            // Initialize audio context on first user interaction
-            initAudioContext();
-            
-            // Stop dark mode sound effect when playing a song after transition
-            const isDark = currentTheme === 'dark';
-            if (isDark) {
-                try {
-                    if (!sfx.paused) {
-                        sfx.pause();
-                        sfx.currentTime = 0;
-                    }
-                } catch (_) {}
-            }
-            
-            // If clicking the same track, toggle play/pause
-            if (currentlyPlaying === audioSrc) {
-                if (!audioPlayer.paused) {
-                    audioPlayer.pause();
-                    updateMediaSessionPlaybackState('paused');
-                    stopDanceStyleFluctuation();
-                    // When paused, stop spinning and restore CSS rotation
-                    restorePlaybackVisual(element);
-                } else {
-                    // Resume playback
-                    const playPromise = audioPlayer.play();
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            updateMediaSessionPlaybackState('playing');
-                            // Set BPM for dancing animation
-                            if (bpm && contentItems) {
-                                const danceSpeed = (240 / bpm); // 4 beats in seconds
-                                contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
-                                startDanceStyleFluctuation(bpm);
-                            }
-                            // When playing, add spinning class and dim slightly
-                            if (element) {
-                                element.classList.add('spinning');
-                                element.style.opacity = '0.8';
-                            }
-                        }).catch(error => {
-                            // Resume failed
-                        });
-                    }
-                }
-                return;
-            }
-
-            // Reset ONLY the previous playing element (not all albums)
-            if (currentPlayingElement && currentPlayingElement !== element) {
-                restorePlaybackVisual(currentPlayingElement);
-                currentPlayingElement = null;
-            }
-
-            // Stop currently playing audio and start new one
-            if (currentlyPlaying) {
-                clearCurrentPlayingState({ resetAudio: true });
-            }
-
-            // Set BPM for dancing animation - calculate duration for 4-beat cycle
-            if (bpm && contentItems) {
-                const danceSpeed = (240 / bpm); // 4 beats in seconds
-                contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
-                // Start dancing immediately when new track plays
-                startDanceStyleFluctuation(bpm);
-            }
-
-            // Find track info for Media Session API
-            const trackInfo = listenData.find(track => track.audio === audioSrc);
-            
-            // Start new audio
-            attemptAudioPlay(audioSrc, element, trackInfo);
-        }
-        
-        function attemptAudioPlay(audioSrc, element, trackInfo) {
-            // Set audio source and properties
-            audioPlayer.src = audioSrc;
-            audioPlayer.volume = 1.0;
-            audioPlayer.preload = 'auto';
-            
-            // Load and play immediately
-            audioPlayer.load();
-            
-            // Add loading visual feedback
-            if (element) {
-                element.style.opacity = '0.6';
-            }
-            
-            // Play as soon as possible
-            const playPromise = audioPlayer.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    currentlyPlaying = audioSrc;
-                    currentPlayingElement = element;
-                    
-                    // Update Media Session API (for lock screen controls, notifications)
-                    updateMediaSession(trackInfo);
-                    
-                    // Visual feedback for successful playback - add spinning animation and dim slightly
-                    if (element) {
-                        element.classList.add('spinning');
-                        element.style.opacity = '0.8';
-                    }
-                }).catch(error => {
-                    // Playback failed - retry once after a brief delay
-                    setTimeout(() => {
-                        audioPlayer.play().then(() => {
-                            currentlyPlaying = audioSrc;
-                            currentPlayingElement = element;
-                            updateMediaSession(trackInfo);
-                            if (element) {
-                                element.classList.add('spinning');
-                                element.style.opacity = '0.8';
-                            }
-                        }).catch(() => {
-                            // Show visual feedback that audio failed
-                            if (element) {
-                                element.style.opacity = '0.5';
-                                setTimeout(() => {
-                                    element.style.opacity = '';
-                                    element.style.transform = '';
-                                }, 300);
-                            }
-                        });
-                    }, 100);
-                });
-            }
-        }
-        
-        // Update Media Session API for rich media controls
-        function updateMediaSession(trackInfo) {
-            if ('mediaSession' in navigator && trackInfo) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: trackInfo.title,
-                    artist: 'Dante Lentini',
-                    album: 'My Playlist',
-                    artwork: [
-                        { src: trackInfo.image, sizes: '512x512', type: 'image/jpeg' }
-                    ]
-                });
-                
-                // Set up media session action handlers
-                navigator.mediaSession.setActionHandler('play', () => {
-                    audioPlayer.play();
-                });
-                
-                navigator.mediaSession.setActionHandler('pause', () => {
-                    audioPlayer.pause();
-                });
-                
-                navigator.mediaSession.setActionHandler('stop', () => {
-                    clearCurrentPlayingState({ resetAudio: true });
-                });
-                
-                // Update playback state
-                updateMediaSessionPlaybackState('playing');
-            }
-        }
-        
-        function updateMediaSessionPlaybackState(state) {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = state;
-            }
-        }
-
-        // Handle audio events
-        audioPlayer.addEventListener('ended', () => {
-            clearCurrentPlayingState();
-        });
-
-        audioPlayer.addEventListener('error', () => {
-            clearCurrentPlayingState();
-        });
-        
-        // Additional event listeners for better playback state management
-        audioPlayer.addEventListener('play', () => {
-            updateMediaSessionPlaybackState('playing');
-        });
-        
-        audioPlayer.addEventListener('pause', () => {
-            if (currentlyPlaying) {
-                updateMediaSessionPlaybackState('paused');
-            }
-        });
-        
-
-        // Dark mode toggle
-        darkToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (pendingTheme === 'dark') {
-                cancelPendingTheme();
-                applyTheme('light', { force: true });
-                return;
-            }
-
-            const next = currentTheme === 'dark' ? 'light' : 'dark';
-
-            if (next === 'dark') {
-                if (audioPlayer && !audioPlayer.paused) {
-                    clearCurrentPlayingState({ resetAudio: true });
-                }
-                startDarkModeTransition();
-            } else {
-                cancelPendingTheme();
-                applyTheme('light', { force: currentTheme === 'light' });
-            }
-        });
-
-        // Starfield animation (enabled in dark mode)
-        (function initStarfield(){
-            const canvas = document.getElementById('starfield');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let stars = [];
-            let meteors = [];
-            function resize(){
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                stars = Array.from({length: Math.floor((canvas.width*canvas.height)/9000)}, () => ({
-                    x: Math.random()*canvas.width,
-                    y: Math.random()*canvas.height,
-                    tw: Math.random()*Math.PI*2,
-                    sp: 0.5 + Math.random()*0.5,
-                    r: 0.6 + Math.random()*1.2
-                }));
-            }
-            window.addEventListener('resize', resize);
-            resize();
-            function tick(){
-                if (canvas.style.display !== 'block') { requestAnimationFrame(tick); return; }
-                ctx.clearRect(0,0,canvas.width,canvas.height);
-                // twinkle stars
-                for (const s of stars){
-                    s.tw += 0.02*s.sp;
-                    const alpha = 0.3 + 0.7*(0.5+0.5*Math.sin(s.tw));
-                    ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-                    ctx.fill();
-                }
-                // meteors
-                if (Math.random()<0.01 && meteors.length<2){
-                    meteors.push({x: Math.random()*canvas.width, y: -20, vx: -6-Math.random()*4, vy: 10+Math.random()*6, life: 1});
-                }
-                for (let i=meteors.length-1;i>=0;i--){
-                    const m = meteors[i];
-                    m.x += m.vx; m.y += m.vy; m.life -= 0.01;
-                    const grad = ctx.createLinearGradient(m.x, m.y, m.x-m.vx*6, m.y-m.vy*6);
-                    grad.addColorStop(0, 'rgba(255,255,255,0.9)');
-                    grad.addColorStop(1, 'rgba(255,255,255,0)');
-                    ctx.strokeStyle = grad;
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(m.x, m.y);
-                    ctx.lineTo(m.x-m.vx*6, m.y-m.vy*6);
-                    ctx.stroke();
-                    if (m.life<=0 || m.y>canvas.height+50) meteors.splice(i,1);
-                }
-                requestAnimationFrame(tick);
-            }
-            requestAnimationFrame(tick);
-        })();
-
-    </script>
-</body>
-</html>
-
-
-
+.text-links a:hover {
+    color: var(--link-color);
+    background: var(--surface-hover);
+}
