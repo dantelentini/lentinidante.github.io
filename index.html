@@ -530,6 +530,8 @@
             if (updateSession) {
                 updateMediaSessionPlaybackState('none');
             }
+            // Remove track 8 playing indicator
+            rootEl.removeAttribute('data-track-8-playing');
         }
 
         // Growth Hacker flash control - works in both light and dark mode
@@ -752,6 +754,9 @@
             // Initialize audio context on first user interaction
             initAudioContext();
             
+            // Check if this is track 8
+            const isTrack8 = audioSrc === 'assets/audio/track-08.mp3';
+            
             // Stop dark mode sound effect when playing a song after transition
             const isDark = currentTheme === 'dark';
             if (isDark) {
@@ -772,6 +777,8 @@
                     stopGrowthHackerFlash();
                     // When paused, stop spinning and restore CSS rotation
                     restorePlaybackVisual(element);
+                    // Remove track 8 indicator when paused
+                    rootEl.removeAttribute('data-track-8-playing');
                 } else {
                     // Resume playback
                     const playPromise = audioPlayer.play();
@@ -799,6 +806,10 @@
                                     }
                                 }
                             }
+                            // Set track 8 indicator when resumed
+                            if (isTrack8) {
+                                rootEl.setAttribute('data-track-8-playing', 'true');
+                            }
                         }).catch(error => {
                             // Resume failed
                         });
@@ -816,6 +827,13 @@
             // Stop currently playing audio and start new one
             if (currentlyPlaying) {
                 clearCurrentPlayingState({ resetAudio: true });
+            }
+            
+            // Set track 8 playing indicator if this is track 8
+            if (isTrack8) {
+                rootEl.setAttribute('data-track-8-playing', 'true');
+            } else {
+                rootEl.removeAttribute('data-track-8-playing');
             }
 
             // Set BPM for dancing animation - calculate duration for 4-beat cycle
@@ -952,10 +970,12 @@
 
         // Handle audio events
         audioPlayer.addEventListener('ended', () => {
+            rootEl.removeAttribute('data-track-8-playing');
             clearCurrentPlayingState();
         });
 
         audioPlayer.addEventListener('error', () => {
+            rootEl.removeAttribute('data-track-8-playing');
             clearCurrentPlayingState();
         });
         
@@ -1034,8 +1054,11 @@
                     ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
                     ctx.fill();
                 }
-                // meteors
-                if (Math.random()<0.01 && meteors.length<2){
+                // meteors - triple the spawn rate and allow more meteors when track 8 is playing
+                const isTrack8Playing = rootEl.getAttribute('data-track-8-playing') === 'true';
+                const meteorSpawnChance = isTrack8Playing ? 0.03 : 0.01;
+                const maxMeteors = isTrack8Playing ? 6 : 2;
+                if (Math.random()<meteorSpawnChance && meteors.length<maxMeteors){
                     meteors.push({x: Math.random()*canvas.width, y: -20, vx: -6-Math.random()*4, vy: 10+Math.random()*6, life: 1});
                 }
                 for (let i=meteors.length-1;i>=0;i--){
