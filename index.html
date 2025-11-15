@@ -114,6 +114,7 @@
         let isButtonActive = false;
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         let audioUnlocked = false;
+        let hasClickedListenBefore = false;
         
         // Unlock audio on first user interaction (for autoplay policies)
         function unlockAudio() {
@@ -156,6 +157,16 @@
             } else {
                 isButtonActive = true;
                 showContent('listen');
+                // Auto-start track-1 only on the very first click
+                if (!hasClickedListenBefore) {
+                    hasClickedListenBefore = true;
+                    setTimeout(() => {
+                        const firstAlbum = contentItems.querySelector('.content-item:first-child');
+                        if (firstAlbum && listenData[0]) {
+                            playAudio(listenData[0].audio, firstAlbum);
+                        }
+                    }, 100);
+                }
             }
         });
 
@@ -239,7 +250,7 @@
             if (mode === 'listen') {
                 contentItems.innerHTML = '';
 
-                listenData.forEach((item) => {
+                listenData.forEach((item, index) => {
                     const contentItem = document.createElement('div');
                     contentItem.className = 'content-item';
                     contentItem.innerHTML = `<img src="${item.image}" alt="${item.title}" title="${item.title}">`;
@@ -259,6 +270,13 @@
                     });
                     
                     contentItems.appendChild(contentItem);
+                    
+                    // If this track is currently playing, restore spinning state
+                    if (currentlyPlaying === item.audio && !audioPlayer.paused) {
+                        contentItem.classList.add('spinning');
+                        contentItem.style.opacity = '0.8';
+                        currentPlayingElement = contentItem;
+                    }
                 });
 
                 contentItems.setAttribute('data-mode', 'listen');
@@ -311,8 +329,9 @@
                 if (!audioPlayer.paused) {
                     audioPlayer.pause();
                     updateMediaSessionPlaybackState('paused');
-                    // When paused, remove inline styles to restore CSS rotation
+                    // When paused, stop spinning and restore CSS rotation
                     if (element) {
+                        element.classList.remove('spinning');
                         element.style.opacity = '';
                         element.style.transform = '';
                     }
@@ -322,10 +341,10 @@
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
                             updateMediaSessionPlaybackState('playing');
-                            // When playing, straighten and dim slightly
+                            // When playing, add spinning class and dim slightly
                             if (element) {
+                                element.classList.add('spinning');
                                 element.style.opacity = '0.8';
-                                element.style.transform = 'rotate(0deg)';
                             }
                         }).catch(error => {
                             console.log('Resume failed:', error);
@@ -337,7 +356,8 @@
 
             // Reset ONLY the previous playing element (not all albums)
             if (currentPlayingElement && currentPlayingElement !== element) {
-                // Remove inline styles to restore CSS rotation
+                // Remove spinning and inline styles to restore CSS rotation
+                currentPlayingElement.classList.remove('spinning');
                 currentPlayingElement.style.opacity = '';
                 currentPlayingElement.style.transform = '';
             }
@@ -380,10 +400,10 @@
                     // Update Media Session API (for lock screen controls, notifications)
                     updateMediaSession(trackInfo);
                     
-                    // Visual feedback for successful playback - straighten and dim slightly
+                    // Visual feedback for successful playback - add spinning animation and dim slightly
                     if (element) {
+                        element.classList.add('spinning');
                         element.style.opacity = '0.8';
-                        element.style.transform = 'rotate(0deg)';
                     }
                 }).catch(error => {
                     console.log('Playback failed:', error);
@@ -395,8 +415,8 @@
                             currentPlayingElement = element;
                             updateMediaSession(trackInfo);
                             if (element) {
+                                element.classList.add('spinning');
                                 element.style.opacity = '0.8';
-                                element.style.transform = 'rotate(0deg)';
                             }
                         }).catch(() => {
                             // Show visual feedback that audio failed
@@ -455,6 +475,7 @@
         audioPlayer.addEventListener('ended', () => {
             // Reset the playing element to its original CSS state
             if (currentPlayingElement) {
+                currentPlayingElement.classList.remove('spinning');
                 currentPlayingElement.style.opacity = '';
                 currentPlayingElement.style.transform = '';
             }
@@ -467,6 +488,7 @@
             console.log('Audio error occurred:', e);
             // Reset the playing element to its original CSS state
             if (currentPlayingElement) {
+                currentPlayingElement.classList.remove('spinning');
                 currentPlayingElement.style.opacity = '';
                 currentPlayingElement.style.transform = '';
             }
@@ -512,6 +534,7 @@
             if (!audioPlayer.paused) {
                 audioPlayer.pause();
                 if (currentPlayingElement) {
+                    currentPlayingElement.classList.remove('spinning');
                     currentPlayingElement.style.opacity = '';
                     currentPlayingElement.style.transform = '';
                 }
