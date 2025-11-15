@@ -25,12 +25,14 @@
     --bg: rgb(0, 100, 230);
     --fg: rgb(194, 246, 255);
     --fg-strong: #fff;
+    color-scheme: light;
 }
 
 [data-theme="dark"] {
     --bg: #000000;
     --fg: #c8d1dc;
     --fg-strong: #ffffff;
+    color-scheme: dark;
 }
 
 /* Base */
@@ -78,6 +80,20 @@ body {
     position: fixed;
     inset: 0;
     /* no theme fade on switch */
+}
+
+/* Force background extension into safe areas on iOS */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg);
+    z-index: -1;
+    /* Extend into safe areas */
+    top: calc(-1 * env(safe-area-inset-top, 0px));
+    bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+    left: calc(-1 * env(safe-area-inset-left, 0px));
+    right: calc(-1 * env(safe-area-inset-right, 0px));
 }
 
 main {
