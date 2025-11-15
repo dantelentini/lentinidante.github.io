@@ -571,3 +571,106 @@ button:active {
     color: var(--link-color);
     background: var(--surface-hover);
 }
+
+/* Growth Hacker link styling */
+.growth-hacker-link {
+    color: inherit;
+    text-decoration: none;
+    transition: none;
+}
+
+.growth-hacker-link:hover {
+    text-decoration: underline;
+}
+
+/* Flashing animation - Light mode (flash whiter with glow) */
+@keyframes flashWhite {
+    0%, 40% {
+        color: inherit;
+        text-shadow: none;
+    }
+    50% {
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                     0 0 30px rgba(255, 255, 255, 0.6),
+                     0 0 40px rgba(255, 255, 255, 0.4);
+    }
+    60%, 100% {
+        color: inherit;
+        text-shadow: none;
+    }
+}
+
+/* Flashing animation - Dark mode (Vibey pastel glow) */
+@keyframes flashRainbow {
+    0%, 10% {
+        color: inherit;
+        text-shadow: none;
+    }
+    25% {
+        color: #a8d8ff;
+        text-shadow: 
+            0 0 15px rgba(168, 216, 255, 0.8),
+            0 0 30px rgba(168, 216, 255, 0.6),
+            0 0 45px rgba(168, 216, 255, 0.4),
+            0 0 60px rgba(168, 216, 255, 0.2);
+    }
+    40% {
+        color: #ffd4e5;
+        text-shadow: 
+            0 0 15px rgba(255, 212, 229, 0.8),
+            0 0 30px rgba(255, 212, 229, 0.6),
+            0 0 45px rgba(255, 212, 229, 0.4),
+            0 0 60px rgba(255, 212, 229, 0.2);
+    }
+    55% {
+        color: #d4b3ff;
+        text-shadow: 
+            0 0 15px rgba(212, 179, 255, 0.8),
+            0 0 30px rgba(212, 179, 255, 0.6),
+            0 0 45px rgba(212, 179, 255, 0.4),
+            0 0 60px rgba(212, 179, 255, 0.2);
+    }
+    70% {
+        color: #b3f5ff;
+        text-shadow: 
+            0 0 15px rgba(179, 245, 255, 0.8),
+            0 0 30px rgba(179, 245, 255, 0.6),
+            0 0 45px rgba(179, 245, 255, 0.4),
+            0 0 60px rgba(179, 245, 255, 0.2);
+    }
+    85% {
+        color: #ffc4d6;
+        text-shadow: 
+            0 0 15px rgba(255, 196, 214, 0.8),
+            0 0 30px rgba(255, 196, 214, 0.6),
+            0 0 45px rgba(255, 196, 214, 0.4),
+            0 0 60px rgba(255, 196, 214, 0.2);
+    }
+    100% {
+        color: inherit;
+        text-shadow: none;
+    }
+}
+
+/* Apply flashing in light mode */
+.growth-hacker-link.flashing {
+    animation: flashWhite var(--flash-duration, 2s) ease-in-out infinite;
+}
+
+/* Apply vibey pastel flashing in dark mode */
+[data-theme="dark"] .growth-hacker-link.flashing {
+    animation: flashRainbow var(--flash-duration, 2s) ease-in-out infinite;
+    font-weight: 500;
+}
+
+/* Founders Inc link - no underline */
+a.white-bold {
+    text-decoration: none;
+    color: var(--fg-strong);
+    font-weight: bold;
+}
+
+a.white-bold:hover {
+    text-decoration: underline;
+}
