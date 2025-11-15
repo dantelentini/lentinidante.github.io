@@ -664,7 +664,16 @@ button:active {
     font-weight: 500;
 }
 
-/* Founders Inc link - no underline */
+/* White links - no underline */
+a.white {
+    text-decoration: none;
+    color: var(--fg-strong);
+}
+
+a.white:hover {
+    text-decoration: underline;
+}
+
 a.white-bold {
     text-decoration: none;
     color: var(--fg-strong);
