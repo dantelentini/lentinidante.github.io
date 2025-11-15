@@ -253,25 +253,41 @@
                 // If same button is clicked and active, deactivate it
                 hideContent();
             } else {
+                const shouldAutoPlay = !hasClickedListenBefore;
+                
                 isButtonActive = true;
                 showContent('listen');
+                
                 // Auto-start track-1 only on the very first click
-                // Must happen immediately to preserve iOS user gesture
-                if (!hasClickedListenBefore) {
+                // MUST happen synchronously for iOS autoplay to work
+                if (shouldAutoPlay) {
                     hasClickedListenBefore = true;
                     listenBtn.classList.add('processing');
                     
-                    // Use requestAnimationFrame instead of setTimeout to maintain gesture context
-                    requestAnimationFrame(() => {
+                    // Trigger play immediately - no async callbacks
+                    // Wait for DOM to render the albums first
+                    const tryPlay = () => {
                         const firstAlbum = contentItems.querySelector('.content-item:first-child');
                         if (firstAlbum && listenData[0]) {
                             playAudio(listenData[0].audio, firstAlbum, listenData[0].bpm);
-                        }
-                        // Remove processing flag after a short delay
-                        requestAnimationFrame(() => {
                             listenBtn.classList.remove('processing');
+                            return true;
+                        }
+                        return false;
+                    };
+                    
+                    // Try immediately
+                    if (!tryPlay()) {
+                        // If elements not ready, try on next frame (still maintains gesture)
+                        requestAnimationFrame(() => {
+                            if (!tryPlay()) {
+                                // Last resort - one more frame
+                                requestAnimationFrame(() => {
+                                    tryPlay();
+                                });
+                            }
                         });
-                    });
+                    }
                 }
             }
         });
