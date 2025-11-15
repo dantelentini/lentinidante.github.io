@@ -46,12 +46,16 @@ html {
     width: 100%;
     position: fixed;
     background-color: var(--bg);
+    /* Ensure background extends beyond viewport on iOS */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
 }
 
 body {
     padding: 60px 40px;
     height: 100vh;
     height: 100dvh; /* Use dynamic viewport height for mobile */
+    min-height: -webkit-fill-available; /* Ensure full coverage on iOS */
     width: 100vw;
     display: flex;
     align-items: center;
@@ -372,11 +376,26 @@ button:active {
     transform: rotate(-5deg);
 }
 
-/* Hover effects for content items */
-.content-item:hover {
+/* Spin in place animation for playing album */
+@keyframes spinInPlace {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.content-item.spinning {
+    animation: spinInPlace 8s linear infinite;
+}
+
+/* Hover effects for content items (not spinning) */
+.content-item:not(.spinning):hover {
     transform: scale(1.05) rotate(0deg) !important;
     z-index: 10;
 }
+
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
@@ -402,7 +421,6 @@ button:active {
         width: 140px;
         height: 140px;
     }
-    
     
 }
 
