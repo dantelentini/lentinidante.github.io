@@ -70,6 +70,15 @@ html {
     -webkit-overflow-scrolling: touch;
 }
 
+/* Dark mode background image for html - only when track 8 is playing */
+[data-theme="dark"][data-track-8-playing="true"] html {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.92)), url('../images/albums/album-08-edit.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
 body {
     position: fixed;
     inset: 0;
@@ -92,6 +101,15 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dark mode background image - only when track 8 is playing */
+[data-theme="dark"][data-track-8-playing="true"] body {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.92)), url('../images/albums/album-08-edit.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
 /* Force background extension into safe areas on iOS */
 body::before {
     content: '';
@@ -104,6 +122,15 @@ body::before {
     bottom: calc(-100px - env(safe-area-inset-bottom, 0px));
     left: calc(-100px - env(safe-area-inset-left, 0px));
     right: calc(-100px - env(safe-area-inset-right, 0px));
+}
+
+/* Dark mode background image for pseudo-element - only when track 8 is playing */
+[data-theme="dark"][data-track-8-playing="true"] body::before {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.92)), url('../images/albums/album-08-edit.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 /* Additional layer for iOS Safari bar coverage */
@@ -127,6 +154,16 @@ html::after {
     height: calc(100px + env(safe-area-inset-bottom, 0px));
     background-color: var(--bg);
     z-index: -2;
+}
+
+/* Dark mode background image for html pseudo-elements - only when track 8 is playing */
+[data-theme="dark"][data-track-8-playing="true"] html::before,
+[data-theme="dark"][data-track-8-playing="true"] html::after {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.92)), url('../images/albums/album-08-edit.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 main {
@@ -601,55 +638,79 @@ button:active {
     }
 }
 
-/* Flashing animation - Dark mode (Vibey pastel glow) */
+/* Flashing animation - Dark mode (Subtle pastel concert vibes with gradients) */
 @keyframes flashRainbow {
-    0%, 10% {
-        color: inherit;
-        text-shadow: none;
+    0% {
+        color: #c8b5e0;
+        text-shadow: 
+            0 0 20px rgba(200, 181, 224, 0.4),
+            0 0 40px rgba(200, 181, 224, 0.2),
+            0 0 60px rgba(180, 160, 210, 0.15);
+        filter: hue-rotate(0deg) saturate(0.9);
+    }
+    12.5% {
+        color: #d4c4f0;
+        text-shadow: 
+            0 0 25px rgba(212, 196, 240, 0.5),
+            0 0 45px rgba(190, 170, 230, 0.3),
+            0 0 65px rgba(170, 150, 220, 0.2);
+        filter: hue-rotate(10deg) saturate(1);
     }
     25% {
-        color: #a8d8ff;
+        color: #b8d4f5;
         text-shadow: 
-            0 0 15px rgba(168, 216, 255, 0.8),
-            0 0 30px rgba(168, 216, 255, 0.6),
-            0 0 45px rgba(168, 216, 255, 0.4),
-            0 0 60px rgba(168, 216, 255, 0.2);
+            0 0 20px rgba(184, 212, 245, 0.45),
+            0 0 40px rgba(160, 200, 240, 0.25),
+            0 0 60px rgba(140, 180, 230, 0.15);
+        filter: hue-rotate(20deg) saturate(0.95);
     }
-    40% {
-        color: #ffd4e5;
+    37.5% {
+        color: #c4e5f5;
         text-shadow: 
-            0 0 15px rgba(255, 212, 229, 0.8),
-            0 0 30px rgba(255, 212, 229, 0.6),
-            0 0 45px rgba(255, 212, 229, 0.4),
-            0 0 60px rgba(255, 212, 229, 0.2);
+            0 0 25px rgba(196, 229, 245, 0.5),
+            0 0 45px rgba(176, 215, 240, 0.3),
+            0 0 65px rgba(156, 200, 230, 0.2);
+        filter: hue-rotate(30deg) saturate(1);
     }
-    55% {
-        color: #d4b3ff;
+    50% {
+        color: #d4f0e8;
         text-shadow: 
-            0 0 15px rgba(212, 179, 255, 0.8),
-            0 0 30px rgba(212, 179, 255, 0.6),
-            0 0 45px rgba(212, 179, 255, 0.4),
-            0 0 60px rgba(212, 179, 255, 0.2);
+            0 0 20px rgba(212, 240, 232, 0.4),
+            0 0 40px rgba(190, 230, 220, 0.25),
+            0 0 60px rgba(170, 220, 210, 0.15);
+        filter: hue-rotate(40deg) saturate(0.9);
     }
-    70% {
-        color: #b3f5ff;
+    62.5% {
+        color: #f5e6d8;
         text-shadow: 
-            0 0 15px rgba(179, 245, 255, 0.8),
-            0 0 30px rgba(179, 245, 255, 0.6),
-            0 0 45px rgba(179, 245, 255, 0.4),
-            0 0 60px rgba(179, 245, 255, 0.2);
+            0 0 25px rgba(245, 230, 216, 0.45),
+            0 0 45px rgba(235, 220, 206, 0.3),
+            0 0 65px rgba(225, 210, 196, 0.2);
+        filter: hue-rotate(50deg) saturate(0.95);
     }
-    85% {
-        color: #ffc4d6;
+    75% {
+        color: #f5d4d8;
         text-shadow: 
-            0 0 15px rgba(255, 196, 214, 0.8),
-            0 0 30px rgba(255, 196, 214, 0.6),
-            0 0 45px rgba(255, 196, 214, 0.4),
-            0 0 60px rgba(255, 196, 214, 0.2);
+            0 0 20px rgba(245, 212, 216, 0.5),
+            0 0 40px rgba(240, 200, 210, 0.3),
+            0 0 60px rgba(235, 190, 205, 0.2);
+        filter: hue-rotate(60deg) saturate(1);
+    }
+    87.5% {
+        color: #e8c8e8;
+        text-shadow: 
+            0 0 25px rgba(232, 200, 232, 0.45),
+            0 0 45px rgba(220, 185, 220, 0.25),
+            0 0 65px rgba(210, 170, 210, 0.15);
+        filter: hue-rotate(70deg) saturate(0.95);
     }
     100% {
-        color: inherit;
-        text-shadow: none;
+        color: #c8b5e0;
+        text-shadow: 
+            0 0 20px rgba(200, 181, 224, 0.4),
+            0 0 40px rgba(200, 181, 224, 0.2),
+            0 0 60px rgba(180, 160, 210, 0.15);
+        filter: hue-rotate(0deg) saturate(0.9);
     }
 }
 
@@ -662,6 +723,7 @@ button:active {
 [data-theme="dark"] .growth-hacker-link.flashing {
     animation: flashRainbow var(--flash-duration, 2s) ease-in-out infinite;
     font-weight: 500;
+    transition: all 0.3s ease;
 }
 
 /* White links - no underline */
