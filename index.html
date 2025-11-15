@@ -244,61 +244,38 @@
             e.stopPropagation();
             e.preventDefault();
             
-            // Prevent double-clicks/spam on iOS
-            if (listenBtn.classList.contains('processing')) {
-                return;
-            }
-            
             if (currentMode === 'listen' && isButtonActive) {
                 // If same button is clicked and active, deactivate it
                 hideContent();
             } else {
-                const shouldAutoPlay = !hasClickedListenBefore;
-                
                 isButtonActive = true;
                 showContent('listen');
                 
-                // Auto-start track-1 only on the very first click
-                // Use same pattern as dark mode audio for iOS compatibility
-                if (shouldAutoPlay) {
+                // Auto-play track-1 only on the very first click - DIRECT like dark mode
+                if (!hasClickedListenBefore) {
                     hasClickedListenBefore = true;
-                    listenBtn.classList.add('processing');
                     
-                    // Create albums first
-                    const firstAlbum = contentItems.querySelector('.content-item:first-child');
-                    if (firstAlbum && listenData[0]) {
-                        // Set up audio SYNCHRONOUSLY like dark mode does
+                    // Direct play - exact same pattern as dark mode
+                    try {
                         const track = listenData[0];
                         audioPlayer.src = track.audio;
-                        audioPlayer.volume = 1.0;
-                        audioPlayer.preload = 'auto';
-                        audioPlayer.load();
+                        audioPlayer.currentTime = 0;
+                        audioPlayer.play().catch(() => {});
                         
-                        // Set BPM for dancing
+                        // Set up visuals and state after play starts
+                        const firstAlbum = contentItems.querySelector('.content-item:first-child');
+                        if (firstAlbum) {
+                            currentlyPlaying = track.audio;
+                            currentPlayingElement = firstAlbum;
+                            firstAlbum.classList.add('spinning');
+                            firstAlbum.style.opacity = '0.8';
+                        }
+                        
+                        // Set BPM and start dancing
                         const danceSpeed = (240 / track.bpm);
                         contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
                         startDanceStyleFluctuation(track.bpm);
-                        
-                        // Play immediately - direct call like dark mode
-                        const playPromise = audioPlayer.play();
-                        if (playPromise !== undefined) {
-                            playPromise.then(() => {
-                                currentlyPlaying = track.audio;
-                                currentPlayingElement = firstAlbum;
-                                firstAlbum.classList.add('spinning');
-                                firstAlbum.style.opacity = '0.8';
-                                updateMediaSession(track);
-                                updateMediaSessionPlaybackState('playing');
-                                listenBtn.classList.remove('processing');
-                            }).catch(() => {
-                                listenBtn.classList.remove('processing');
-                            });
-                        } else {
-                            listenBtn.classList.remove('processing');
-                        }
-                    } else {
-                        listenBtn.classList.remove('processing');
-                    }
+                    } catch (_) {}
                 }
             }
         });
