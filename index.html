@@ -8,10 +8,21 @@
     <meta name="theme-color" content="#0064e6" id="theme-color-meta">
     <title>Dante Lentini</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <!-- Preload album artwork for instant display -->
+    <link rel="preload" as="image" href="assets/images/albums/album-01.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-02.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-03.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-04.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-05.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-06.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-07.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-08.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-08-edit.gif">
 </head>
 <body>
     <main>
-        <canvas id="starfield" style="position:fixed;inset:0;z-index:0;pointer-events:none;display:none"></canvas>
+        <canvas id="starfield" style="position:fixed;inset:0;z-index:0;pointer-events:none;display:none;opacity:0;transition:opacity 0.8s ease"></canvas>
         
         <!-- Content Display Areas -->
         <div class="content-grid" style="z-index:1">
@@ -97,11 +108,30 @@
             currentTheme = next;
 
             if (next === 'dark') {
+                // Remove transition class for instant dark mode
+                rootEl.classList.remove('transitioning-to-light');
                 rootEl.setAttribute('data-theme', 'dark');
-                if (starCanvas) starCanvas.style.display = 'block';
+                if (starCanvas) {
+                    // Instantly show starfield
+                    starCanvas.style.display = 'block';
+                    starCanvas.style.opacity = '1';
+                }
             } else {
+                // Add transition class for smooth light mode transition
+                rootEl.classList.add('transitioning-to-light');
                 rootEl.removeAttribute('data-theme');
-                if (starCanvas) starCanvas.style.display = 'none';
+                if (starCanvas) {
+                    // Fade out the starfield
+                    starCanvas.style.opacity = '0';
+                    // Hide after transition completes
+                    setTimeout(() => {
+                        starCanvas.style.display = 'none';
+                    }, 800);
+                }
+                // Remove transition class after transition completes
+                setTimeout(() => {
+                    rootEl.classList.remove('transitioning-to-light');
+                }, 800);
             }
 
             syncSystemChrome(next);
@@ -187,6 +217,26 @@
             { image: 'assets/images/albums/album-07.jpg', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 128 },
             { image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 97, gifImage: 'assets/images/albums/album-08-edit.gif' }
         ];
+
+        // Preload all album images and GIF for instant appearance
+        (function preloadImages() {
+            const imagesToPreload = [];
+            
+            // Add all album cover images
+            listenData.forEach(track => {
+                imagesToPreload.push(track.image);
+                // Add GIF if present
+                if (track.gifImage) {
+                    imagesToPreload.push(track.gifImage);
+                }
+            });
+            
+            // Preload each image
+            imagesToPreload.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        })();
 
         // DOM elements
         const readBtn = document.getElementById('read-btn');
@@ -316,7 +366,12 @@
             if (currentMode === 'listen' && isButtonActive) {
                 hideContent();
             } else {
-                const shouldAutoPlay = !hasClickedListenBefore && !isReturningFromBackground;
+                // Only auto-play track 1 if: first time clicking listen, not returning from background,
+                // not in dark mode, and track 8 is not currently playing
+                const shouldAutoPlay = !hasClickedListenBefore && 
+                                      !isReturningFromBackground && 
+                                      currentTheme !== 'dark' && 
+                                      currentlyPlaying !== 'assets/audio/track-08.mp3';
                 
                 isButtonActive = true;
                 showContent('listen');
@@ -562,6 +617,13 @@
                 
                 // Start flashing with track 8 BPM
                 startGrowthHackerFlash(97);
+                
+                // Restore other albums to full opacity after dark mode activates
+                const otherAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
+                otherAlbums.forEach(album => {
+                    album.style.transition = 'opacity 2s ease-in';
+                    album.style.opacity = '1';
+                });
                 
                 track8GifTimer = null;
             }, 6700); // 6.7 seconds
@@ -810,6 +872,12 @@
             // Check if this is track 8
             const isTrack8 = audioSrc === 'assets/audio/track-08.mp3';
             
+            // If switching to a non-track-8 track while in dark mode, switch back to light
+            if (!isTrack8 && currentTheme === 'dark') {
+                applyTheme('light', { force: true });
+                stopGrowthHackerFlash();
+            }
+            
             // Stop dark mode sound effect when playing a song after transition
             const isDark = currentTheme === 'dark';
             if (isDark) {
@@ -832,10 +900,14 @@
                     clearTrack8GifTimer();
                     // When paused, stop spinning and restore CSS rotation
                     restorePlaybackVisual(element);
-                    // Remove track 8 indicator when paused
+                    // Remove track 8 indicator when paused and switch back to light mode if needed
                     if (isTrack8) {
                         rootEl.removeAttribute('data-track-8-playing');
                         track8LastRestartTime = 0;
+                        // Switch back to light mode when track 8 is paused
+                        if (currentTheme === 'dark') {
+                            applyTheme('light', { force: true });
+                        }
                     }
                 } else {
                     // Currently paused - resume/restart
@@ -1022,11 +1094,21 @@
 
         // Handle audio events
         audioPlayer.addEventListener('ended', () => {
+            // If track 8 ends and we're in dark mode, switch back to light
+            if (currentTheme === 'dark') {
+                applyTheme('light', { force: true });
+                stopGrowthHackerFlash();
+            }
             rootEl.removeAttribute('data-track-8-playing');
             clearCurrentPlayingState();
         });
 
         audioPlayer.addEventListener('error', () => {
+            // If error occurs in dark mode, switch back to light
+            if (currentTheme === 'dark') {
+                applyTheme('light', { force: true });
+                stopGrowthHackerFlash();
+            }
             rootEl.removeAttribute('data-track-8-playing');
             clearCurrentPlayingState();
         });
@@ -1048,11 +1130,15 @@
             e.preventDefault();
             e.stopPropagation();
 
-            // If already in dark mode, switch back to light
+            // If already in dark mode, switch back to light and stop track 8
             if (currentTheme === 'dark') {
                 cancelPendingTheme();
                 applyTheme('light', { force: true });
                 stopGrowthHackerFlash();
+                // Stop track 8 if it's playing
+                if (currentlyPlaying === 'assets/audio/track-08.mp3') {
+                    clearCurrentPlayingState({ resetAudio: true });
+                }
                 return;
             }
 
