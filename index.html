@@ -210,6 +210,7 @@
         let lastButtonClickTime = 0;
         let isProcessingButtonClick = false;
         let track8GifTimer = null; // Timer for track 8 album art change and dark mode
+        let track8LastRestartTime = 0; // Track when track 8 was last restarted
         
         // Unlock audio on first user interaction (for autoplay policies)
         function unlockAudio() {
@@ -546,7 +547,7 @@
                 album.style.opacity = '0.15';
             });
             
-            // Start 13-second timer for gif change and dark mode
+            // Start 6.7-second timer for gif change and dark mode
             track8GifTimer = setTimeout(() => {
                 // Change album art to gif
                 if (element) {
@@ -563,7 +564,7 @@
                 startGrowthHackerFlash(97);
                 
                 track8GifTimer = null;
-            }, 13000); // 13 seconds
+            }, 6700); // 6.7 seconds
         }
 
         function clearCurrentPlayingState(options = {}) {
@@ -581,8 +582,9 @@
             if (updateSession) {
                 updateMediaSessionPlaybackState('none');
             }
-            // Remove track 8 playing indicator
+            // Remove track 8 playing indicator and reset restart timer
             rootEl.removeAttribute('data-track-8-playing');
+            track8LastRestartTime = 0;
         }
 
         // Growth Hacker flash control - works in both light and dark mode
@@ -819,9 +821,10 @@
                 } catch (_) {}
             }
             
-            // If clicking the same track, toggle play/pause
+            // If clicking the same track, toggle play/pause (with special behavior for track 8)
             if (currentlyPlaying === audioSrc) {
                 if (!audioPlayer.paused) {
+                    // Currently playing - pause it
                     audioPlayer.pause();
                     updateMediaSessionPlaybackState('paused');
                     stopDanceStyleFluctuation();
@@ -830,9 +833,18 @@
                     // When paused, stop spinning and restore CSS rotation
                     restorePlaybackVisual(element);
                     // Remove track 8 indicator when paused
-                    rootEl.removeAttribute('data-track-8-playing');
+                    if (isTrack8) {
+                        rootEl.removeAttribute('data-track-8-playing');
+                        track8LastRestartTime = 0;
+                    }
                 } else {
-                    // Resume playback
+                    // Currently paused - resume/restart
+                    if (isTrack8) {
+                        // For track 8, always restart from beginning when resuming
+                        audioPlayer.currentTime = 0;
+                        track8LastRestartTime = Date.now();
+                    }
+                    
                     const playPromise = audioPlayer.play();
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
@@ -849,14 +861,10 @@
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
                                 
-                                // If this is album 8, start the timer for dark mode
+                                // If this is track 8, start the dark mode timer
                                 if (isTrack8) {
                                     startTrack8DarkModeTransition(element);
                                 }
-                            }
-                            // Set track 8 indicator when resumed
-                            if (isTrack8) {
-                                rootEl.setAttribute('data-track-8-playing', 'true');
                             }
                         }).catch(error => {
                             // Resume failed
@@ -880,8 +888,10 @@
             // Set track 8 playing indicator if this is track 8
             if (isTrack8) {
                 rootEl.setAttribute('data-track-8-playing', 'true');
+                track8LastRestartTime = Date.now(); // Track when track 8 starts
             } else {
                 rootEl.removeAttribute('data-track-8-playing');
+                track8LastRestartTime = 0;
             }
 
             // Set BPM for dancing animation - calculate duration for 4-beat cycle
@@ -1033,35 +1043,36 @@
         });
         
 
-        // Dark mode toggle
+        // Dark mode toggle - opens listen albums and plays track 8
         darkToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
 
-            if (pendingTheme === 'dark') {
+            // If already in dark mode, switch back to light
+            if (currentTheme === 'dark') {
                 cancelPendingTheme();
                 applyTheme('light', { force: true });
                 stopGrowthHackerFlash();
                 return;
             }
 
-            const next = currentTheme === 'dark' ? 'light' : 'dark';
+            // Cancel any pending dark mode transition from the old method
+            cancelPendingTheme();
 
-            if (next === 'dark') {
-                // Close listen tab if open
-                if (currentMode === 'listen') {
-                    hideContent();
+            // Open listen albums
+            isButtonActive = true;
+            showContent('listen');
+            
+            // Wait for DOM to update, then play track 8
+            setTimeout(() => {
+                const track8 = listenData[7]; // Track 08
+                if (track8) {
+                    const track8Element = contentItems.querySelector('.content-item:nth-child(8)');
+                    if (track8Element) {
+                        playAudio(track8.audio, track8Element, track8.bpm);
+                    }
                 }
-                
-                if (audioPlayer && !audioPlayer.paused) {
-                    clearCurrentPlayingState({ resetAudio: true });
-                }
-                startDarkModeTransition();
-            } else {
-                cancelPendingTheme();
-                applyTheme('light', { force: currentTheme === 'light' });
-                stopGrowthHackerFlash();
-            }
+            }, 50);
         });
 
         // Starfield animation (enabled in dark mode)
