@@ -206,6 +206,7 @@
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         let audioUnlocked = false;
         let hasClickedListenBefore = false;
+        let isReturningFromBackground = false;
         
         // Unlock audio on first user interaction (for autoplay policies)
         function unlockAudio() {
@@ -221,6 +222,21 @@
         // Add listeners for audio unlock
         document.addEventListener('touchstart', unlockAudio, { once: true });
         document.addEventListener('click', unlockAudio, { once: true });
+        
+        // Handle page visibility changes (tab switching on mobile)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Page is hidden (tab switched away or app backgrounded)
+                // Don't pause audio, let it continue playing
+            } else {
+                // Page is visible again (tab switched back or app foregrounded)
+                isReturningFromBackground = true;
+                // Reset the flag after a short delay to prevent accidental triggers
+                setTimeout(() => {
+                    isReturningFromBackground = false;
+                }, 1000);
+            }
+        });
 
         // Button event listeners
         readBtn.addEventListener('click', (e) => {
@@ -255,12 +271,13 @@
                 // If same button is clicked and active, deactivate it
                 hideContent();
             } else {
-                const shouldAutoPlay = !hasClickedListenBefore;
+                // Don't auto-play if returning from background to prevent spam
+                const shouldAutoPlay = !hasClickedListenBefore && !isReturningFromBackground;
                 
                 isButtonActive = true;
                 showContent('listen');
                 
-                // Auto-play track-1 only on the very first click
+                // Auto-play track-1 only on the very first click (and not when returning from background)
                 // Call playAudio synchronously just like tapping an album (works on iOS)
                 if (shouldAutoPlay) {
                     hasClickedListenBefore = true;
@@ -380,11 +397,19 @@
                     
                     contentItems.appendChild(contentItem);
                     
-                    // If this track is currently playing, restore spinning state
+                    // If this track is currently playing, restore spinning state and GIF
                     if (currentlyPlaying === item.audio && !audioPlayer.paused) {
                         contentItem.classList.add('spinning');
                         contentItem.style.opacity = '0.8';
                         currentPlayingElement = contentItem;
+                        
+                        // If this is album 8 and it's playing, use the GIF
+                        if (item.gifImage) {
+                            const img = contentItem.querySelector('img');
+                            if (img) {
+                                img.src = item.gifImage;
+                            }
+                        }
                     }
                 });
 
