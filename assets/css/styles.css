@@ -355,22 +355,141 @@ button:active {
     animation-delay: 0s !important;
 }
 
-/* Dancing side-to-side animation for non-spinning albums */
-@keyframes danceSideToSide {
-    0%, 100% {
-        transform: translateX(0) rotate(var(--item-rotation, 0deg));
+/* SMOOTH - Hypnotic flow, natural groove */
+@keyframes danceSmooth {
+    0% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1);
     }
-    25% {
-        transform: translateX(-8px) rotate(calc(var(--item-rotation, 0deg) - 2deg));
+    15% {
+        transform: translate(-6px, -2px) rotate(calc(var(--item-rotation, 0deg) - 3deg)) scale(1.02);
     }
-    75% {
-        transform: translateX(8px) rotate(calc(var(--item-rotation, 0deg) + 2deg));
+    35% {
+        transform: translate(-8px, 0) rotate(calc(var(--item-rotation, 0deg) - 2deg)) scale(1);
+    }
+    50% {
+        transform: translate(0, 2px) rotate(var(--item-rotation, 0deg)) scale(0.98);
+    }
+    65% {
+        transform: translate(8px, 0) rotate(calc(var(--item-rotation, 0deg) + 2deg)) scale(1);
+    }
+    85% {
+        transform: translate(6px, -2px) rotate(calc(var(--item-rotation, 0deg) + 3deg)) scale(1.02);
+    }
+    100% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1);
     }
 }
 
-/* Only dance when a song is playing */
+/* JUMP - Bouncing to the beat with realistic physics */
+@keyframes danceJump {
+    0%, 10% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    15% {
+        transform: translate(0, -20px) rotate(calc(var(--item-rotation, 0deg) - 3deg)) scale(1.02, 1.08);
+    }
+    20% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1.05, 0.95);
+    }
+    25%, 30% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    35%, 45% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    50% {
+        transform: translate(0, -20px) rotate(calc(var(--item-rotation, 0deg) + 3deg)) scale(1.02, 1.08);
+    }
+    55% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1.05, 0.95);
+    }
+    60%, 65% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    70%, 75% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+    80% {
+        transform: translate(0, -14px) rotate(var(--item-rotation, 0deg)) scale(1.01, 1.05);
+    }
+    85% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1.03, 0.97);
+    }
+    90%, 100% {
+        transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
+    }
+}
+
+/* HYPE MODE - Lean/bounce towards the playing track */
+@keyframes hypeLeft {
+    0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
+    25% { transform: translate(15px, -8px) rotate(calc(var(--item-rotation, 0deg) + 8deg)) scale(1.08); }
+    50% { transform: translate(12px, 0) rotate(calc(var(--item-rotation, 0deg) + 5deg)) scale(1.02); }
+    75% { transform: translate(15px, -8px) rotate(calc(var(--item-rotation, 0deg) + 8deg)) scale(1.08); }
+}
+
+@keyframes hypeRight {
+    0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
+    25% { transform: translate(-15px, -8px) rotate(calc(var(--item-rotation, 0deg) - 8deg)) scale(1.08); }
+    50% { transform: translate(-12px, 0) rotate(calc(var(--item-rotation, 0deg) - 5deg)) scale(1.02); }
+    75% { transform: translate(-15px, -8px) rotate(calc(var(--item-rotation, 0deg) - 8deg)) scale(1.08); }
+}
+
+@keyframes hypeUp {
+    0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
+    25% { transform: translate(0, 12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
+    50% { transform: translate(0, 8px) rotate(var(--item-rotation, 0deg)) scale(1.02); }
+    75% { transform: translate(0, 12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
+}
+
+@keyframes hypeDown {
+    0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
+    25% { transform: translate(0, -12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
+    50% { transform: translate(0, -8px) rotate(var(--item-rotation, 0deg)) scale(1.02); }
+    75% { transform: translate(0, -12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
+}
+
+/* Hype mode active */
+.content-items.hype-mode .content-item:not(.spinning) {
+    animation-duration: 1s !important;
+    animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+    animation-delay: 0s !important;
+}
+
+.content-items.hype-mode .content-item.hype-left {
+    animation-name: hypeLeft !important;
+}
+
+.content-items.hype-mode .content-item.hype-right {
+    animation-name: hypeRight !important;
+}
+
+.content-items.hype-mode .content-item.hype-up {
+    animation-name: hypeUp !important;
+}
+
+.content-items.hype-mode .content-item.hype-down {
+    animation-name: hypeDown !important;
+}
+
+/* Only dance when a song is playing - default styles */
 .content-items:has(.spinning) .content-item:not(.spinning) {
-    animation: danceSideToSide 3s ease-in-out infinite;
+    animation-duration: var(--dance-duration, 2s);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-iteration-count: infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Dance style variations - all albums sync together */
+.content-items[data-dance-style="smooth"] .content-item:not(.spinning) {
+    animation-name: danceSmooth;
+    animation-timing-function: ease-in-out;
+}
+
+.content-items[data-dance-style="jump"] .content-item:not(.spinning) {
+    animation-name: danceJump;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Hover effects for content items (not spinning) */
