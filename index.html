@@ -172,14 +172,14 @@
 
         // Content data - only listen has visual content
         const listenData = [
-            { image: 'assets/images/albums/album-01.jpg', title: 'Track 01', audio: 'assets/audio/track-01.mp3' },
-            { image: 'assets/images/albums/album-02.jpg', title: 'Track 02', audio: 'assets/audio/track-02.mp3' },
-            { image: 'assets/images/albums/album-03.jpg', title: 'Track 03', audio: 'assets/audio/track-03.mp3' },
-            { image: 'assets/images/albums/album-04.jpg', title: 'Track 04', audio: 'assets/audio/track-04.mp3' },
-            { image: 'assets/images/albums/album-05.jpg', title: 'Track 05', audio: 'assets/audio/track-05.mp3' },
-            { image: 'assets/images/albums/album-06.jpg', title: 'Track 06', audio: 'assets/audio/track-06.mp3' },
-            { image: 'assets/images/albums/album-07.jpg', title: 'Track 07', audio: 'assets/audio/track-07.mp3' },
-            { image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3' }
+            { image: 'assets/images/albums/album-01.jpg', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
+            { image: 'assets/images/albums/album-02.jpg', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 140 },
+            { image: 'assets/images/albums/album-03.jpg', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
+            { image: 'assets/images/albums/album-04.jpg', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 119 },
+            { image: 'assets/images/albums/album-05.jpg', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 138 },
+            { image: 'assets/images/albums/album-06.jpg', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
+            { image: 'assets/images/albums/album-07.jpg', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 128 },
+            { image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 97 }
         ];
 
         // DOM elements
@@ -253,7 +253,7 @@
                     setTimeout(() => {
                         const firstAlbum = contentItems.querySelector('.content-item:first-child');
                         if (firstAlbum && listenData[0]) {
-                            playAudio(listenData[0].audio, firstAlbum);
+                            playAudio(listenData[0].audio, firstAlbum, listenData[0].bpm);
                         }
                     }, 100);
                 }
@@ -347,19 +347,20 @@
                 listenData.forEach((item, index) => {
                     const contentItem = document.createElement('div');
                     contentItem.className = 'content-item';
+                    contentItem.dataset.bpm = item.bpm;
                     contentItem.innerHTML = `<img src="${item.image}" alt="${item.title}" title="${item.title}">`;
                     
                     contentItem.addEventListener('click', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        playAudio(item.audio, contentItem);
+                        playAudio(item.audio, contentItem, item.bpm);
                         isButtonActive = true;
                     });
                     
                     contentItem.addEventListener('touchend', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        playAudio(item.audio, contentItem);
+                        playAudio(item.audio, contentItem, item.bpm);
                         isButtonActive = true;
                     });
                     
@@ -414,12 +415,210 @@
             restorePlaybackVisual(currentPlayingElement);
             currentlyPlaying = null;
             currentPlayingElement = null;
+            stopDanceStyleFluctuation();
             if (updateSession) {
                 updateMediaSessionPlaybackState('none');
             }
         }
 
-        function playAudio(audioSrc, element) {
+        // Advanced dance system with coordination patterns
+        let currentDanceStyle = 'smooth';
+        let currentCoordMode = 'independent'; // 'independent', 'sync', 'mirror', 'pairs', 'wave'
+        let styleChangeTimeout = null;
+        let coordChangeTimeout = null;
+        let hypeTimeout = null;
+        let hypeInterval = null;
+        
+        function setCoordinationMode(mode) {
+            currentCoordMode = mode;
+            const albums = contentItems.querySelectorAll('.content-item:not(.spinning)');
+            
+            if (mode === 'sync') {
+                // All dance in perfect sync - no delay
+                albums.forEach(album => {
+                    album.style.animationDelay = '0s';
+                });
+            } else if (mode === 'mirror') {
+                // Left side mirrors right side
+                albums.forEach((album, index) => {
+                    if (index < 4) {
+                        // Top row - left mirrors right
+                        const mirrorIndex = 3 - index;
+                        album.style.animationDelay = `${mirrorIndex * 0.2}s`;
+                    } else {
+                        // Bottom row - left mirrors right
+                        const mirrorIndex = 7 - index;
+                        album.style.animationDelay = `${mirrorIndex * 0.2}s`;
+                    }
+                });
+            } else if (mode === 'pairs') {
+                // Adjacent pairs hop together - mad funny and vibey
+                albums.forEach((album, index) => {
+                    // Pairs: 0&1, 2&3, 4&5, 6&7
+                    const pairGroup = Math.floor(index / 2);
+                    album.style.animationDelay = `${pairGroup * 0.25}s`;
+                });
+            } else if (mode === 'wave') {
+                // Smooth wave pattern for swaying
+                albums.forEach((album, index) => {
+                    album.style.animationDelay = `${index * 0.12}s`;
+                });
+            } else {
+                // Independent - each has unique offset
+                albums.forEach((album, index) => {
+                    album.style.animationDelay = `${index * 0.15}s`;
+                });
+            }
+        }
+        
+        function triggerHypeMode() {
+            // Find the spinning album position
+            const spinningAlbum = contentItems.querySelector('.content-item.spinning');
+            if (!spinningAlbum) return;
+            
+            const spinningIndex = Array.from(contentItems.children).indexOf(spinningAlbum);
+            const albums = contentItems.querySelectorAll('.content-item:not(.spinning)');
+            
+            // Determine direction for each album to lean towards the spinning one
+            albums.forEach((album, idx) => {
+                // Remove previous hype classes
+                album.classList.remove('hype-left', 'hype-right', 'hype-up', 'hype-down');
+                
+                // Find actual index in all albums
+                const actualIndex = Array.from(contentItems.children).indexOf(album);
+                
+                // Determine direction to lean based on position relative to spinning album
+                if (actualIndex < spinningIndex) {
+                    // Album is to the left, lean right towards it
+                    album.classList.add('hype-right');
+                } else if (actualIndex > spinningIndex) {
+                    // Album is to the right, lean left towards it
+                    album.classList.add('hype-left');
+                }
+                
+                // Add vertical lean based on row
+                if (actualIndex < 4 && spinningIndex >= 4) {
+                    album.classList.add('hype-down');
+                } else if (actualIndex >= 4 && spinningIndex < 4) {
+                    album.classList.add('hype-up');
+                }
+            });
+            
+            // Activate hype mode
+            contentItems.classList.add('hype-mode');
+            
+            // Deactivate after 4 seconds
+            if (hypeTimeout) clearTimeout(hypeTimeout);
+            hypeTimeout = setTimeout(() => {
+                contentItems.classList.remove('hype-mode');
+                albums.forEach(album => {
+                    album.classList.remove('hype-left', 'hype-right', 'hype-up', 'hype-down');
+                });
+            }, 4000);
+        }
+        
+        function scheduleRandomHype(bpm) {
+            // Schedule next hype moment randomly (every 24-48 beats)
+            const baseBeats = 24 + Math.floor(Math.random() * 24);
+            const duration = ((60 / bpm) * 1000) * baseBeats;
+            hypeInterval = setTimeout(() => {
+                triggerHypeMode();
+                scheduleRandomHype(bpm);
+            }, duration);
+        }
+        
+        function cycleCoordinationMode(bpm) {
+            // Cycle through coordination modes with smart transitions
+            const modes = ['independent', 'sync', 'pairs', 'mirror', 'wave'];
+            
+            // Pick next mode randomly but not the same as current
+            let nextMode;
+            do {
+                nextMode = modes[Math.floor(Math.random() * modes.length)];
+            } while (nextMode === currentCoordMode);
+            
+            setCoordinationMode(nextMode);
+            
+            // Stay in each mode for 12-24 beats
+            const baseBeats = 12 + Math.floor(Math.random() * 12);
+            const duration = ((60 / bpm) * 1000) * baseBeats;
+            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), duration);
+        }
+        
+        function switchDanceStyle(bpm) {
+            // Alternate between smooth and jump
+            currentDanceStyle = currentDanceStyle === 'smooth' ? 'jump' : 'smooth';
+            contentItems.setAttribute('data-dance-style', currentDanceStyle);
+            
+            // Random duration: 12-24 beats
+            const baseBeats = 12 + Math.floor(Math.random() * 12);
+            const duration = ((60 / bpm) * 1000) * baseBeats;
+            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), duration);
+        }
+        
+        function startDanceStyleFluctuation(bpm) {
+            // Stop any existing timeouts
+            if (styleChangeTimeout) {
+                clearTimeout(styleChangeTimeout);
+                styleChangeTimeout = null;
+            }
+            if (coordChangeTimeout) {
+                clearTimeout(coordChangeTimeout);
+                coordChangeTimeout = null;
+            }
+            if (hypeInterval) {
+                clearTimeout(hypeInterval);
+                hypeInterval = null;
+            }
+            if (hypeTimeout) {
+                clearTimeout(hypeTimeout);
+                hypeTimeout = null;
+            }
+            
+            // Start with smooth and independent mode
+            currentDanceStyle = 'smooth';
+            currentCoordMode = 'independent';
+            contentItems.setAttribute('data-dance-style', 'smooth');
+            setCoordinationMode('independent');
+            
+            // Schedule first dance style switch
+            const styleBeats = 12 + Math.floor(Math.random() * 12);
+            const styleDuration = ((60 / bpm) * 1000) * styleBeats;
+            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), styleDuration);
+            
+            // Schedule first coordination mode switch
+            const coordBeats = 16 + Math.floor(Math.random() * 16);
+            const coordDuration = ((60 / bpm) * 1000) * coordBeats;
+            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), coordDuration);
+            
+            // Schedule first hype moment
+            scheduleRandomHype(bpm);
+        }
+        
+        function stopDanceStyleFluctuation() {
+            if (styleChangeTimeout) {
+                clearTimeout(styleChangeTimeout);
+                styleChangeTimeout = null;
+            }
+            if (coordChangeTimeout) {
+                clearTimeout(coordChangeTimeout);
+                coordChangeTimeout = null;
+            }
+            if (hypeInterval) {
+                clearTimeout(hypeInterval);
+                hypeInterval = null;
+            }
+            if (hypeTimeout) {
+                clearTimeout(hypeTimeout);
+                hypeTimeout = null;
+            }
+            contentItems.classList.remove('hype-mode');
+            contentItems.removeAttribute('data-dance-style');
+            currentDanceStyle = 'smooth';
+            currentCoordMode = 'independent';
+        }
+
+        function playAudio(audioSrc, element, bpm) {
             if (pendingTheme === 'dark') {
                 return;
             }
@@ -442,6 +641,7 @@
                 if (!audioPlayer.paused) {
                     audioPlayer.pause();
                     updateMediaSessionPlaybackState('paused');
+                    stopDanceStyleFluctuation();
                     // When paused, stop spinning and restore CSS rotation
                     restorePlaybackVisual(element);
                 } else {
@@ -450,6 +650,12 @@
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
                             updateMediaSessionPlaybackState('playing');
+                            // Set BPM for dancing animation
+                            if (bpm && contentItems) {
+                                const danceSpeed = (240 / bpm); // 4 beats in seconds
+                                contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
+                                startDanceStyleFluctuation(bpm);
+                            }
                             // When playing, add spinning class and dim slightly
                             if (element) {
                                 element.classList.add('spinning');
@@ -472,6 +678,14 @@
             // Stop currently playing audio and start new one
             if (currentlyPlaying) {
                 clearCurrentPlayingState({ resetAudio: true });
+            }
+
+            // Set BPM for dancing animation - calculate duration for 4-beat cycle
+            if (bpm && contentItems) {
+                const danceSpeed = (240 / bpm); // 4 beats in seconds
+                contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
+                // Start dancing immediately when new track plays
+                startDanceStyleFluctuation(bpm);
             }
 
             // Find track info for Media Session API
