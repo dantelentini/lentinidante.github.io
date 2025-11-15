@@ -30,8 +30,8 @@
         </div>
         <p>
             I'm a <a href="https://dollarhomepage.com/" target="_blank" id="growth-hacker-link" class="growth-hacker-link">Growth Hacker</a>. In my past, I<br>
-            left college, made <span class="white">tiktoks</span> and joined<br>
-            <span class="white">startups</span>— all of which led me to SF,<br>
+            left college, made <a href="https://www.tiktok.com/@thesitesupply" target="_blank" class="white">tiktoks</a> and joined<br>
+            <a href="https://www.ycombinator.com/companies/hyper" target="_blank" class="white">startups</a>— all of which led me to SF,<br>
             where I'm now at <a href="https://f.inc/" target="_blank" class="white-bold">Founders, Inc.</a>
         </p>
         <div class="signature">
@@ -185,7 +185,7 @@
             { image: 'assets/images/albums/album-05.jpg', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 138 },
             { image: 'assets/images/albums/album-06.jpg', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
             { image: 'assets/images/albums/album-07.jpg', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 128 },
-            { image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 97 }
+            { image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 97, gifImage: 'assets/images/albums/album-08-edit.gif' }
         ];
 
         // DOM elements
@@ -418,6 +418,12 @@
             element.classList.remove('spinning');
             element.style.opacity = '';
             element.style.transform = '';
+            
+            // If this is album 8, restore the jpg version
+            const img = element.querySelector('img');
+            if (img && img.src.includes('album-08-edit.gif')) {
+                img.src = 'assets/images/albums/album-08.jpg';
+            }
         }
 
         function clearCurrentPlayingState(options = {}) {
@@ -693,6 +699,15 @@
                             if (element) {
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
+                                
+                                // If this is album 8, switch to the gif version
+                                const trackInfo = listenData.find(track => track.audio === audioSrc);
+                                if (trackInfo && trackInfo.gifImage) {
+                                    const img = element.querySelector('img');
+                                    if (img) {
+                                        img.src = trackInfo.gifImage;
+                                    }
+                                }
                             }
                         }).catch(error => {
                             // Resume failed
@@ -763,6 +778,14 @@
                     if (element) {
                         element.classList.add('spinning');
                         element.style.opacity = '0.8';
+                        
+                        // If this is album 8, switch to the gif version
+                        if (trackInfo && trackInfo.gifImage) {
+                            const img = element.querySelector('img');
+                            if (img) {
+                                img.src = trackInfo.gifImage;
+                            }
+                        }
                     }
                 }).catch(error => {
                     // Playback failed - retry once after a brief delay
@@ -777,6 +800,14 @@
                             if (element) {
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
+                                
+                                // If this is album 8, switch to the gif version
+                                if (trackInfo && trackInfo.gifImage) {
+                                    const img = element.querySelector('img');
+                                    if (img) {
+                                        img.src = trackInfo.gifImage;
+                                    }
+                                }
                             }
                         }).catch(() => {
                             // Show visual feedback that audio failed
