@@ -208,8 +208,8 @@
 
         // Click outside to deactivate button mode (but not on mobile)
         document.addEventListener('click', (e) => {
-            // Don't hide content if clicking on album items
-            if (e.target.closest('.content-item')) {
+            // Don't hide content if clicking on album items or dark mode button
+            if (e.target.closest('.content-item') || e.target.closest('#dark-mode-toggle')) {
                 return;
             }
             
@@ -529,9 +529,25 @@
         // Dark mode toggle
         darkToggle.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation(); // Prevent click outside handler from triggering
             
-            // Pause any currently playing audio and reset visual
-            if (!audioPlayer.paused) {
+            if (pendingDark) {
+                if (toggleTimeoutId) { clearTimeout(toggleTimeoutId); toggleTimeoutId = null; }
+                pendingDark = false;
+                isThemeToggling = false;
+                rootEl.removeAttribute('data-theme');
+                if (starCanvas) starCanvas.style.display = 'none';
+                try { sfx.pause(); sfx.currentTime = 0; } catch(_) {}
+                localStorage.setItem(THEME_KEY, 'light');
+                if (themeColorMeta) themeColorMeta.setAttribute('content', '#0064e6');
+                return;
+            }
+            if (isThemeToggling) return;
+            const isDark = rootEl.getAttribute('data-theme') === 'dark';
+            const next = isDark ? 'light' : 'dark';
+            
+            // Stop any currently playing music ONLY when entering dark mode
+            if (next === 'dark' && !audioPlayer.paused) {
                 audioPlayer.pause();
                 if (currentPlayingElement) {
                     currentPlayingElement.classList.remove('spinning');
@@ -542,24 +558,9 @@
                 currentPlayingElement = null;
             }
             
-            if (pendingDark) {
-                if (toggleTimeoutId) { clearTimeout(toggleTimeoutId); toggleTimeoutId = null; }
-                pendingDark = false;
-                isThemeToggling = false;
-                rootEl.removeAttribute('data-theme');
-                if (starCanvas) starCanvas.style.display = 'none';
-                try { sfx.pause(); sfx.currentTime = 0; } catch(_) {}
-                hideContent();
-                localStorage.setItem(THEME_KEY, 'light');
-                return;
-            }
-            if (isThemeToggling) return;
-            const isDark = rootEl.getAttribute('data-theme') === 'dark';
-            const next = isDark ? 'light' : 'dark';
             isThemeToggling = true;
             if (toggleTimeoutId) clearTimeout(toggleTimeoutId);
             if (next === 'dark') {
-                fadeOutContent(600);
                 toggleTimeoutId = setTimeout(() => {
                     rootEl.setAttribute('data-theme', 'dark');
                     if (starCanvas) starCanvas.style.display = 'block';
@@ -578,7 +579,6 @@
                 pendingDark = false;
                 localStorage.setItem(THEME_KEY, 'light');
                 if (themeColorMeta) themeColorMeta.setAttribute('content', '#0064e6');
-                hideContent();
                 [readBtn, writeBtn, listenBtn].forEach(btn => btn.blur());
             }
             try {
