@@ -45,14 +45,21 @@ html {
     height: 100%;
     width: 100%;
     position: fixed;
+    inset: 0;
     background-color: var(--bg);
     /* Ensure background extends beyond viewport on iOS */
     min-height: 100vh;
     min-height: -webkit-fill-available;
+    /* Force full coverage on iOS including safe areas */
+    -webkit-overflow-scrolling: touch;
 }
 
 body {
     padding: 60px 40px;
+    padding-top: max(60px, env(safe-area-inset-top));
+    padding-bottom: max(60px, env(safe-area-inset-bottom));
+    padding-left: max(40px, env(safe-area-inset-left));
+    padding-right: max(40px, env(safe-area-inset-right));
     height: 100vh;
     height: 100dvh; /* Use dynamic viewport height for mobile */
     min-height: -webkit-fill-available; /* Ensure full coverage on iOS */
@@ -69,8 +76,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
     position: fixed;
-    top: 0;
-    left: 0;
+    inset: 0;
     /* no theme fade on switch */
 }
 
@@ -406,6 +412,10 @@ button:active {
 @media (max-width: 768px) {
     body {
         padding: 40px 20px;
+        padding-top: max(40px, env(safe-area-inset-top));
+        padding-bottom: max(40px, env(safe-area-inset-bottom));
+        padding-left: max(20px, env(safe-area-inset-left));
+        padding-right: max(20px, env(safe-area-inset-right));
     }
     
     /* Improve touch targets on mobile */
@@ -419,6 +429,10 @@ button:active {
 @media (max-width: 480px) {
     body {
         padding: 30px 15px;
+        padding-top: max(30px, env(safe-area-inset-top));
+        padding-bottom: max(30px, env(safe-area-inset-bottom));
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
     }
     
     /* Even larger touch targets on very small screens */
