@@ -21,7 +21,13 @@
         
         <h1>Hi,</h1>
         <p>
-            I like to <button id="read-btn">read</button>, <button id="write-btn">write</button>, and <button id="listen-btn">listen</button>.<br><br>
+            I like to <button id="read-btn">read</button>, <button id="write-btn">write</button>, and <button id="listen-btn">listen</button>.
+        </p>
+        <div class="text-links">
+            <a href="http://thebooksireadinsteadofgoingtocollege.com" target="_blank" id="read-link">thebooksireadinsteadofgoingtocollege.com</a>
+            <a href="http://thingsivechangedmymindon.com" target="_blank" id="write-link">thingsivechangedmymindon.com</a>
+        </div>
+        <p>
             I'm a Growth Hacker. In my past, I<br>
             left college, made <span class="white">tiktoks</span> and joined<br>
             <span class="white">startups</span>— all of which led me to SF,<br>
@@ -59,39 +65,17 @@
         localStorage.setItem(THEME_KEY, 'light');
         if (themeColorMeta) themeColorMeta.setAttribute('content', '#0064e6');
 
-        // Content data
-        const contentData = {
-            read: [
-                { type: 'book', image: 'assets/images/books/blue_ocean.jpg', title: 'Blue Ocean Strategy' },
-                { type: 'book', image: 'assets/images/books/build.jpg', title: 'Build' },
-                { type: 'book', image: 'assets/images/books/founding_sales.jpg', title: 'Founding Sales' },
-                { type: 'book', image: 'assets/images/books/lean_startup.jpg', title: 'The Lean Startup' },
-                { type: 'book', image: 'assets/images/books/read_write_own.jpg', title: 'Read Write Own' },
-                { type: 'book', image: 'assets/images/books/the_cold_start.jpg', title: 'The Cold Start Problem' },
-                { type: 'book', image: 'assets/images/books/the_courage.jpg', title: 'The Courage to be Disliked' },
-                { type: 'book', image: 'assets/images/books/total_freedom.jpg', title: 'Total Freedom' }
-            ],
-            write: [
-                { type: 'letter', image: 'assets/images/papers/paper-01.jpg', title: 'Letter 1' },
-                { type: 'letter', image: 'assets/images/papers/paper-01.jpg', title: 'Letter 2' },
-                { type: 'letter', image: 'assets/images/papers/paper-01.jpg', title: 'Letter 3' },
-                { type: 'letter', image: 'assets/images/papers/paper-01.jpg', title: 'Letter 4' },
-                { type: 'letter', image: 'assets/images/papers/paper-01.jpg', title: 'Letter 5' },
-                { type: 'letter', image: 'assets/images/papers/paper-01.jpg', title: 'Letter 6' },
-                { type: 'letter', image: 'assets/images/papers/paper-01.jpg', title: 'Letter 7' },
-                { type: 'letter', image: 'assets/images/papers/paper-01.jpg', title: 'Letter 8' }
-            ],
-            listen: [
-                { type: 'album', image: 'assets/images/albums/album-01.jpg', title: 'Track 01', audio: 'assets/audio/track-01.mp3' },
-                { type: 'album', image: 'assets/images/albums/album-02.jpg', title: 'Track 02', audio: 'assets/audio/track-02.mp3' },
-                { type: 'album', image: 'assets/images/albums/album-03.jpg', title: 'Track 03', audio: 'assets/audio/track-03.mp3' },
-                { type: 'album', image: 'assets/images/albums/album-04.jpg', title: 'Track 04', audio: 'assets/audio/track-04.mp3' },
-                { type: 'album', image: 'assets/images/albums/album-05.jpg', title: 'Track 05', audio: 'assets/audio/track-05.mp3' },
-                { type: 'album', image: 'assets/images/albums/album-06.jpg', title: 'Track 06', audio: 'assets/audio/track-06.mp3' },
-                { type: 'album', image: 'assets/images/albums/album-07.jpg', title: 'Track 07', audio: 'assets/audio/track-07.mp3' },
-                { type: 'album', image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3' }
-            ]
-        };
+        // Content data - only listen has visual content
+        const listenData = [
+            { image: 'assets/images/albums/album-01.jpg', title: 'Track 01', audio: 'assets/audio/track-01.mp3' },
+            { image: 'assets/images/albums/album-02.jpg', title: 'Track 02', audio: 'assets/audio/track-02.mp3' },
+            { image: 'assets/images/albums/album-03.jpg', title: 'Track 03', audio: 'assets/audio/track-03.mp3' },
+            { image: 'assets/images/albums/album-04.jpg', title: 'Track 04', audio: 'assets/audio/track-04.mp3' },
+            { image: 'assets/images/albums/album-05.jpg', title: 'Track 05', audio: 'assets/audio/track-05.mp3' },
+            { image: 'assets/images/albums/album-06.jpg', title: 'Track 06', audio: 'assets/audio/track-06.mp3' },
+            { image: 'assets/images/albums/album-07.jpg', title: 'Track 07', audio: 'assets/audio/track-07.mp3' },
+            { image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3' }
+        ];
 
         // DOM elements
         const readBtn = document.getElementById('read-btn');
@@ -101,17 +85,16 @@
         const audioPlayer = document.getElementById('audio-player');
         const darkToggle = document.getElementById('dark-mode-toggle');
         const starCanvas = document.getElementById('starfield');
+        const readLink = document.getElementById('read-link');
+        const writeLink = document.getElementById('write-link');
         let isThemeToggling = false;
         let toggleTimeoutId = null;
-        let pendingDark = false; // tracks a scheduled (not yet applied) dark mode
-        let preloadedRead = false;
+        let pendingDark = false;
 
         let currentMode = null;
         let currentlyPlaying = null;
-        let isButtonActive = false; // Track if a button is actively pressed
+        let isButtonActive = false;
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        // (mobile audio interaction tracking no longer required)
 
         // Button event listeners
         readBtn.addEventListener('click', () => {
@@ -142,18 +125,23 @@
             }
         });
 
+        let hoverTimeout = null;
+
         // Hover event listeners
         readBtn.addEventListener('mouseenter', () => {
+            if (hoverTimeout) clearTimeout(hoverTimeout);
             if (!isButtonActive) {
                 showContent('read');
             }
         });
         writeBtn.addEventListener('mouseenter', () => {
+            if (hoverTimeout) clearTimeout(hoverTimeout);
             if (!isButtonActive) {
                 showContent('write');
             }
         });
         listenBtn.addEventListener('mouseenter', () => {
+            if (hoverTimeout) clearTimeout(hoverTimeout);
             if (!isButtonActive) {
                 showContent('listen');
             }
@@ -162,11 +150,14 @@
         // Mouse leave events to hide content when not hovering (only if no button is active)
         [readBtn, writeBtn, listenBtn].forEach(btn => {
             btn.addEventListener('mouseleave', () => {
-                setTimeout(() => {
-                    if (!isHoveringAnyButton() && !isButtonActive) {
-                        hideContent();
-                    }
-                }, 100);
+                if (!isButtonActive) {
+                    if (hoverTimeout) clearTimeout(hoverTimeout);
+                    hoverTimeout = setTimeout(() => {
+                        if (!isHoveringAnyButton() && !isButtonActive) {
+                            hideContent();
+                        }
+                    }, 150);
+                }
             });
         });
 
@@ -199,45 +190,48 @@
             // Update current mode
             currentMode = mode;
 
-            // Clear existing content
-            contentItems.innerHTML = '';
+            // Hide all links first
+            readLink.classList.remove('visible');
+            writeLink.classList.remove('visible');
 
-            // Add new content items
-            contentData[mode].forEach((item, index) => {
-                const contentItem = document.createElement('div');
-                contentItem.className = 'content-item';
-                contentItem.innerHTML = `<img src="${item.image}" alt="${item.title}" title="${item.title}">`;
-                
-                // Add click event for albums
-                if (item.type === 'album') {
+            // Show appropriate link for read or write
+            if (mode === 'read') {
+                readLink.classList.add('visible');
+            } else if (mode === 'write') {
+                writeLink.classList.add('visible');
+            }
+
+            // For listen mode, show the album content
+            if (mode === 'listen') {
+                contentItems.innerHTML = '';
+
+                listenData.forEach((item) => {
+                    const contentItem = document.createElement('div');
+                    contentItem.className = 'content-item';
+                    contentItem.innerHTML = `<img src="${item.image}" alt="${item.title}" title="${item.title}">`;
+                    
                     contentItem.addEventListener('click', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        
                         playAudio(item.audio, contentItem);
-                        // Prevent the document click handler from hiding content
                         isButtonActive = true;
                     });
                     
-                    // Add touch events for mobile/iOS
                     contentItem.addEventListener('touchend', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        
                         playAudio(item.audio, contentItem);
-                        // Prevent the document click handler from hiding content
                         isButtonActive = true;
                     });
-                }
-                
-                contentItems.appendChild(contentItem);
-            });
+                    
+                    contentItems.appendChild(contentItem);
+                });
 
-            // Set the data mode for CSS targeting
-            contentItems.setAttribute('data-mode', mode);
-            
-            // Show content with animation
-            contentItems.classList.add('active');
+                contentItems.setAttribute('data-mode', 'listen');
+                contentItems.classList.add('active');
+            } else {
+                contentItems.classList.remove('active');
+            }
         }
 
         function fadeOutContent(durationMs = 600) {
@@ -252,13 +246,28 @@
         function hideContent() {
             contentItems.classList.remove('active');
             [readBtn, writeBtn, listenBtn].forEach(btn => btn.classList.remove('active'));
+            readLink.classList.remove('visible');
+            writeLink.classList.remove('visible');
             currentMode = null;
             isButtonActive = false;
         }
 
         function playAudio(audioSrc, element) {
-            // Increment click count for multi-click permission
+            // Block audio playback during dark mode transition
+            if (pendingDark) {
+                return;
+            }
             
+            // Stop dark mode sound effect when playing a song after transition
+            const isDark = rootEl.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                try {
+                    if (!sfx.paused) {
+                        sfx.pause();
+                        sfx.currentTime = 0;
+                    }
+                } catch (_) {}
+            }
             
             // If clicking the same track, toggle play/pause
             if (currentlyPlaying === audioSrc) {
@@ -351,29 +360,22 @@
             }
         });
 
-        // Add touch event listeners for mobile audio permissions
-        // mobile audio interaction tracking removed
-
-        function preloadReadImages(){
-            if (preloadedRead) return;
-            try {
-                (contentData.read || []).forEach(item => { const img = new Image(); img.src = item.image; });
-                preloadedRead = true;
-            } catch(_) {}
-        }
-
         // Dark mode toggle
         darkToggle.addEventListener('click', (e) => {
             e.preventDefault();
-            // If a delayed dark is pending, clicking again cancels everything
+            
+            // Pause any currently playing audio
+            if (!audioPlayer.paused) {
+                audioPlayer.pause();
+                currentlyPlaying = null;
+            }
+            
             if (pendingDark) {
                 if (toggleTimeoutId) { clearTimeout(toggleTimeoutId); toggleTimeoutId = null; }
                 pendingDark = false;
                 isThemeToggling = false;
-                // ensure we remain in light mode
                 rootEl.removeAttribute('data-theme');
                 if (starCanvas) starCanvas.style.display = 'none';
-                setAutoCycle(false);
                 try { sfx.pause(); sfx.currentTime = 0; } catch(_) {}
                 hideContent();
                 localStorage.setItem(THEME_KEY, 'light');
@@ -382,55 +384,35 @@
             if (isThemeToggling) return;
             const isDark = rootEl.getAttribute('data-theme') === 'dark';
             const next = isDark ? 'light' : 'dark';
-            // guard against rapid re-clicks
             isThemeToggling = true;
             if (toggleTimeoutId) clearTimeout(toggleTimeoutId);
             if (next === 'dark') {
-                // delayed enter to dark
-                preloadReadImages();
-                strobeWindowUntil = performance.now() + 6300;
-                // If any content is visible/selected, gently fade it out before switching
                 fadeOutContent(600);
                 toggleTimeoutId = setTimeout(() => {
                     rootEl.setAttribute('data-theme', 'dark');
                     if (starCanvas) starCanvas.style.display = 'block';
                     if (themeColorMeta) themeColorMeta.setAttribute('content', '#000000');
-                    // Reveal books exactly when dark applies (mobile and desktop)
-                    isButtonActive = true;
-                    showContent('read');
-                    setAutoCycle(true); // start 118 BPM cycle in dark
                     isThemeToggling = false;
-                    strobeWindowUntil = 0; // end strobe window
                     pendingDark = false;
                     localStorage.setItem(THEME_KEY, 'dark');
                 }, 6300);
                 pendingDark = true;
             } else {
-                // instant exit to light, cancel pending enter
                 if (toggleTimeoutId) { clearTimeout(toggleTimeoutId); toggleTimeoutId = null; }
                 rootEl.removeAttribute('data-theme');
                 if (starCanvas) starCanvas.style.display = 'none';
-                setAutoCycle(false);
-                strobeWindowUntil = 0;
                 isThemeToggling = false;
-                // stop and reset dark-mode sound so it can restart fresh later
                 try { sfx.pause(); sfx.currentTime = 0; } catch (_) {}
                 pendingDark = false;
                 localStorage.setItem(THEME_KEY, 'light');
                 if (themeColorMeta) themeColorMeta.setAttribute('content', '#0064e6');
-                // Ensure no buttons remain selected and content is hidden
                 hideContent();
                 [readBtn, writeBtn, listenBtn].forEach(btn => btn.blur());
             }
-            // Play SFX without interrupting main audio
             try {
                 if (next === 'dark') {
-                    const wasPaused = audioPlayer.paused;
                     sfx.currentTime = 0;
                     sfx.play().catch(() => {});
-                    if (!wasPaused && audioPlayer.paused) {
-                        audioPlayer.play().catch(() => {});
-                    }
                 } else {
                     sfx.pause();
                     sfx.currentTime = 0;
@@ -493,28 +475,6 @@
             requestAnimationFrame(tick);
         })();
 
-        // 118 BPM half-beat auto-cycle (255ms)
-        const beatMs = 510;
-        let cycleIndex = 0;
-        const cycleButtons = [readBtn, writeBtn, listenBtn];
-        let autoCycleTimer = null;
-        function setAutoCycle(on){
-            if (on && !autoCycleTimer){
-                autoCycleTimer = setInterval(() => {
-                    const btn = cycleButtons[cycleIndex % cycleButtons.length];
-                    btn.classList.add('active');
-                    setTimeout(()=>btn.classList.remove('active'), Math.max(120, Math.floor(beatMs*0.45)));
-                    isButtonActive = false;
-                    showContent(['read','write','listen'][cycleIndex % 3]);
-                    cycleIndex++;
-                }, beatMs);
-            } else if (!on && autoCycleTimer){
-                clearInterval(autoCycleTimer);
-                autoCycleTimer = null;
-            }
-        }
-        // keep off on load to prevent flashing
-        setAutoCycle(false);
     </script>
 </body>
 </html>
