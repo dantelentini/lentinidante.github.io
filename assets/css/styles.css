@@ -70,6 +70,11 @@ html {
     -webkit-overflow-scrolling: touch;
 }
 
+/* Only transition when going back to light mode */
+html.transitioning-to-light {
+    transition: background-color 0.8s ease;
+}
+
 
 body {
     position: fixed;
@@ -93,6 +98,10 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+html.transitioning-to-light body {
+    transition: background-color 0.8s ease, color 0.8s ease;
+}
+
 
 /* Force background extension into safe areas on iOS */
 body::before {
@@ -108,6 +117,10 @@ body::before {
     right: calc(-100px - env(safe-area-inset-right, 0px));
 }
 
+html.transitioning-to-light body::before {
+    transition: background-color 0.8s ease;
+}
+
 
 /* Additional layer for iOS Safari bar coverage */
 html::before {
@@ -121,6 +134,10 @@ html::before {
     z-index: -2;
 }
 
+html.transitioning-to-light::before {
+    transition: background-color 0.8s ease;
+}
+
 html::after {
     content: '';
     position: fixed;
@@ -130,6 +147,10 @@ html::after {
     height: calc(100px + env(safe-area-inset-bottom, 0px));
     background-color: var(--bg);
     z-index: -2;
+}
+
+html.transitioning-to-light::after {
+    transition: background-color 0.8s ease;
 }
 
 
@@ -712,4 +733,3 @@ a.white-bold {
 a.white-bold:hover {
     text-decoration: underline;
 }
-
