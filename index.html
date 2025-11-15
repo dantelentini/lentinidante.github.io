@@ -209,6 +209,7 @@
         let isReturningFromBackground = false;
         let lastButtonClickTime = 0;
         let isProcessingButtonClick = false;
+        let track8GifTimer = null; // Timer for track 8 album art change and dark mode
         
         // Unlock audio on first user interaction (for autoplay policies)
         function unlockAudio() {
@@ -462,14 +463,14 @@
                     
                     contentItems.appendChild(contentItem);
                     
-                    // If this track is currently playing, restore spinning state and GIF
+                    // If this track is currently playing, restore spinning state
                     if (currentlyPlaying === item.audio && !audioPlayer.paused) {
                         contentItem.classList.add('spinning');
                         contentItem.style.opacity = '0.8';
                         currentPlayingElement = contentItem;
                         
-                        // If this is album 8 and it's playing, use the GIF
-                        if (item.gifImage) {
+                        // If this is track 8 and dark mode is active, show the gif
+                        if (item.gifImage && currentTheme === 'dark') {
                             const img = contentItem.querySelector('img');
                             if (img) {
                                 img.src = item.gifImage;
@@ -516,6 +517,55 @@
             }
         }
 
+        function clearTrack8GifTimer() {
+            if (track8GifTimer) {
+                clearTimeout(track8GifTimer);
+                track8GifTimer = null;
+            }
+            // Restore opacity to all albums
+            const allAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
+            allAlbums.forEach(album => {
+                album.style.transition = '';
+                album.style.opacity = '';
+            });
+        }
+
+        function startTrack8DarkModeTransition(element) {
+            // Clear any existing timer
+            clearTrack8GifTimer();
+            
+            // Keep track 8 at full opacity
+            if (element) {
+                element.style.opacity = '1';
+            }
+            
+            // Start fading out other albums over 3 seconds
+            const allAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
+            allAlbums.forEach(album => {
+                album.style.transition = 'opacity 3s ease-out';
+                album.style.opacity = '0.15';
+            });
+            
+            // Start 13-second timer for gif change and dark mode
+            track8GifTimer = setTimeout(() => {
+                // Change album art to gif
+                if (element) {
+                    const img = element.querySelector('img');
+                    if (img) {
+                        img.src = 'assets/images/albums/album-08-edit.gif';
+                    }
+                }
+                
+                // Activate dark mode without audio
+                applyTheme('dark', { skipAudio: true });
+                
+                // Start flashing with track 8 BPM
+                startGrowthHackerFlash(97);
+                
+                track8GifTimer = null;
+            }, 13000); // 13 seconds
+        }
+
         function clearCurrentPlayingState(options = {}) {
             const { resetAudio = false, updateSession = true } = options;
             if (resetAudio) {
@@ -527,6 +577,7 @@
             currentPlayingElement = null;
             stopDanceStyleFluctuation();
             stopGrowthHackerFlash();
+            clearTrack8GifTimer();
             if (updateSession) {
                 updateMediaSessionPlaybackState('none');
             }
@@ -775,6 +826,7 @@
                     updateMediaSessionPlaybackState('paused');
                     stopDanceStyleFluctuation();
                     stopGrowthHackerFlash();
+                    clearTrack8GifTimer();
                     // When paused, stop spinning and restore CSS rotation
                     restorePlaybackVisual(element);
                     // Remove track 8 indicator when paused
@@ -797,13 +849,9 @@
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
                                 
-                                // If this is album 8, switch to the gif version
-                                const trackInfo = listenData.find(track => track.audio === audioSrc);
-                                if (trackInfo && trackInfo.gifImage) {
-                                    const img = element.querySelector('img');
-                                    if (img) {
-                                        img.src = trackInfo.gifImage;
-                                    }
+                                // If this is album 8, start the timer for dark mode
+                                if (isTrack8) {
+                                    startTrack8DarkModeTransition(element);
                                 }
                             }
                             // Set track 8 indicator when resumed
@@ -887,12 +935,9 @@
                         element.classList.add('spinning');
                         element.style.opacity = '0.8';
                         
-                        // If this is album 8, switch to the gif version
-                        if (trackInfo && trackInfo.gifImage) {
-                            const img = element.querySelector('img');
-                            if (img) {
-                                img.src = trackInfo.gifImage;
-                            }
+                        // If this is album 8, start the timer for dark mode and gif
+                        if (audioSrc === 'assets/audio/track-08.mp3') {
+                            startTrack8DarkModeTransition(element);
                         }
                     }
                 }).catch(error => {
@@ -909,12 +954,9 @@
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
                                 
-                                // If this is album 8, switch to the gif version
-                                if (trackInfo && trackInfo.gifImage) {
-                                    const img = element.querySelector('img');
-                                    if (img) {
-                                        img.src = trackInfo.gifImage;
-                                    }
+                                // If this is album 8, start the timer for dark mode and gif
+                                if (audioSrc === 'assets/audio/track-08.mp3') {
+                                    startTrack8DarkModeTransition(element);
                                 }
                             }
                         }).catch(() => {
@@ -1083,7 +1125,6 @@
     </script>
 </body>
 </html>
-
 
 
 
