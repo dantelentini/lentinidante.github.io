@@ -22,16 +22,34 @@
 
 /* Theme */
 :root {
-    --bg: rgb(0, 100, 230);
-    --fg: rgb(194, 246, 255);
-    --fg-strong: #fff;
+    --bg: #0064e6;
+    --fg: #c2f6ff;
+    --fg-muted: rgba(255, 255, 255, 0.9);
+    --fg-strong: #ffffff;
+    --surface-raised: rgba(255, 255, 255, 0.08);
+    --surface-hover: rgba(255, 255, 255, 0.2);
+    --content-border: rgba(255, 255, 255, 0.2);
+    --content-border-strong: rgba(255, 255, 255, 0.4);
+    --content-shadow: rgba(0, 17, 51, 0.35);
+    --content-shadow-strong: rgba(0, 17, 51, 0.55);
+    --button-active-fg: #0064e6;
+    --link-color: #ffffff;
     color-scheme: light;
 }
 
 [data-theme="dark"] {
     --bg: #000000;
     --fg: #c8d1dc;
+    --fg-muted: rgba(255, 255, 255, 0.85);
     --fg-strong: #ffffff;
+    --surface-raised: rgba(255, 255, 255, 0.08);
+    --surface-hover: rgba(255, 255, 255, 0.24);
+    --content-border: rgba(255, 255, 255, 0.08);
+    --content-border-strong: rgba(255, 255, 255, 0.2);
+    --content-shadow: rgba(0, 0, 0, 0.65);
+    --content-shadow-strong: rgba(0, 0, 0, 0.85);
+    --button-active-fg: #000000;
+    --link-color: #ffffff;
     color-scheme: dark;
 }
 
@@ -167,7 +185,7 @@ p {
 button {
     all: revert;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease;
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
     touch-action: manipulation; /* Optimize touch interactions */
 }
@@ -182,23 +200,17 @@ button:hover {
 
 button.active {
     background-color: var(--fg-strong);
-    color: var(--bg);
+    color: var(--button-active-fg);
 }
 
 /* Active state for mobile touch */
 button:active {
     opacity: 0.6;
-    transform: scale(0.98);
 }
 
 /* Fix button visibility in dark mode - use light text */
 [data-theme="dark"] button:not(.active) {
     color: var(--fg);
-}
-
-[data-theme="dark"] button.active {
-    background-color: var(--fg-strong);
-    color: #000000;
 }
 
 /* Content Grid */
@@ -239,8 +251,8 @@ button:active {
     cursor: pointer;
     transition: all 0.3s ease;
     pointer-events: all;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px var(--content-shadow);
+    border: 2px solid var(--content-border);
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
     touch-action: manipulation; /* Optimize touch interactions */
     will-change: transform, opacity; /* Optimize for animations */
@@ -249,8 +261,8 @@ button:active {
 
 .content-item:hover {
     transform: scale(1.05);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 12px 48px var(--content-shadow-strong);
+    border-color: var(--content-border-strong);
 }
 
 .content-item img {
@@ -382,14 +394,14 @@ button:active {
     font-size: 12px;
     font-family: 'Courier New', 'Monaco', monospace;
     font-weight: 500;
-    color: #ffffff;
+    color: var(--link-color);
     text-decoration: none;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
     padding: 3px 6px;
     border-radius: 3px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     line-height: 1.2;
     white-space: nowrap;
 }
@@ -400,6 +412,6 @@ button:active {
 }
 
 .text-links a:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.15);
+    color: var(--link-color);
+    background: var(--surface-hover);
 }
