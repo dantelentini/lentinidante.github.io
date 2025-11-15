@@ -218,6 +218,7 @@
         // Button event listeners
         readBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            e.preventDefault();
             
             if (currentMode === 'read' && isButtonActive) {
                 // If same button is clicked and active, deactivate it
@@ -229,6 +230,7 @@
         });
         writeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            e.preventDefault();
             
             if (currentMode === 'write' && isButtonActive) {
                 // If same button is clicked and active, deactivate it
@@ -240,6 +242,12 @@
         });
         listenBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            e.preventDefault();
+            
+            // Prevent double-clicks/spam on iOS
+            if (listenBtn.classList.contains('processing')) {
+                return;
+            }
             
             if (currentMode === 'listen' && isButtonActive) {
                 // If same button is clicked and active, deactivate it
@@ -250,12 +258,15 @@
                 // Auto-start track-1 only on the very first click
                 if (!hasClickedListenBefore) {
                     hasClickedListenBefore = true;
+                    listenBtn.classList.add('processing');
+                    
                     setTimeout(() => {
                         const firstAlbum = contentItems.querySelector('.content-item:first-child');
                         if (firstAlbum && listenData[0]) {
                             playAudio(listenData[0].audio, firstAlbum, listenData[0].bpm);
                         }
-                    }, 100);
+                        listenBtn.classList.remove('processing');
+                    }, 200);
                 }
             }
         });
@@ -296,7 +307,7 @@
             });
         });
 
-        // Click outside to deactivate button mode (but not on mobile)
+        // Click outside to deactivate button mode
         document.addEventListener('click', (e) => {
             // Don't hide content if clicking on album items, dark mode button, or any social links
             if (e.target.closest('.content-item') || 
@@ -307,7 +318,8 @@
                 return;
             }
             
-            if (!isMobile && !readBtn.contains(e.target) && !writeBtn.contains(e.target) && !listenBtn.contains(e.target)) {
+            // If clicking outside buttons, deactivate
+            if (!readBtn.contains(e.target) && !writeBtn.contains(e.target) && !listenBtn.contains(e.target)) {
                 isButtonActive = false;
                 if (!isHoveringAnyButton()) {
                     hideContent();
