@@ -185,7 +185,7 @@ p {
 button {
     all: revert;
     cursor: pointer;
-    transition: opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    transition: opacity 0.3s ease;
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
     touch-action: manipulation; /* Optimize touch interactions */
 }
