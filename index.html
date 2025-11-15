@@ -256,17 +256,22 @@
                 isButtonActive = true;
                 showContent('listen');
                 // Auto-start track-1 only on the very first click
+                // Must happen immediately to preserve iOS user gesture
                 if (!hasClickedListenBefore) {
                     hasClickedListenBefore = true;
                     listenBtn.classList.add('processing');
                     
-                    setTimeout(() => {
+                    // Use requestAnimationFrame instead of setTimeout to maintain gesture context
+                    requestAnimationFrame(() => {
                         const firstAlbum = contentItems.querySelector('.content-item:first-child');
                         if (firstAlbum && listenData[0]) {
                             playAudio(listenData[0].audio, firstAlbum, listenData[0].bpm);
                         }
-                        listenBtn.classList.remove('processing');
-                    }, 200);
+                        // Remove processing flag after a short delay
+                        requestAnimationFrame(() => {
+                            listenBtn.classList.remove('processing');
+                        });
+                    });
                 }
             }
         });
