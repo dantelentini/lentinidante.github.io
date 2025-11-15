@@ -67,10 +67,7 @@
         let currentTheme = null;
         let pendingTheme = null;
         let themeTransitionTimer = null;
-        const prefersDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : false;
-        const storedTheme = localStorage.getItem(THEME_KEY);
-        const initialTheme = (storedTheme === 'dark' || storedTheme === 'light') ? storedTheme : (prefersDark ? 'dark' : 'light');
-        applyTheme(initialTheme, { skipAudio: true, persist: Boolean(storedTheme) });
+        applyTheme('light', { skipAudio: true });
         function syncSystemChrome(theme = 'light') {
             const color = THEME_COLORS[theme] || THEME_COLORS.light;
             const statusStyle = theme === 'dark' ? 'black' : 'default';
@@ -92,7 +89,7 @@
 
         function applyTheme(theme, options = {}) {
             const next = theme === 'dark' ? 'dark' : 'light';
-            const { skipAudio = false, persist = true, force = false } = options;
+            const { skipAudio = false, force = false } = options;
             if (!force && currentTheme === next) {
                 return;
             }
@@ -108,10 +105,6 @@
             }
 
             syncSystemChrome(next);
-
-            if (persist) {
-                localStorage.setItem(THEME_KEY, next);
-            }
 
             if (!skipAudio) {
                 if (next === 'dark') {
