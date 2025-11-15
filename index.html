@@ -216,7 +216,9 @@
         document.addEventListener('click', unlockAudio, { once: true });
 
         // Button event listeners
-        readBtn.addEventListener('click', () => {
+        readBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
             if (currentMode === 'read' && isButtonActive) {
                 // If same button is clicked and active, deactivate it
                 hideContent();
@@ -225,7 +227,9 @@
                 showContent('read');
             }
         });
-        writeBtn.addEventListener('click', () => {
+        writeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
             if (currentMode === 'write' && isButtonActive) {
                 // If same button is clicked and active, deactivate it
                 hideContent();
@@ -234,7 +238,9 @@
                 showContent('write');
             }
         });
-        listenBtn.addEventListener('click', () => {
+        listenBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
             if (currentMode === 'listen' && isButtonActive) {
                 // If same button is clicked and active, deactivate it
                 hideContent();
@@ -596,7 +602,6 @@
             if (pendingTheme === 'dark') {
                 cancelPendingTheme();
                 applyTheme('light', { force: true });
-                [readBtn, writeBtn, listenBtn].forEach(btn => btn.blur());
                 return;
             }
 
@@ -610,7 +615,6 @@
             } else {
                 cancelPendingTheme();
                 applyTheme('light', { force: currentTheme === 'light' });
-                [readBtn, writeBtn, listenBtn].forEach(btn => btn.blur());
             }
         });
 
