@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="theme-color" content="#0064e6" id="theme-color" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#0064e6" id="theme-color-light">
+    <meta name="theme-color" content="#000000" id="theme-color-dark">
     <title>Dante Lentini</title>
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
@@ -54,8 +54,8 @@
     <script>
         // Theme init
         const rootEl = document.documentElement;
-        const themeColorMetaLight = document.querySelector('meta[name="theme-color"][media*="light"]');
-        const themeColorMetaDark = document.querySelector('meta[name="theme-color"][media*="dark"]');
+        const themeColorMetaLight = document.getElementById('theme-color-light');
+        const themeColorMetaDark = document.getElementById('theme-color-dark');
         const THEME_KEY = 'theme-preference';
         const sfx = new Audio('assets/audio/dark-mode.mp3');
         sfx.preload = 'auto';
@@ -66,6 +66,9 @@
         rootEl.removeAttribute('data-theme');
         if (initialStarCanvas) initialStarCanvas.style.display = 'none';
         localStorage.setItem(THEME_KEY, 'light');
+        // Set initial theme color
+        if (themeColorMetaLight) themeColorMetaLight.setAttribute('content', '#0064e6');
+        if (themeColorMetaDark) themeColorMetaDark.setAttribute('content', '#0064e6');
         
         // Initialize Audio Context for better browser compatibility
         let audioContext = null;
@@ -75,7 +78,7 @@
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     audioContext = new AudioContext();
                 } catch (e) {
-                    console.log('Web Audio API not supported');
+                    // Web Audio API not supported
                 }
             }
             // Resume if suspended (for autoplay policies)
@@ -353,7 +356,7 @@
                                 element.style.opacity = '0.8';
                             }
                         }).catch(error => {
-                            console.log('Resume failed:', error);
+                            // Resume failed
                         });
                     }
                 }
@@ -412,9 +415,7 @@
                         element.style.opacity = '0.8';
                     }
                 }).catch(error => {
-                    console.log('Playback failed:', error);
-                    
-                    // Retry once after a brief delay
+                    // Playback failed - retry once after a brief delay
                     setTimeout(() => {
                         audioPlayer.play().then(() => {
                             currentlyPlaying = audioSrc;
@@ -491,8 +492,7 @@
         });
 
         audioPlayer.addEventListener('error', (e) => {
-            console.log('Audio error occurred:', e);
-            // Reset the playing element to its original CSS state
+            // Reset the playing element to its original CSS state on error
             if (currentPlayingElement) {
                 currentPlayingElement.classList.remove('spinning');
                 currentPlayingElement.style.opacity = '';
@@ -514,23 +514,6 @@
             }
         });
         
-        // Handle loading states for better UX
-        audioPlayer.addEventListener('loadstart', () => {
-            console.log('Loading audio...');
-        });
-        
-        audioPlayer.addEventListener('canplay', () => {
-            console.log('Audio ready to play');
-        });
-        
-        // Handle stalling/buffering
-        audioPlayer.addEventListener('waiting', () => {
-            console.log('Audio buffering...');
-        });
-        
-        audioPlayer.addEventListener('playing', () => {
-            console.log('Audio playing smoothly');
-        });
 
         // Dark mode toggle
         darkToggle.addEventListener('click', (e) => {
@@ -545,6 +528,9 @@
                 if (starCanvas) starCanvas.style.display = 'none';
                 try { sfx.pause(); sfx.currentTime = 0; } catch(_) {}
                 localStorage.setItem(THEME_KEY, 'light');
+                // Reset theme colors to light
+                if (themeColorMetaLight) themeColorMetaLight.setAttribute('content', '#0064e6');
+                if (themeColorMetaDark) themeColorMetaDark.setAttribute('content', '#0064e6');
                 return;
             }
             if (isThemeToggling) return;
@@ -566,6 +552,10 @@
             isThemeToggling = true;
             if (toggleTimeoutId) clearTimeout(toggleTimeoutId);
             if (next === 'dark') {
+                // Immediately set theme color to black for iOS Safari
+                if (themeColorMetaLight) themeColorMetaLight.setAttribute('content', '#000000');
+                if (themeColorMetaDark) themeColorMetaDark.setAttribute('content', '#000000');
+                
                 toggleTimeoutId = setTimeout(() => {
                     rootEl.setAttribute('data-theme', 'dark');
                     if (starCanvas) starCanvas.style.display = 'block';
@@ -582,6 +572,10 @@
                 try { sfx.pause(); sfx.currentTime = 0; } catch (_) {}
                 pendingDark = false;
                 localStorage.setItem(THEME_KEY, 'light');
+                // Reset theme colors to light
+                if (themeColorMetaLight) themeColorMetaLight.setAttribute('content', '#0064e6');
+                if (themeColorMetaDark) themeColorMetaDark.setAttribute('content', '#0064e6');
+                
                 [readBtn, writeBtn, listenBtn].forEach(btn => btn.blur());
             }
             try {
