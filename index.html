@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0064e6" id="theme-color">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="theme-color" content="#0064e6" id="theme-color" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <title>Dante Lentini</title>
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
@@ -52,7 +54,8 @@
     <script>
         // Theme init
         const rootEl = document.documentElement;
-        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        const themeColorMetaLight = document.querySelector('meta[name="theme-color"][media*="light"]');
+        const themeColorMetaDark = document.querySelector('meta[name="theme-color"][media*="dark"]');
         const THEME_KEY = 'theme-preference';
         const sfx = new Audio('assets/audio/dark-mode.mp3');
         sfx.preload = 'auto';
@@ -63,7 +66,6 @@
         rootEl.removeAttribute('data-theme');
         if (initialStarCanvas) initialStarCanvas.style.display = 'none';
         localStorage.setItem(THEME_KEY, 'light');
-        if (themeColorMeta) themeColorMeta.setAttribute('content', '#0064e6');
         
         // Initialize Audio Context for better browser compatibility
         let audioContext = null;
@@ -208,8 +210,12 @@
 
         // Click outside to deactivate button mode (but not on mobile)
         document.addEventListener('click', (e) => {
-            // Don't hide content if clicking on album items or dark mode button
-            if (e.target.closest('.content-item') || e.target.closest('#dark-mode-toggle')) {
+            // Don't hide content if clicking on album items, dark mode button, or any social links
+            if (e.target.closest('.content-item') || 
+                e.target.closest('#dark-mode-toggle') || 
+                e.target.closest('.social-links') ||
+                e.target === darkToggle ||
+                darkToggle.contains(e.target)) {
                 return;
             }
             
@@ -539,7 +545,6 @@
                 if (starCanvas) starCanvas.style.display = 'none';
                 try { sfx.pause(); sfx.currentTime = 0; } catch(_) {}
                 localStorage.setItem(THEME_KEY, 'light');
-                if (themeColorMeta) themeColorMeta.setAttribute('content', '#0064e6');
                 return;
             }
             if (isThemeToggling) return;
@@ -564,7 +569,6 @@
                 toggleTimeoutId = setTimeout(() => {
                     rootEl.setAttribute('data-theme', 'dark');
                     if (starCanvas) starCanvas.style.display = 'block';
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#000000');
                     isThemeToggling = false;
                     pendingDark = false;
                     localStorage.setItem(THEME_KEY, 'dark');
@@ -578,7 +582,6 @@
                 try { sfx.pause(); sfx.currentTime = 0; } catch (_) {}
                 pendingDark = false;
                 localStorage.setItem(THEME_KEY, 'light');
-                if (themeColorMeta) themeColorMeta.setAttribute('content', '#0064e6');
                 [readBtn, writeBtn, listenBtn].forEach(btn => btn.blur());
             }
             try {
