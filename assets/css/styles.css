@@ -80,10 +80,11 @@ main {
 h1 {
     font-size: 2.2em;
     color: var(--fg-strong);
+    margin-bottom: 0.3em;
 }
 
 p {
-    margin-bottom: 1em;
+    margin-bottom: 0.2em;
     line-height: 1.4;
 }
 
@@ -403,4 +404,41 @@ button:active {
     }
     
     
+}
+
+/* Text Links */
+.text-links {
+    height: 20px;
+    margin: 0;
+    position: relative;
+    width: 100%;
+}
+
+.text-links a {
+    position: absolute;
+    left: -6px;
+    top: 0;
+    font-size: 12px;
+    font-family: 'Courier New', 'Monaco', monospace;
+    font-weight: 500;
+    color: #ffffff;
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    padding: 3px 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.text-links a.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.text-links a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
 }
