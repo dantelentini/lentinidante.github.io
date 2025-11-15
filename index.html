@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#0064e6" id="theme-color-light">
-    <meta name="theme-color" content="#000000" id="theme-color-dark">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" id="apple-status-bar">
+    <meta name="theme-color" content="#0064e6" id="theme-color-meta">
     <title>Dante Lentini</title>
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
@@ -54,21 +53,112 @@
     <script>
         // Theme init
         const rootEl = document.documentElement;
-        const themeColorMetaLight = document.getElementById('theme-color-light');
-        const themeColorMetaDark = document.getElementById('theme-color-dark');
+        let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        const appleStatusBarMeta = document.getElementById('apple-status-bar');
         const THEME_KEY = 'theme-preference';
+        const THEME_COLORS = { light: '#0064e6', dark: '#000000' };
+        const DARK_MODE_DELAY_MS = 6300;
         const sfx = new Audio('assets/audio/dark-mode.mp3');
         sfx.preload = 'auto';
         sfx.crossOrigin = 'anonymous';
         sfx.volume = 1.0;
-        const initialStarCanvas = document.getElementById('starfield');
-        // Force default light on load; ignore saved dark preference
-        rootEl.removeAttribute('data-theme');
-        if (initialStarCanvas) initialStarCanvas.style.display = 'none';
-        localStorage.setItem(THEME_KEY, 'light');
-        // Set initial theme color
-        if (themeColorMetaLight) themeColorMetaLight.setAttribute('content', '#0064e6');
-        if (themeColorMetaDark) themeColorMetaDark.setAttribute('content', '#0064e6');
+        const starCanvas = document.getElementById('starfield');
+        if (starCanvas) starCanvas.style.display = 'none';
+        let currentTheme = null;
+        let pendingTheme = null;
+        let themeTransitionTimer = null;
+        const prefersDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : false;
+        const storedTheme = localStorage.getItem(THEME_KEY);
+        const initialTheme = (storedTheme === 'dark' || storedTheme === 'light') ? storedTheme : (prefersDark ? 'dark' : 'light');
+        applyTheme(initialTheme, { skipAudio: true, persist: Boolean(storedTheme) });
+        function syncSystemChrome(theme = 'light') {
+            const color = THEME_COLORS[theme] || THEME_COLORS.light;
+            const statusStyle = theme === 'dark' ? 'black' : 'default';
+            
+            if (themeColorMeta) {
+                themeColorMeta.content = color;
+            }
+            
+            if (appleStatusBarMeta) {
+                appleStatusBarMeta.content = statusStyle;
+            }
+            
+            // Force repaint
+            setTimeout(() => {
+                if (themeColorMeta) themeColorMeta.content = color;
+                if (appleStatusBarMeta) appleStatusBarMeta.content = statusStyle;
+            }, 10);
+        }
+
+        function applyTheme(theme, options = {}) {
+            const next = theme === 'dark' ? 'dark' : 'light';
+            const { skipAudio = false, persist = true, force = false } = options;
+            if (!force && currentTheme === next) {
+                return;
+            }
+
+            currentTheme = next;
+
+            if (next === 'dark') {
+                rootEl.setAttribute('data-theme', 'dark');
+                if (starCanvas) starCanvas.style.display = 'block';
+            } else {
+                rootEl.removeAttribute('data-theme');
+                if (starCanvas) starCanvas.style.display = 'none';
+            }
+
+            syncSystemChrome(next);
+
+            if (persist) {
+                localStorage.setItem(THEME_KEY, next);
+            }
+
+            if (!skipAudio) {
+                if (next === 'dark') {
+                    playDarkModeSfx();
+                } else {
+                    stopDarkModeSfx();
+                }
+            }
+        }
+
+        function playDarkModeSfx() {
+            try {
+                sfx.currentTime = 0;
+                sfx.play().catch(() => {});
+            } catch (_) {}
+        }
+
+        function stopDarkModeSfx() {
+            try {
+                sfx.pause();
+                sfx.currentTime = 0;
+            } catch (_) {}
+        }
+
+        function cancelPendingTheme(options = {}) {
+            const { stopAudio = true } = options;
+            if (themeTransitionTimer) {
+                clearTimeout(themeTransitionTimer);
+                themeTransitionTimer = null;
+            }
+            if (stopAudio && pendingTheme === 'dark') {
+                stopDarkModeSfx();
+            }
+            pendingTheme = null;
+        }
+
+        function startDarkModeTransition() {
+            cancelPendingTheme();
+            pendingTheme = 'dark';
+            syncSystemChrome('dark');
+            playDarkModeSfx();
+            themeTransitionTimer = setTimeout(() => {
+                cancelPendingTheme({ stopAudio: false });
+                applyTheme('dark', { skipAudio: true });
+            }, DARK_MODE_DELAY_MS);
+        }
+
         
         // Initialize Audio Context for better browser compatibility
         let audioContext = null;
@@ -106,12 +196,8 @@
         const contentItems = document.getElementById('content-items');
         const audioPlayer = document.getElementById('audio-player');
         const darkToggle = document.getElementById('dark-mode-toggle');
-        const starCanvas = document.getElementById('starfield');
         const readLink = document.getElementById('read-link');
         const writeLink = document.getElementById('write-link');
-        let isThemeToggling = false;
-        let toggleTimeoutId = null;
-        let pendingDark = false;
 
         let currentMode = null;
         let currentlyPlaying = null;
@@ -313,17 +399,36 @@
             isButtonActive = false;
         }
 
+        function restorePlaybackVisual(element) {
+            if (!element) return;
+            element.classList.remove('spinning');
+            element.style.opacity = '';
+            element.style.transform = '';
+        }
+
+        function clearCurrentPlayingState(options = {}) {
+            const { resetAudio = false, updateSession = true } = options;
+            if (resetAudio) {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+            }
+            restorePlaybackVisual(currentPlayingElement);
+            currentlyPlaying = null;
+            currentPlayingElement = null;
+            if (updateSession) {
+                updateMediaSessionPlaybackState('none');
+            }
+        }
+
         function playAudio(audioSrc, element) {
-            // Block audio playback during dark mode transition
-            if (pendingDark) {
+            if (pendingTheme === 'dark') {
                 return;
             }
-            
             // Initialize audio context on first user interaction
             initAudioContext();
             
             // Stop dark mode sound effect when playing a song after transition
-            const isDark = rootEl.getAttribute('data-theme') === 'dark';
+            const isDark = currentTheme === 'dark';
             if (isDark) {
                 try {
                     if (!sfx.paused) {
@@ -339,11 +444,7 @@
                     audioPlayer.pause();
                     updateMediaSessionPlaybackState('paused');
                     // When paused, stop spinning and restore CSS rotation
-                    if (element) {
-                        element.classList.remove('spinning');
-                        element.style.opacity = '';
-                        element.style.transform = '';
-                    }
+                    restorePlaybackVisual(element);
                 } else {
                     // Resume playback
                     const playPromise = audioPlayer.play();
@@ -365,16 +466,13 @@
 
             // Reset ONLY the previous playing element (not all albums)
             if (currentPlayingElement && currentPlayingElement !== element) {
-                // Remove spinning and inline styles to restore CSS rotation
-                currentPlayingElement.classList.remove('spinning');
-                currentPlayingElement.style.opacity = '';
-                currentPlayingElement.style.transform = '';
+                restorePlaybackVisual(currentPlayingElement);
+                currentPlayingElement = null;
             }
 
             // Stop currently playing audio and start new one
             if (currentlyPlaying) {
-                audioPlayer.pause();
-                audioPlayer.currentTime = 0;
+                clearCurrentPlayingState({ resetAudio: true });
             }
 
             // Find track info for Media Session API
@@ -462,9 +560,7 @@
                 });
                 
                 navigator.mediaSession.setActionHandler('stop', () => {
-                    audioPlayer.pause();
-                    audioPlayer.currentTime = 0;
-                    currentlyPlaying = null;
+                    clearCurrentPlayingState({ resetAudio: true });
                 });
                 
                 // Update playback state
@@ -480,27 +576,11 @@
 
         // Handle audio events
         audioPlayer.addEventListener('ended', () => {
-            // Reset the playing element to its original CSS state
-            if (currentPlayingElement) {
-                currentPlayingElement.classList.remove('spinning');
-                currentPlayingElement.style.opacity = '';
-                currentPlayingElement.style.transform = '';
-            }
-            currentlyPlaying = null;
-            currentPlayingElement = null;
-            updateMediaSessionPlaybackState('none');
+            clearCurrentPlayingState();
         });
 
-        audioPlayer.addEventListener('error', (e) => {
-            // Reset the playing element to its original CSS state on error
-            if (currentPlayingElement) {
-                currentPlayingElement.classList.remove('spinning');
-                currentPlayingElement.style.opacity = '';
-                currentPlayingElement.style.transform = '';
-            }
-            currentlyPlaying = null;
-            currentPlayingElement = null;
-            updateMediaSessionPlaybackState('none');
+        audioPlayer.addEventListener('error', () => {
+            clearCurrentPlayingState();
         });
         
         // Additional event listeners for better playback state management
@@ -518,75 +598,27 @@
         // Dark mode toggle
         darkToggle.addEventListener('click', (e) => {
             e.preventDefault();
-            e.stopPropagation(); // Prevent click outside handler from triggering
-            
-            if (pendingDark) {
-                if (toggleTimeoutId) { clearTimeout(toggleTimeoutId); toggleTimeoutId = null; }
-                pendingDark = false;
-                isThemeToggling = false;
-                rootEl.removeAttribute('data-theme');
-                if (starCanvas) starCanvas.style.display = 'none';
-                try { sfx.pause(); sfx.currentTime = 0; } catch(_) {}
-                localStorage.setItem(THEME_KEY, 'light');
-                // Reset theme colors to light
-                if (themeColorMetaLight) themeColorMetaLight.setAttribute('content', '#0064e6');
-                if (themeColorMetaDark) themeColorMetaDark.setAttribute('content', '#0064e6');
+            e.stopPropagation();
+
+            if (pendingTheme === 'dark') {
+                cancelPendingTheme();
+                applyTheme('light', { force: true });
+                [readBtn, writeBtn, listenBtn].forEach(btn => btn.blur());
                 return;
             }
-            if (isThemeToggling) return;
-            const isDark = rootEl.getAttribute('data-theme') === 'dark';
-            const next = isDark ? 'light' : 'dark';
-            
-            // Stop any currently playing music ONLY when entering dark mode
-            if (next === 'dark' && !audioPlayer.paused) {
-                audioPlayer.pause();
-                if (currentPlayingElement) {
-                    currentPlayingElement.classList.remove('spinning');
-                    currentPlayingElement.style.opacity = '';
-                    currentPlayingElement.style.transform = '';
-                }
-                currentlyPlaying = null;
-                currentPlayingElement = null;
-            }
-            
-            isThemeToggling = true;
-            if (toggleTimeoutId) clearTimeout(toggleTimeoutId);
+
+            const next = currentTheme === 'dark' ? 'light' : 'dark';
+
             if (next === 'dark') {
-                // Immediately set theme color to black for iOS Safari
-                if (themeColorMetaLight) themeColorMetaLight.setAttribute('content', '#000000');
-                if (themeColorMetaDark) themeColorMetaDark.setAttribute('content', '#000000');
-                
-                toggleTimeoutId = setTimeout(() => {
-                    rootEl.setAttribute('data-theme', 'dark');
-                    if (starCanvas) starCanvas.style.display = 'block';
-                    isThemeToggling = false;
-                    pendingDark = false;
-                    localStorage.setItem(THEME_KEY, 'dark');
-                }, 6300);
-                pendingDark = true;
+                if (audioPlayer && !audioPlayer.paused) {
+                    clearCurrentPlayingState({ resetAudio: true });
+                }
+                startDarkModeTransition();
             } else {
-                if (toggleTimeoutId) { clearTimeout(toggleTimeoutId); toggleTimeoutId = null; }
-                rootEl.removeAttribute('data-theme');
-                if (starCanvas) starCanvas.style.display = 'none';
-                isThemeToggling = false;
-                try { sfx.pause(); sfx.currentTime = 0; } catch (_) {}
-                pendingDark = false;
-                localStorage.setItem(THEME_KEY, 'light');
-                // Reset theme colors to light
-                if (themeColorMetaLight) themeColorMetaLight.setAttribute('content', '#0064e6');
-                if (themeColorMetaDark) themeColorMetaDark.setAttribute('content', '#0064e6');
-                
+                cancelPendingTheme();
+                applyTheme('light', { force: currentTheme === 'light' });
                 [readBtn, writeBtn, listenBtn].forEach(btn => btn.blur());
             }
-            try {
-                if (next === 'dark') {
-                    sfx.currentTime = 0;
-                    sfx.play().catch(() => {});
-                } else {
-                    sfx.pause();
-                    sfx.currentTime = 0;
-                }
-            } catch (_) {}
         });
 
         // Starfield animation (enabled in dark mode)
