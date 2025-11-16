@@ -190,7 +190,6 @@ h1 {
     font-size: 2.2em;
     color: var(--fg-strong);
     margin-bottom: 0.3em;
-    transition: opacity 0.6s ease;
 }
 
 /* Container for both h1 elements to occupy same space */
@@ -198,6 +197,7 @@ h1 {
     display: grid;
     margin-bottom: 0.3em;
     overflow: visible;
+    position: relative;
 }
 
 .h1-container h1 {
@@ -206,10 +206,51 @@ h1 {
     overflow: visible;
 }
 
-/* Hide "Hi," in dark mode */
-[data-theme="dark"] h1:not(.hey-now) {
-    opacity: 0;
+/* Dedicated styling for the initial "Hi," text so we can animate it */
+.hi-text {
+    position: relative;
+    z-index: 5;
+}
+
+/* Car image that will drive in and hit the "Hi," text */
+.hi-car {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    /* start well off the right side of the screen using transforms like the \"Hey now\" text */
+    transform: translate3d(120vw, -50%, 0);
+    /* slightly smaller car for better proportion */
+    width: min(260px, 55vw);
+    max-width: none;
     pointer-events: none;
+    opacity: 0;
+    z-index: 6;
+}
+
+/* Reset states when the hit hasn't been triggered */
+:root:not(.hi-hit) .hi-text {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+:root:not(.hi-hit) .hi-car {
+    opacity: 0;
+    transform: translate3d(120vw, -50%, 0);
+}
+
+/* Triggered state: \"Hi,\" gets hit and flies off, car drives through */
+.hi-hit .hi-text {
+    pointer-events: none;
+    /* start just after the car reaches it so the collision feels physical */
+    animation: hiTextHit 1.05s linear 0.18s forwards;
+}
+
+/* Drive the car in from the right when hit is triggered */
+.hi-hit .hi-car {
+    opacity: 1;
+    /* slightly longer so it can ease in, \"thud\", then speed out */
+    animation: hiCarDriveIn 1.3s linear forwards;
 }
 
 /* "Hey now," text - hidden in light mode, rises in dark mode */
@@ -288,7 +329,8 @@ h1.hey-now span {
     animation:
         heyDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
         heyFloatLoop 5.5s ease-in-out infinite;
-    animation-delay: 0s, var(--hey-rise-duration, 11s);
+    /* both drift and float run during the rise for a free-gravity feel */
+    animation-delay: 0s, 0.25s;
     animation-fill-mode: forwards, both;
 }
 
@@ -296,7 +338,7 @@ h1.hey-now span {
     animation:
         nowDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
         nowFloatLoop 6s ease-in-out infinite;
-    animation-delay: 0s, var(--hey-rise-duration, 11s);
+    animation-delay: 0s, 0.35s;
     animation-fill-mode: forwards, both;
 }
 
@@ -304,8 +346,56 @@ h1.hey-now span {
     animation:
         commaDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
         commaFloatLoop 4.5s ease-in-out infinite;
-    animation-delay: 0s, var(--hey-rise-duration, 11s);
+    animation-delay: 0s, 0.2s;
     animation-fill-mode: forwards, both;
+}
+
+/* Animation for the \"Hi,\" text getting hit off-screen */
+@keyframes hiTextHit {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-4px) rotate(-2deg);
+    }
+    55% {
+        opacity: 1;
+        transform: translateX(-14vw) rotate(-6deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-120vw) rotate(-12deg);
+    }
+}
+
+/* Animation for the car driving in from the right to hit \"Hi,\" */
+@keyframes hiCarDriveIn {
+    0% {
+        opacity: 1;
+        transform: translate3d(120vw, -50%, 0);
+    }
+    25% {
+        /* smooth early approach */
+        transform: translate3d(40vw, -50%, 0);
+    }
+    45% {
+        /* getting closer to the \"Hi,\" */
+        transform: translate3d(10vw, -50%, 0);
+    }
+    60% {
+        /* impact zone – nose of car overlapping the \"Hi,\" */
+        transform: translate3d(-22vw, -50%, 0);
+    }
+    78% {
+        /* easing out of impact before accelerating off */
+        transform: translate3d(-50vw, -50%, 0);
+    }
+    100% {
+        /* fully past the left edge, well off-screen */
+        transform: translate3d(-140vw, -50%, 0);
+    }
 }
 
 @keyframes heyZeroGravity {
@@ -338,19 +428,19 @@ h1.hey-now span {
 
 @keyframes heyDrift {
     0% {
-        transform: translate3d(-18px, 26px, 0) rotate(-16deg);
+        transform: translate3d(-26px, 34px, 0) rotate(-20deg);
     }
     20% {
-        transform: translate3d(-9px, 12px, 0) rotate(-9deg);
+        transform: translate3d(-14px, 18px, 0) rotate(-12deg);
     }
     40% {
-        transform: translate3d(6px, 8px, 0) rotate(5deg);
+        transform: translate3d(10px, 10px, 0) rotate(7deg);
     }
     60% {
-        transform: translate3d(-5px, 0, 0) rotate(-4deg);
+        transform: translate3d(-8px, -2px, 0) rotate(-6deg);
     }
     80% {
-        transform: translate3d(4px, -4px, 0) rotate(3deg);
+        transform: translate3d(6px, -6px, 0) rotate(4deg);
     }
     100% {
         transform: translate3d(0, 0, 0) rotate(0deg);
@@ -359,19 +449,19 @@ h1.hey-now span {
 
 @keyframes nowDrift {
     0% {
-        transform: translate3d(16px, 24px, 0) rotate(13deg);
+        transform: translate3d(22px, 30px, 0) rotate(16deg);
     }
     25% {
-        transform: translate3d(8px, 12px, 0) rotate(8deg);
+        transform: translate3d(12px, 16px, 0) rotate(10deg);
     }
     50% {
-        transform: translate3d(-6px, 2px, 0) rotate(-6deg);
+        transform: translate3d(-10px, 4px, 0) rotate(-8deg);
     }
     70% {
-        transform: translate3d(4px, -3px, 0) rotate(3deg);
+        transform: translate3d(6px, -5px, 0) rotate(4deg);
     }
     90% {
-        transform: translate3d(-2px, -2px, 0) rotate(-1deg);
+        transform: translate3d(-4px, -3px, 0) rotate(-2deg);
     }
     100% {
         transform: translate3d(0, 0, 0) rotate(0deg);
@@ -380,16 +470,16 @@ h1.hey-now span {
 
 @keyframes commaDrift {
     0% {
-        transform: translate3d(6px, 18px, 0) rotate(26deg) scale(0.88);
+        transform: translate3d(10px, 24px, 0) rotate(30deg) scale(0.86);
     }
     25% {
-        transform: translate3d(4px, 11px, 0) rotate(14deg) scale(0.93);
+        transform: translate3d(6px, 16px, 0) rotate(18deg) scale(0.92);
     }
     55% {
-        transform: translate3d(-3px, 2px, 0) rotate(-7deg) scale(1.07);
+        transform: translate3d(-6px, 4px, 0) rotate(-10deg) scale(1.08);
     }
     80% {
-        transform: translate3d(2px, -3px, 0) rotate(3deg) scale(1.01);
+        transform: translate3d(4px, -4px, 0) rotate(4deg) scale(1.02);
     }
     100% {
         transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
@@ -565,7 +655,7 @@ button:active {
     transition: all 0.3s ease;
     pointer-events: all;
     box-shadow: 0 8px 32px var(--content-shadow);
-    border: 2px solid var(--content-border);
+    border: 3px solid var(--content-border);
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
     touch-action: manipulation; /* Optimize touch interactions */
     will-change: transform, opacity; /* Optimize for animations */
