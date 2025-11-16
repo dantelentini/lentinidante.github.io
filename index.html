@@ -840,14 +840,14 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
                 // Start "Growth Hacker" text flash at track 8's BPM (150)
                 startGrowthHackerFlash(150);
                 
-                // Fade other albums back to full visibility after 4s delay
+                // Fade other albums back to full visibility after 12s delay
                 setTimeout(() => {
                     const otherAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
                     otherAlbums.forEach(album => {
                         album.style.transition = 'opacity 2s ease-in';
                         album.style.opacity = '1';
                     });
-                }, 4000);
+                }, 12000);
                 
                 track8GifTimer = null;
             }, 6700);
