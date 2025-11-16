@@ -1,4 +1,8 @@
-/* Fonts */
+/* =============================================================
+   FONTS - Custom font declarations
+   ============================================================= */
+
+/* Primary font family - Regular weight */
 @font-face {
     font-family: 'Family';
     src: url('../fonts/family-regular.woff2') format('woff2');
@@ -6,6 +10,7 @@
     font-display: swap;
 }
 
+/* Primary font family - Bold weight */
 @font-face {
     font-family: 'Family';
     src: url('../fonts/family-bold.woff2') format('woff2');
@@ -13,6 +18,7 @@
     font-display: swap;
 }
 
+/* Handwritten font for signature */
 @font-face {
     font-family: 'Caveat';
     src: url(https://fonts.gstatic.com/s/caveat/v18/WnznHAc5bAfYB2QRah7pcpNvOx-pjfJ9eIWpYT5Kmgq3sw.woff2) format('woff2');
@@ -20,62 +26,72 @@
     font-display: swap;
 }
 
-/* Theme */
+/* =============================================================
+   THEME SYSTEM - Light and dark mode color schemes
+   ============================================================= */
+
+/* Light mode (default) */
 :root {
-    --bg: #0064e6;
-    --fg: #c2f6ff;
-    --fg-muted: rgba(255, 255, 255, 0.9);
-    --fg-strong: #ffffff;
-    --surface-raised: rgba(255, 255, 255, 0.08);
-    --surface-hover: rgba(255, 255, 255, 0.2);
-    --content-border: rgba(255, 255, 255, 0.2);
-    --content-border-strong: rgba(255, 255, 255, 0.4);
-    --content-shadow: rgba(0, 17, 51, 0.35);
-    --content-shadow-strong: rgba(0, 17, 51, 0.55);
-    --button-active-fg: #0064e6;
-    --link-color: #ffffff;
+    --bg: #0064e6;                              /* Bright blue background */
+    --fg: #c2f6ff;                              /* Light cyan text */
+    --fg-muted: rgba(255, 255, 255, 0.9);      /* Muted white text */
+    --fg-strong: #ffffff;                       /* Pure white for emphasis */
+    --surface-raised: rgba(255, 255, 255, 0.08); /* Subtle surface elevation */
+    --surface-hover: rgba(255, 255, 255, 0.2);   /* Hover state for surfaces */
+    --content-border: rgba(255, 255, 255, 0.2);  /* Album borders */
+    --content-border-strong: rgba(255, 255, 255, 0.4); /* Hovered album borders */
+    --content-shadow: rgba(0, 17, 51, 0.35);     /* Album shadows */
+    --content-shadow-strong: rgba(0, 17, 51, 0.55); /* Hovered album shadows */
+    --button-active-fg: #0064e6;                 /* Active button text color */
+    --link-color: #ffffff;                       /* Link color */
     color-scheme: light;
 }
 
+/* Dark mode (activated by track 8) */
 [data-theme="dark"] {
-    --bg: #000000;
-    --fg: #c8d1dc;
-    --fg-muted: rgba(255, 255, 255, 0.85);
-    --fg-strong: #ffffff;
-    --surface-raised: rgba(255, 255, 255, 0.08);
-    --surface-hover: rgba(255, 255, 255, 0.24);
-    --content-border: rgba(255, 255, 255, 0.08);
-    --content-border-strong: rgba(255, 255, 255, 0.2);
-    --content-shadow: rgba(0, 0, 0, 0.65);
-    --content-shadow-strong: rgba(0, 0, 0, 0.85);
-    --button-active-fg: #000000;
-    --link-color: #ffffff;
+    --bg: #000000;                              /* Pure black background */
+    --fg: #c8d1dc;                              /* Light gray text */
+    --fg-muted: rgba(255, 255, 255, 0.85);     /* Slightly dimmed white */
+    --fg-strong: #ffffff;                       /* Pure white for emphasis */
+    --surface-raised: rgba(255, 255, 255, 0.08); /* Subtle surface elevation */
+    --surface-hover: rgba(255, 255, 255, 0.24);  /* Brighter hover state */
+    --content-border: rgba(255, 255, 255, 0.08); /* Subtle album borders */
+    --content-border-strong: rgba(255, 255, 255, 0.2); /* Hovered album borders */
+    --content-shadow: rgba(0, 0, 0, 0.65);       /* Darker shadows */
+    --content-shadow-strong: rgba(0, 0, 0, 0.85); /* Deepest shadows */
+    --button-active-fg: #000000;                 /* Active button text (black on white) */
+    --link-color: #ffffff;                       /* Link color */
     color-scheme: dark;
 }
 
-/* Base */
+/* =============================================================
+   BASE STYLES - Root element and body setup
+   ============================================================= */
+
+/* Universal reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Fixed viewport to prevent scroll and maintain full-screen */
 html {
     position: fixed;
     inset: 0;
     overflow: hidden;
     background-color: var(--bg);
     min-height: 100vh;
-    min-height: -webkit-fill-available;
+    min-height: -webkit-fill-available; /* iOS Safari compatibility */
     -webkit-overflow-scrolling: touch;
 }
 
-/* Only transition when going back to light mode */
+/* Smooth transition when returning to light mode */
 html.transitioning-to-light {
     transition: background-color 0.8s ease;
 }
 
-
+/* Body with centered content and safe area padding */
 body {
     position: fixed;
     inset: 0;
@@ -98,19 +114,23 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Smooth color transitions during theme switch */
 html.transitioning-to-light body {
     transition: background-color 0.8s ease, color 0.8s ease;
 }
 
+/* =============================================================
+   SAFE AREA COVERAGE - iOS notch and gesture bar handling
+   ============================================================= */
 
-/* Force background extension into safe areas on iOS */
+/* Extend background behind safe areas */
 body::before {
     content: '';
     position: fixed;
     inset: 0;
     background-color: var(--bg);
     z-index: -1;
-    /* Extend into safe areas with extra margin */
+    /* Extra padding beyond safe areas */
     top: calc(-100px - env(safe-area-inset-top, 0px));
     bottom: calc(-100px - env(safe-area-inset-bottom, 0px));
     left: calc(-100px - env(safe-area-inset-left, 0px));
@@ -121,8 +141,7 @@ html.transitioning-to-light body::before {
     transition: background-color 0.8s ease;
 }
 
-
-/* Additional layer for iOS Safari bar coverage */
+/* Cover top safe area (status bar) */
 html::before {
     content: '';
     position: fixed;
@@ -138,6 +157,7 @@ html.transitioning-to-light::before {
     transition: background-color 0.8s ease;
 }
 
+/* Cover bottom safe area (gesture bar) */
 html::after {
     content: '';
     position: fixed;
@@ -153,19 +173,278 @@ html.transitioning-to-light::after {
     transition: background-color 0.8s ease;
 }
 
+/* =============================================================
+   LAYOUT - Main content container
+   ============================================================= */
 
 main {
     max-width: 100%;
     max-height: 100%;
-    overflow: hidden;
+    overflow: visible;
 }
 
-/* Typography */
+/* =============================================================
+   TYPOGRAPHY - Text styles and formatting
+   ============================================================= */
 h1 {
     font-size: 2.2em;
     color: var(--fg-strong);
     margin-bottom: 0.3em;
-    
+    transition: opacity 0.6s ease;
+}
+
+/* Container for both h1 elements to occupy same space */
+.h1-container {
+    display: grid;
+    margin-bottom: 0.3em;
+    overflow: visible;
+}
+
+.h1-container h1 {
+    grid-area: 1 / 1;
+    margin-bottom: 0;
+    overflow: visible;
+}
+
+/* Hide "Hi," in dark mode */
+[data-theme="dark"] h1:not(.hey-now) {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* "Hey now," text - hidden in light mode, rises in dark mode */
+h1.hey-now {
+    opacity: 0;
+    transform: translate3d(-1px, 108vh, 0) scale(0.97) rotate(-4deg);
+    pointer-events: none;
+    z-index: 10;
+    position: relative;
+}
+
+/* Animate "Hey now," to rise when dark mode activates */
+[data-theme="dark"] h1.hey-now {
+    animation: heyZeroGravity var(--hey-rise-duration, 11s) linear forwards;
+}
+
+/* Hey now text should match body text color for proper flash effect */
+h1.hey-now,
+h1.hey-now span {
+    color: var(--fg);
+}
+
+/* Flashing animations - Start at 13s, alternating pattern with Growth and Hacker */
+[data-theme="dark"] .hey-now.start-flash .word-hey {
+    animation:
+        heyDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        heyFloatLoop 5.5s ease-in-out infinite,
+        flashHacker var(--flash-duration, 0.4s) ease-in-out infinite;
+    animation-delay: 0s, var(--hey-rise-duration, 11s), 0s;
+    animation-fill-mode: forwards, both, none;
+}
+
+[data-theme="dark"] .hey-now.start-flash .word-now {
+    animation:
+        nowDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        nowFloatLoop 6s ease-in-out infinite,
+        flashGrowth var(--flash-duration, 0.4s) ease-in-out infinite;
+    animation-delay: 0s, var(--hey-rise-duration, 11s), 0s;
+    animation-fill-mode: forwards, both, none;
+}
+
+[data-theme="dark"] .hey-now.start-flash .word-comma {
+    animation:
+        commaDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        commaFloatLoop 4.5s ease-in-out infinite,
+        flashGrowth var(--flash-duration, 0.4s) ease-in-out infinite;
+    animation-delay: 0s, var(--hey-rise-duration, 11s), 0s;
+    animation-fill-mode: forwards, both, none;
+}
+
+/* Hide "Hey now," in light mode by moving it off screen */
+:root:not([data-theme="dark"]) h1.hey-now {
+    opacity: 0;
+    transition: opacity 0s;
+}
+
+/* Per-character floating physics */
+.hey-now span {
+    display: inline-block;
+    text-shadow: none;
+}
+
+.hey-now .word-hey {
+    margin-right: 0.02em;
+}
+
+.hey-now .word-now {
+    margin-right: -0.006em;
+}
+
+.hey-now .word-comma {
+    margin-left: -0.042em;
+}
+
+[data-theme="dark"] .hey-now .word-hey {
+    animation:
+        heyDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        heyFloatLoop 5.5s ease-in-out infinite;
+    animation-delay: 0s, var(--hey-rise-duration, 11s);
+    animation-fill-mode: forwards, both;
+}
+
+[data-theme="dark"] .hey-now .word-now {
+    animation:
+        nowDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        nowFloatLoop 6s ease-in-out infinite;
+    animation-delay: 0s, var(--hey-rise-duration, 11s);
+    animation-fill-mode: forwards, both;
+}
+
+[data-theme="dark"] .hey-now .word-comma {
+    animation:
+        commaDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        commaFloatLoop 4.5s ease-in-out infinite;
+    animation-delay: 0s, var(--hey-rise-duration, 11s);
+    animation-fill-mode: forwards, both;
+}
+
+@keyframes heyZeroGravity {
+    0% {
+        opacity: 0;
+        transform: translate3d(-1px, 108vh, 0) scale(0.97) rotate(-4deg);
+    }
+    10% {
+        opacity: 0.9;
+        transform: translate3d(-0.8px, 90vh, 0) scale(0.975) rotate(-3deg);
+    }
+    30% {
+        opacity: 1;
+        transform: translate3d(-0.4px, 65vh, 0) scale(0.99) rotate(-1.5deg);
+    }
+    60% {
+        transform: translate3d(1px, 40vh, 0) scale(1.01) rotate(0.5deg);
+    }
+    85% {
+        transform: translate3d(0.4px, 16vh, 0) scale(1.02) rotate(-0.15deg);
+    }
+    92% {
+        transform: translate3d(0.2px, 10vh, 0) scale(1.02) rotate(-0.08deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    }
+}
+
+@keyframes heyDrift {
+    0% {
+        transform: translate3d(-18px, 26px, 0) rotate(-16deg);
+    }
+    20% {
+        transform: translate3d(-9px, 12px, 0) rotate(-9deg);
+    }
+    40% {
+        transform: translate3d(6px, 8px, 0) rotate(5deg);
+    }
+    60% {
+        transform: translate3d(-5px, 0, 0) rotate(-4deg);
+    }
+    80% {
+        transform: translate3d(4px, -4px, 0) rotate(3deg);
+    }
+    100% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+}
+
+@keyframes nowDrift {
+    0% {
+        transform: translate3d(16px, 24px, 0) rotate(13deg);
+    }
+    25% {
+        transform: translate3d(8px, 12px, 0) rotate(8deg);
+    }
+    50% {
+        transform: translate3d(-6px, 2px, 0) rotate(-6deg);
+    }
+    70% {
+        transform: translate3d(4px, -3px, 0) rotate(3deg);
+    }
+    90% {
+        transform: translate3d(-2px, -2px, 0) rotate(-1deg);
+    }
+    100% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+}
+
+@keyframes commaDrift {
+    0% {
+        transform: translate3d(6px, 18px, 0) rotate(26deg) scale(0.88);
+    }
+    25% {
+        transform: translate3d(4px, 11px, 0) rotate(14deg) scale(0.93);
+    }
+    55% {
+        transform: translate3d(-3px, 2px, 0) rotate(-7deg) scale(1.07);
+    }
+    80% {
+        transform: translate3d(2px, -3px, 0) rotate(3deg) scale(1.01);
+    }
+    100% {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    }
+}
+
+@keyframes heyFloatLoop {
+    0% {
+        transform: translate3d(-4px, 2px, 0) rotate(-3deg);
+    }
+    25% {
+        transform: translate3d(3px, -4px, 0) rotate(4deg);
+    }
+    50% {
+        transform: translate3d(-2px, -5px, 0) rotate(-2deg);
+    }
+    75% {
+        transform: translate3d(4px, 3px, 0) rotate(3deg);
+    }
+    100% {
+        transform: translate3d(-3px, 1px, 0) rotate(-1deg);
+    }
+}
+
+@keyframes nowFloatLoop {
+    0% {
+        transform: translate3d(3px, -1px, 0) rotate(2.5deg);
+    }
+    30% {
+        transform: translate3d(-3.5px, 2px, 0) rotate(-3deg);
+    }
+    60% {
+        transform: translate3d(3px, 3px, 0) rotate(2deg);
+    }
+    90% {
+        transform: translate3d(-2px, -2.5px, 0) rotate(-1.5deg);
+    }
+    100% {
+        transform: translate3d(2px, 0.5px, 0) rotate(1deg);
+    }
+}
+
+@keyframes commaFloatLoop {
+    0% {
+        transform: translate3d(1.8px, 0.6px, 0) rotate(2deg);
+    }
+    35% {
+        transform: translate3d(-1.5px, -1.8px, 0) rotate(-3deg);
+    }
+    65% {
+        transform: translate3d(2.1px, 1.6px, 0) rotate(2.2deg);
+    }
+    100% {
+        transform: translate3d(-1px, -0.8px, 0) rotate(-1.2deg);
+    }
 }
 
 p {
@@ -182,7 +461,7 @@ p {
     font-weight: bold;
 }
 
-/* Signature */
+/* Handwritten signature style */
 .signature {
     margin: 1em 0 0.5em;
     font-family: 'Caveat', cursive;
@@ -191,7 +470,10 @@ p {
     color: var(--fg-strong);
 }
 
-/* Social Links */
+/* =============================================================
+   NAVIGATION - Social links
+   ============================================================= */
+
 .social-links {
     display: flex;
     gap: 12px;
@@ -207,7 +489,9 @@ p {
     color: var(--fg-strong);
 }
 
-/* Buttons - Default browser styling with visibility fixes */
+/* =============================================================
+   BUTTONS - Interactive button styles
+   ============================================================= */
 button {
     all: revert;
     cursor: pointer;
@@ -234,12 +518,15 @@ button:active {
     opacity: 0.6;
 }
 
-/* Fix button visibility in dark mode - use light text */
+/* Ensure buttons are visible in dark mode */
 [data-theme="dark"] button:not(.active) {
     color: var(--fg);
 }
 
-/* Content Grid */
+/* =============================================================
+   CONTENT GRID - Album display system
+   ============================================================= */
+
 .content-grid {
     position: absolute;
     top: 0;
@@ -298,9 +585,11 @@ button:active {
     object-position: center;
 }
 
-/* Album positioning for listen mode */
+/* =============================================================
+   ALBUM POSITIONING - Layout for listen mode grid
+   ============================================================= */
 
-/* LISTEN - Albums: Moved further from main content */
+/* Album grid: 4 on top row, 4 on bottom row */
 .content-items[data-mode="listen"] .content-item:nth-child(1) {
     top: 8%;
     left: calc(50% - 240px);
@@ -365,7 +654,11 @@ button:active {
     animation-delay: 2.8s;
 }
 
-/* Spin in place animation for playing album */
+/* =============================================================
+   ANIMATIONS - Album dance and spin effects
+   ============================================================= */
+
+/* Spinning animation for currently playing album */
 @keyframes spinInPlace {
     0% {
         transform: rotate(0deg);
@@ -380,7 +673,7 @@ button:active {
     animation-delay: 0s !important;
 }
 
-/* SMOOTH - Hypnotic flow, natural groove */
+/* Dance style: Smooth - Hypnotic sway and flow */
 @keyframes danceSmooth {
     0% {
         transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1);
@@ -405,7 +698,7 @@ button:active {
     }
 }
 
-/* JUMP - Bouncing to the beat with realistic physics */
+/* Dance style: Jump - Bouncy hops with beat sync */
 @keyframes danceJump {
     0%, 10% {
         transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1, 1);
@@ -445,7 +738,11 @@ button:active {
     }
 }
 
-/* HYPE MODE - Lean/bounce towards the playing track */
+/* =============================================================
+   HYPE MODE - Albums lean toward playing track
+   ============================================================= */
+
+/* Lean left toward playing album */
 @keyframes hypeLeft {
     0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
     25% { transform: translate(15px, -8px) rotate(calc(var(--item-rotation, 0deg) + 8deg)) scale(1.08); }
@@ -453,6 +750,7 @@ button:active {
     75% { transform: translate(15px, -8px) rotate(calc(var(--item-rotation, 0deg) + 8deg)) scale(1.08); }
 }
 
+/* Lean right toward playing album */
 @keyframes hypeRight {
     0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
     25% { transform: translate(-15px, -8px) rotate(calc(var(--item-rotation, 0deg) - 8deg)) scale(1.08); }
@@ -460,6 +758,7 @@ button:active {
     75% { transform: translate(-15px, -8px) rotate(calc(var(--item-rotation, 0deg) - 8deg)) scale(1.08); }
 }
 
+/* Lean up toward playing album */
 @keyframes hypeUp {
     0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
     25% { transform: translate(0, 12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
@@ -467,6 +766,7 @@ button:active {
     75% { transform: translate(0, 12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
 }
 
+/* Lean down toward playing album */
 @keyframes hypeDown {
     0%, 100% { transform: translate(0, 0) rotate(var(--item-rotation, 0deg)) scale(1); }
     25% { transform: translate(0, -12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
@@ -474,7 +774,7 @@ button:active {
     75% { transform: translate(0, -12px) rotate(var(--item-rotation, 0deg)) scale(1.08); }
 }
 
-/* Hype mode active */
+/* Apply hype mode animations */
 .content-items.hype-mode .content-item:not(.spinning) {
     animation-duration: 1s !important;
     animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
@@ -497,7 +797,11 @@ button:active {
     animation-name: hypeDown !important;
 }
 
-/* Only dance when a song is playing - default styles */
+/* =============================================================
+   DANCE SYSTEM - BPM-synced album choreography
+   ============================================================= */
+
+/* Enable dancing for non-playing albums when a track is active */
 .content-items:has(.spinning) .content-item:not(.spinning) {
     animation-duration: var(--dance-duration, 2s);
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -517,15 +821,18 @@ button:active {
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hover effects for content items (not spinning) */
+/* Pause dance on hover and scale up */
 .content-item:not(.spinning):hover {
     transform: scale(1.05) rotate(0deg) !important;
     z-index: 10;
     animation-play-state: paused;
 }
 
+/* =============================================================
+   RESPONSIVE DESIGN - Mobile optimizations
+   ============================================================= */
 
-/* Mobile responsive adjustments */
+/* Tablet and smaller - Reduce padding, enlarge touch targets */
 @media (max-width: 768px) {
     body {
         padding: 40px 20px;
@@ -535,7 +842,7 @@ button:active {
         padding-right: max(20px, env(safe-area-inset-right));
     }
     
-    /* Improve touch targets on mobile */
+    /* Larger albums for easier tapping */
     .content-item {
         width: 130px;
         height: 130px;
@@ -543,6 +850,7 @@ button:active {
     
 }
 
+/* Small phones - Maximum optimization */
 @media (max-width: 480px) {
     body {
         padding: 30px 15px;
@@ -552,7 +860,7 @@ button:active {
         padding-right: max(15px, env(safe-area-inset-right));
     }
     
-    /* Even larger touch targets on very small screens */
+    /* Maximum touch target size for tiny screens */
     .content-item {
         width: 140px;
         height: 140px;
@@ -560,7 +868,10 @@ button:active {
     
 }
 
-/* Text Links */
+/* =============================================================
+   TEXT LINKS - Read and write mode links
+   ============================================================= */
+
 .text-links {
     height: 20px;
     margin: 0;
@@ -597,7 +908,11 @@ button:active {
     background: var(--surface-hover);
 }
 
-/* Growth Hacker link styling */
+/* =============================================================
+   GROWTH HACKER FLASH - BPM-synced text animation
+   ============================================================= */
+
+/* Base link style */
 .growth-hacker-link {
     color: inherit;
     text-decoration: none;
@@ -608,7 +923,7 @@ button:active {
     text-decoration: underline;
 }
 
-/* Flashing animation for "Growth" - flashes on beats 1 and 3 */
+/* "Growth" flashes on beats 1 and 3 */
 @keyframes flashGrowth {
     0%, 15% {
         color: inherit;
@@ -636,7 +951,7 @@ button:active {
     }
 }
 
-/* Flashing animation for "Hacker" - flashes on beats 2 and 4 (offset) */
+/* "Hacker" flashes on beats 2 and 4 (offset from "Growth") */
 @keyframes flashHacker {
     0%, 40% {
         color: inherit;
