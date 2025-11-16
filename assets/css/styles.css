@@ -220,7 +220,7 @@ h1 {
     left: 50%;
     right: auto;
     /* start well off the right side of the screen using transforms like the \"Hey now\" text */
-    transform: translate3d(120vw, -50%, 0);
+    transform: translate3d(120vw, -70%, 0);
     /* slightly smaller car for better proportion */
     width: min(260px, 55vw);
     max-width: none;
@@ -237,7 +237,7 @@ h1 {
 
 :root:not(.hi-hit) .hi-car {
     opacity: 0;
-    transform: translate3d(120vw, -50%, 0);
+    transform: translate3d(120vw, -70%, 0);
 }
 
 /* Triggered state: \"Hi,\" gets hit and flies off, car drives through */
@@ -265,11 +265,11 @@ h1.hey-now {
 }
 
 /* Animate "Hey now," to rise, starting even earlier before the screen goes black.
-   The JS adds .hi-hit shortly before dark mode; with a -3s delay here,
-   the animation behaves as if it started ~3s earlier than the hit. */
+   The JS adds .hi-hit shortly before dark mode; with a -2s delay here,
+   the animation behaves as if it started ~2s earlier than the hit. */
 .hi-hit h1.hey-now {
     animation: heyZeroGravity var(--hey-rise-duration, 15s) linear forwards;
-    animation-delay: -3s;
+    animation-delay: -2s;
 }
 
 /* Hey now text should match body text color for proper flash effect */
@@ -380,27 +380,27 @@ h1.hey-now span {
 @keyframes hiCarDriveIn {
     0% {
         opacity: 1;
-        transform: translate3d(120vw, -50%, 0);
+        transform: translate3d(120vw, -70%, 0);
     }
     25% {
         /* smooth early approach */
-        transform: translate3d(40vw, -50%, 0);
+        transform: translate3d(40vw, -70%, 0);
     }
     45% {
         /* getting closer to the \"Hi,\" */
-        transform: translate3d(10vw, -50%, 0);
+        transform: translate3d(10vw, -70%, 0);
     }
     60% {
         /* impact zone – nose of car overlapping the \"Hi,\" */
-        transform: translate3d(-22vw, -50%, 0);
+        transform: translate3d(-22vw, -70%, 0);
     }
     78% {
         /* easing out of impact before accelerating off */
-        transform: translate3d(-50vw, -50%, 0);
+        transform: translate3d(-50vw, -70%, 0);
     }
     100% {
         /* fully past the left edge, well off-screen */
-        transform: translate3d(-140vw, -50%, 0);
+        transform: translate3d(-140vw, -70%, 0);
     }
 }
 
