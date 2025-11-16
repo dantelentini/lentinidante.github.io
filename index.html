@@ -42,7 +42,13 @@
             </div>
         </div>
         
-        <h1>Hi,</h1>
+        <div class="h1-container">
+            <h1>Hi,</h1>
+            <h1 class="hey-now">
+                <span class="word-hey">Hey</span>
+                <span class="word-now">now</span><span class="word-comma">,</span>
+            </h1>
+        </div>
         <p>
             I like to <button id="read-btn">read</button>, <button id="write-btn">write</button>, and <button id="listen-btn">listen</button>.
         </p>
@@ -73,73 +79,96 @@
     <audio id="audio-player" preload="metadata" crossorigin="anonymous" playsinline></audio>
     
     <script>
-        // Theme init
+        // =====================================================
+        // THEME SYSTEM - Light/Dark mode management
+        // =====================================================
+        
+        // Theme configuration and DOM references
         const rootEl = document.documentElement;
         let themeColorMeta = document.querySelector('meta[name="theme-color"]');
         const appleStatusBarMeta = document.getElementById('apple-status-bar');
         const THEME_KEY = 'theme-preference';
         const THEME_COLORS = { light: '#0064e6', dark: '#000000' };
         const DARK_MODE_DELAY_MS = 6300;
+        
+        // Dark mode sound effect setup
         const sfx = new Audio('assets/audio/dark-mode.mp3');
         sfx.preload = 'auto';
         sfx.crossOrigin = 'anonymous';
         sfx.volume = 1.0;
+        
+        // Starfield canvas for dark mode visual effect
         const starCanvas = document.getElementById('starfield');
-        if (starCanvas) starCanvas.style.display = 'none';
-        let currentTheme = null;
-        let pendingTheme = null;
-        let themeTransitionTimer = null;
+        
+        // Theme state tracking
+        let currentTheme = null; // Current active theme ('light' or 'dark')
+        let pendingTheme = null; // Theme scheduled to activate
+        let themeTransitionTimer = null; // Timer for delayed theme transitions
+        
+        // Initialize with light theme on page load
         applyTheme('light', { skipAudio: true });
+        
+        /**
+         * Synchronizes system UI elements (status bar, address bar) with current theme
+         * @param {string} theme - 'light' or 'dark'
+         */
         function syncSystemChrome(theme = 'light') {
             const color = THEME_COLORS[theme] || THEME_COLORS.light;
             const statusStyle = theme === 'dark' ? 'black' : 'default';
             
+            // Update meta tags for browser chrome (address bar color)
             if (themeColorMeta) {
                 themeColorMeta.content = color;
             }
             
+            // Update iOS status bar style
             if (appleStatusBarMeta) {
                 appleStatusBarMeta.content = statusStyle;
             }
             
-            // Force repaint
+            // Force repaint to ensure mobile browsers register the change
             setTimeout(() => {
                 if (themeColorMeta) themeColorMeta.content = color;
                 if (appleStatusBarMeta) appleStatusBarMeta.content = statusStyle;
             }, 10);
         }
 
+        /**
+         * Applies a theme with visual transitions and optional audio
+         * @param {string} theme - 'light' or 'dark'
+         * @param {object} options - { skipAudio: bool, force: bool }
+         */
         function applyTheme(theme, options = {}) {
             const next = theme === 'dark' ? 'dark' : 'light';
             const { skipAudio = false, force = false } = options;
+            
+            // Skip if already on this theme (unless forced)
             if (!force && currentTheme === next) {
                 return;
             }
 
             currentTheme = next;
 
-            if (next === 'dark') {
-                // Remove transition class for instant dark mode
+        if (next === 'dark') {
+                // Dark mode: instant transition
                 rootEl.classList.remove('transitioning-to-light');
                 rootEl.setAttribute('data-theme', 'dark');
                 if (starCanvas) {
-                    // Instantly show starfield
                     starCanvas.style.display = 'block';
                     starCanvas.style.opacity = '1';
                 }
             } else {
-                // Add transition class for smooth light mode transition
+                // Light mode: smooth fade transition
                 rootEl.classList.add('transitioning-to-light');
                 rootEl.removeAttribute('data-theme');
                 if (starCanvas) {
-                    // Fade out the starfield
+                    // Fade out starfield over 800ms
                     starCanvas.style.opacity = '0';
-                    // Hide after transition completes
                     setTimeout(() => {
                         starCanvas.style.display = 'none';
                     }, 800);
                 }
-                // Remove transition class after transition completes
+                // Clean up transition class after animation
                 setTimeout(() => {
                     rootEl.classList.remove('transitioning-to-light');
                 }, 800);
@@ -147,6 +176,7 @@
 
             syncSystemChrome(next);
 
+            // Play audio feedback if not skipped
             if (!skipAudio) {
                 if (next === 'dark') {
                     playDarkModeSfx();
@@ -156,13 +186,19 @@
             }
         }
 
+        /**
+         * Plays dark mode sound effect
+         */
         function playDarkModeSfx() {
             try {
                 sfx.currentTime = 0;
-                sfx.play().catch(() => {});
+                sfx.play().catch(() => {}); // Suppress autoplay errors
             } catch (_) {}
         }
 
+        /**
+         * Stops and resets dark mode sound effect
+         */
         function stopDarkModeSfx() {
             try {
                 sfx.pause();
@@ -170,54 +206,76 @@
             } catch (_) {}
         }
 
+        /**
+         * Cancels any pending theme transition
+         * @param {object} options - { stopAudio: bool }
+         */
         function cancelPendingTheme(options = {}) {
             const { stopAudio = true } = options;
+            
+            // Clear any scheduled theme transition
             if (themeTransitionTimer) {
                 clearTimeout(themeTransitionTimer);
                 themeTransitionTimer = null;
             }
+            
+            // Stop audio if transitioning to dark mode
             if (stopAudio && pendingTheme === 'dark') {
                 stopDarkModeSfx();
             }
             pendingTheme = null;
         }
 
+        /**
+         * Initiates timed transition to dark mode with audio
+         */
         function startDarkModeTransition() {
             cancelPendingTheme();
             pendingTheme = 'dark';
             syncSystemChrome('dark');
             playDarkModeSfx();
             
+            // Apply dark mode after audio plays (6.3s)
             themeTransitionTimer = setTimeout(() => {
                 cancelPendingTheme({ stopAudio: false });
                 applyTheme('dark', { skipAudio: true });
                 
-                // Start flashing with dark mode audio BPM after theme is applied
+                // Sync "Growth Hacker" text flash with 150 BPM
                 if (typeof startGrowthHackerFlash !== 'undefined') {
                     startGrowthHackerFlash(150);
                 }
             }, DARK_MODE_DELAY_MS);
         }
 
+        // =====================================================
+        // AUDIO CONTEXT - Web Audio API for better compatibility
+        // =====================================================
         
-        // Initialize Audio Context for better browser compatibility
         let audioContext = null;
+        
+        /**
+         * Initializes and resumes Web Audio API context (handles autoplay policies)
+         */
         function initAudioContext() {
             if (!audioContext) {
                 try {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     audioContext = new AudioContext();
                 } catch (e) {
-                    // Web Audio API not supported
+                    // Web Audio API not supported (fallback to HTML5 audio)
                 }
             }
-            // Resume if suspended (for autoplay policies)
+            // Resume if suspended due to browser autoplay policies
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
             }
         }
 
-        // Content data - only listen has visual content
+        // =====================================================
+        // CONTENT DATA - Track information for music player
+        // =====================================================
+        
+        // Album covers, audio files, and BPM for each track
         const listenData = [
             { image: 'assets/images/albums/album_1.webp', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
             { image: 'assets/images/albums/album_2.webp', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 95 },
@@ -229,43 +287,52 @@
             { image: 'assets/images/albums/album_8.webp', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 150, gifImage: 'assets/images/albums/album_8_edit.gif' }
         ];
 
-        // Aggressively preload ALL images and audio for instant, flawless experience
+        // =====================================================
+        // ASSET PRELOADING - Load all media for instant experience
+        // =====================================================
+        
+        /**
+         * Preloads all images and audio files on page load
+         * Ensures zero latency when user interacts with albums
+         */
         (function preloadAllAssets() {
-            // Preload all album cover images
             const imagesToPreload = [];
             const audioToPreload = [];
             
-            // Collect all assets from listenData
+            // Collect all assets from track data
             listenData.forEach(track => {
                 imagesToPreload.push(track.image);
                 audioToPreload.push(track.audio);
-                // Add GIF if present
+                // Include GIF variants (e.g., track 8)
                 if (track.gifImage) {
                     imagesToPreload.push(track.gifImage);
                 }
             });
             
-            // Preload each image immediately
+            // Preload all images by creating Image objects
             imagesToPreload.forEach(src => {
                 const img = new Image();
                 img.src = src;
             });
             
-            // Aggressively preload all audio files with metadata
+            // Preload all audio files with full download
             audioToPreload.forEach(src => {
                 const audio = new Audio();
-                audio.preload = 'auto'; // Force full download
-                audio.load(); // Start loading immediately
+                audio.preload = 'auto';
+                audio.load();
                 audio.src = src;
             });
             
-            // Also ensure dark mode sound is ready
+            // Preload dark mode sound effect
             sfx.load();
             
             console.log('🚀 All assets preloading for instant experience!');
         })();
 
-        // DOM elements
+        // =====================================================
+        // DOM REFERENCES - Cache elements for performance
+        // =====================================================
+        
         const readBtn = document.getElementById('read-btn');
         const writeBtn = document.getElementById('write-btn');
         const listenBtn = document.getElementById('listen-btn');
@@ -273,76 +340,131 @@
         const audioPlayer = document.getElementById('audio-player');
         const darkToggle = document.getElementById('dark-mode-toggle');
         const readLink = document.getElementById('read-link');
-        const writeLink = document.getElementById('write-link');
-        const growthHackerLink = document.getElementById('growth-hacker-link');
+const writeLink = document.getElementById('write-link');
+const growthHackerLink = document.getElementById('growth-hacker-link');
 
-        let currentMode = null;
-        let currentlyPlaying = null;
-        let currentPlayingElement = null;
-        let isButtonActive = false;
-        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        let audioUnlocked = false;
-        let hasClickedListenBefore = false;
-        let isReturningFromBackground = false;
-        let lastButtonClickTime = 0;
-        let isProcessingButtonClick = false;
-        let track8GifTimer = null; // Timer for track 8 album art change and dark mode
-        let track8LastRestartTime = 0; // Track when track 8 was last restarted
+        // =====================================================
+        // APPLICATION STATE - Track UI and playback status
+        // =====================================================
         
-        // Unlock audio on first user interaction (for autoplay policies)
+        // Content display state
+        let currentMode = null; // Current active mode: 'read', 'write', or 'listen'
+        let isButtonActive = false; // Whether a button is "locked" active (vs hover)
+        
+        // Audio playback state
+        let currentlyPlaying = null; // Currently playing audio source
+        let currentPlayingElement = null; // DOM element of playing album
+        
+        // Device and interaction state
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let audioUnlocked = false; // Whether user has interacted (for autoplay)
+        let hasClickedListenBefore = false; // First-time listen auto-play flag
+        let isReturningFromBackground = false; // Prevent auto-actions when returning to tab
+        let lastButtonClickTime = 0; // Debounce timestamp
+        let isProcessingButtonClick = false; // Prevent rapid clicks
+        
+        // Track 8 special effects state
+        let track8GifTimer = null; // Timer for GIF swap and dark mode trigger
+        let track8LastRestartTime = 0; // Track restart timestamp
+        let heyNowFlashTimer = null; // Timer for delayed "Hey now" flashing
+
+        /**
+         * Schedules "Hey now," flashing to start after a delay
+         * @param {number} bpm - Beats per minute for flash timing
+         * @param {number} delayMs - Delay before flashing begins
+         */
+function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
+    if (heyNowFlashTimer) {
+        clearTimeout(heyNowFlashTimer);
+    }
+    heyNowFlashTimer = setTimeout(() => {
+        startHeyNowFlash(bpm);
+        heyNowFlashTimer = null;
+    }, delayMs);
+}
+        
+        // =====================================================
+        // AUDIO UNLOCK - Handle browser autoplay policies
+        // =====================================================
+        
+        /**
+         * Unlocks audio playback on first user interaction
+         * Required for iOS/Safari and other browsers with autoplay restrictions
+         */
         function unlockAudio() {
             if (!audioUnlocked) {
                 initAudioContext();
                 audioUnlocked = true;
-                // Remove listener after first unlock
                 document.removeEventListener('touchstart', unlockAudio);
                 document.removeEventListener('click', unlockAudio);
             }
         }
         
-        // Add listeners for audio unlock
+        // Register unlock listeners (fire once on first interaction)
         document.addEventListener('touchstart', unlockAudio, { once: true });
         document.addEventListener('click', unlockAudio, { once: true });
         
-        // Handle page visibility changes (tab switching on mobile)
+        // =====================================================
+        // PAGE VISIBILITY - Handle tab switching
+        // =====================================================
+        
+        /**
+         * Tracks when user switches away/back to tab
+         * Prevents unwanted auto-play behaviors when returning
+         */
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                // Page is hidden (tab switched away or app backgrounded)
-                // Don't pause audio, let it continue playing
+                // Tab/app in background - audio continues
             } else {
-                // Page is visible again (tab switched back or app foregrounded)
+                // Tab/app returned to foreground
                 isReturningFromBackground = true;
-                // Reset the flag after a short delay to prevent accidental triggers
+                // Reset flag after 1 second to allow normal interactions
                 setTimeout(() => {
                     isReturningFromBackground = false;
                 }, 1000);
             }
         });
 
-        // Track touch to prevent ghost clicks on mobile
+        // =====================================================
+        // TOUCH HANDLING - Prevent ghost clicks on mobile
+        // =====================================================
+        
         let lastTouchTime = 0;
         
-        // Prevent ghost clicks after touch events
+        /**
+         * Prevents duplicate "ghost" click events after touch on mobile
+         * Touch events fire first, then click events ~300-400ms later
+         * @param {Event} e - The event object
+         * @returns {boolean} - True if event should be blocked
+         */
         function preventGhostClick(e) {
             const now = Date.now();
+            // Block click if touch happened within 400ms
             if (e.type === 'click' && (now - lastTouchTime) < 400) {
                 e.stopPropagation();
                 e.preventDefault();
                 return true;
             }
+            // Record touch timestamp
             if (e.type === 'touchend' || e.type === 'touchstart') {
                 lastTouchTime = now;
             }
             return false;
         }
         
-        // Debounce function to prevent rapid button clicks
+        /**
+         * Debounces button clicks to prevent rapid-fire triggering
+         * @param {Function} callback - Function to debounce
+         * @param {number} delay - Minimum delay between calls (ms)
+         * @returns {Function} - Debounced function
+         */
         function debounceButtonClick(callback, delay = 300) {
             return function(e) {
                 // Prevent ghost clicks on mobile
                 if (preventGhostClick(e)) return;
                 
                 const now = Date.now();
+                // Block if already processing or within delay window
                 if (isProcessingButtonClick || (now - lastButtonClickTime) < delay) {
                     e.stopPropagation();
                     e.preventDefault();
@@ -354,6 +476,7 @@
                 try {
                     callback(e);
                 } finally {
+                    // Release processing lock after brief delay
                     setTimeout(() => {
                         isProcessingButtonClick = false;
                     }, 100);
@@ -361,11 +484,19 @@
             };
         }
 
-        // Button event handlers
+        // =====================================================
+        // BUTTON HANDLERS - Read, Write, Listen interactions
+        // =====================================================
+        
+        /**
+         * Handles click/touch on "read" button
+         * Toggles content display on repeated clicks
+         */
         function handleReadButton(e) {
             e.stopPropagation();
             e.preventDefault();
             
+            // Toggle: hide if already showing read content
             if (currentMode === 'read' && isButtonActive) {
                 hideContent();
             } else {
@@ -374,10 +505,15 @@
             }
         }
         
+        /**
+         * Handles click/touch on "write" button
+         * Toggles content display on repeated clicks
+         */
         function handleWriteButton(e) {
             e.stopPropagation();
             e.preventDefault();
             
+            // Toggle: hide if already showing write content
             if (currentMode === 'write' && isButtonActive) {
                 hideContent();
             } else {
@@ -386,15 +522,23 @@
             }
         }
         
+        /**
+         * Handles click/touch on "listen" button
+         * Shows albums and auto-plays track 1 on first click
+         */
         function handleListenButton(e) {
             e.stopPropagation();
             e.preventDefault();
             
+            // Toggle: hide if already showing listen content
             if (currentMode === 'listen' && isButtonActive) {
                 hideContent();
             } else {
-                // Only auto-play track 1 if: first time clicking listen, not returning from background,
-                // not in dark mode, and track 8 is not currently playing
+                // Auto-play track 1 ONLY if all conditions met:
+                // - First time clicking listen button
+                // - Not returning from background tab
+                // - Not in dark mode
+                // - Track 8 not currently playing
                 const shouldAutoPlay = !hasClickedListenBefore && 
                                       !isReturningFromBackground && 
                                       currentTheme !== 'dark' && 
@@ -414,8 +558,11 @@
             }
         }
         
-        // Button event listeners with debouncing
-        // On mobile, use touchend to avoid ghost clicks; on desktop, use click
+        // =====================================================
+        // EVENT LISTENERS - Attach handlers to buttons
+        // =====================================================
+        
+        // Mobile uses touchend to prevent ghost clicks; desktop uses click
         if (isMobile) {
             readBtn.addEventListener('touchend', debounceButtonClick(handleReadButton));
             writeBtn.addEventListener('touchend', debounceButtonClick(handleWriteButton));
@@ -426,9 +573,13 @@
             listenBtn.addEventListener('click', debounceButtonClick(handleListenButton));
         }
 
+        // =====================================================
+        // HOVER HANDLERS - Desktop-only preview on hover
+        // =====================================================
+        
         let hoverTimeout = null;
 
-        // Hover event listeners - ONLY on non-mobile devices to prevent conflicts with touch
+        // Only enable hover previews on desktop to avoid conflicts with touch
         if (!isMobile) {
             readBtn.addEventListener('mouseenter', () => {
                 if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -449,11 +600,12 @@
                 }
             });
 
-            // Mouse leave events to hide content when not hovering (only if no button is active)
+            // Hide content when mouse leaves button (only in hover mode, not active mode)
             [readBtn, writeBtn, listenBtn].forEach(btn => {
                 btn.addEventListener('mouseleave', () => {
                     if (!isButtonActive) {
                         if (hoverTimeout) clearTimeout(hoverTimeout);
+                        // Delay hiding in case moving between buttons
                         hoverTimeout = setTimeout(() => {
                             if (!isHoveringAnyButton() && !isButtonActive) {
                                 hideContent();
@@ -464,9 +616,16 @@
             });
         }
 
-        // Click outside to deactivate button mode
+        // =====================================================
+        // CLICK OUTSIDE - Deactivate locked button state
+        // =====================================================
+        
+        /**
+         * Clicking outside buttons deactivates "locked" button mode
+         * Allows click-to-pin and click-outside-to-unpin behavior
+         */
         document.addEventListener('click', (e) => {
-            // Don't hide content if clicking on album items, dark mode button, or any social links
+            // Preserve interactions with albums, dark mode toggle, and links
             if (e.target.closest('.content-item') || 
                 e.target.closest('#dark-mode-toggle') || 
                 e.target.closest('.social-links') ||
@@ -475,7 +634,7 @@
                 return;
             }
             
-            // If clicking outside buttons, deactivate
+            // Clicking outside buttons deactivates locked mode
             if (!readBtn.contains(e.target) && !writeBtn.contains(e.target) && !listenBtn.contains(e.target)) {
                 isButtonActive = false;
                 if (!isHoveringAnyButton()) {
@@ -484,32 +643,41 @@
             }
         });
 
+        /**
+         * Checks if mouse is currently hovering over any button
+         * @returns {boolean} - True if hovering any button
+         */
         function isHoveringAnyButton() {
             return readBtn.matches(':hover') || writeBtn.matches(':hover') || listenBtn.matches(':hover');
         }
 
+        // =====================================================
+        // CONTENT DISPLAY - Show/hide content areas
+        // =====================================================
+        
+        /**
+         * Shows content for specified mode (read/write/listen)
+         * @param {string} mode - 'read', 'write', or 'listen'
+         */
         function showContent(mode) {
-            // Remove active class from all buttons
+            // Update button states
             [readBtn, writeBtn, listenBtn].forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to current button
             document.getElementById(mode + '-btn').classList.add('active');
 
-            // Update current mode
             currentMode = mode;
 
-            // Hide all links first
+            // Reset link visibility
             readLink.classList.remove('visible');
             writeLink.classList.remove('visible');
 
-            // Show appropriate link for read or write
+            // Show appropriate link for read/write modes
             if (mode === 'read') {
                 readLink.classList.add('visible');
             } else if (mode === 'write') {
                 writeLink.classList.add('visible');
             }
 
-            // For listen mode, show the album content
+            // Listen mode: render album grid
             if (mode === 'listen') {
                 contentItems.innerHTML = '';
 
@@ -521,13 +689,13 @@
                     
                     let albumTouchHandled = false;
                     
-                    // On mobile, use touchend; on desktop, use click
+                    // Mobile: use touchend to prevent ghost clicks
                     if (isMobile) {
                         contentItem.addEventListener('touchend', (e) => {
                             e.stopPropagation();
                             e.preventDefault();
                             
-                            // Prevent duplicate touches
+                            // Prevent rapid duplicate touches
                             if (albumTouchHandled) return;
                             albumTouchHandled = true;
                             setTimeout(() => { albumTouchHandled = false; }, 300);
@@ -536,6 +704,7 @@
                             isButtonActive = true;
                         });
                     } else {
+                        // Desktop: standard click
                         contentItem.addEventListener('click', (e) => {
                             e.stopPropagation();
                             e.preventDefault();
@@ -546,13 +715,13 @@
                     
                     contentItems.appendChild(contentItem);
                     
-                    // If this track is currently playing, restore spinning state
+                    // Restore playback state if this track is currently playing
                     if (currentlyPlaying === item.audio && !audioPlayer.paused) {
                         contentItem.classList.add('spinning');
                         contentItem.style.opacity = '0.8';
                         currentPlayingElement = contentItem;
                         
-                        // If this is track 8 and dark mode is active, show the gif
+                        // Track 8 in dark mode: show animated GIF
                         if (item.gifImage && currentTheme === 'dark') {
                             const img = contentItem.querySelector('img');
                             if (img) {
@@ -569,6 +738,10 @@
             }
         }
 
+        /**
+         * Fades out content with smooth transition
+         * @param {number} durationMs - Fade duration in milliseconds
+         */
         function fadeOutContent(durationMs = 600) {
             if (!contentItems.classList.contains('active')) return;
             contentItems.classList.add('fade-out');
@@ -578,6 +751,9 @@
             }, durationMs);
         }
 
+        /**
+         * Hides all content and resets button states
+         */
         function hideContent() {
             contentItems.classList.remove('active');
             [readBtn, writeBtn, listenBtn].forEach(btn => btn.classList.remove('active'));
@@ -587,25 +763,37 @@
             isButtonActive = false;
         }
 
+        // =====================================================
+        // VISUAL STATE MANAGEMENT - Album animations & effects
+        // =====================================================
+        
+        /**
+         * Restores album to non-playing state
+         * Removes spinning animation and resets visual properties
+         * @param {HTMLElement} element - Album element to restore
+         */
         function restorePlaybackVisual(element) {
             if (!element) return;
             element.classList.remove('spinning');
             element.style.opacity = '';
             element.style.transform = '';
             
-            // If this is album 8, restore the webp version
+            // Track 8: restore static WebP image
             const img = element.querySelector('img');
             if (img && img.src.includes('album_8_edit.gif')) {
                 img.src = 'assets/images/albums/album_8.webp';
             }
         }
 
+        /**
+         * Clears track 8 GIF timer and restores album opacity
+         */
         function clearTrack8GifTimer() {
             if (track8GifTimer) {
                 clearTimeout(track8GifTimer);
                 track8GifTimer = null;
             }
-            // Restore opacity to all albums
+            // Restore all non-playing albums to full opacity
             const allAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
             allAlbums.forEach(album => {
                 album.style.transition = '';
@@ -613,25 +801,32 @@
             });
         }
 
+        /**
+         * Initiates track 8's special dark mode transition sequence
+         * Fades out other albums, then swaps to GIF and triggers dark mode
+         * @param {HTMLElement} element - Track 8 album element
+         */
         function startTrack8DarkModeTransition(element) {
-            // Clear any existing timer
             clearTrack8GifTimer();
             
-            // Keep track 8 at full opacity
+            // Schedule "Hey now," flashing 19 seconds after trigger
+            scheduleHeyNowFlash(150, 19000);
+
+            // Maintain track 8 at full opacity during transition
             if (element) {
                 element.style.opacity = '1';
             }
             
-            // Start fading out other albums over 3 seconds
+            // Gradually fade out other albums over 3 seconds
             const allAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
             allAlbums.forEach(album => {
                 album.style.transition = 'opacity 3s ease-out';
                 album.style.opacity = '0.15';
             });
             
-            // Start 6.7-second timer for gif change and dark mode
+            // After 6.7 seconds: swap to GIF and activate dark mode
             track8GifTimer = setTimeout(() => {
-                // Change album art to gif
+                // Swap album art to animated GIF
                 if (element) {
                     const img = element.querySelector('img');
                     if (img) {
@@ -639,23 +834,29 @@
                     }
                 }
                 
-                // Activate dark mode without audio
+                // Trigger dark mode (no audio, since track is playing)
                 applyTheme('dark', { skipAudio: true });
                 
-                // Start flashing with track 8 BPM
+                // Start "Growth Hacker" text flash at track 8's BPM (150)
                 startGrowthHackerFlash(150);
                 
-                // Restore other albums to full opacity after dark mode activates
-                const otherAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
-                otherAlbums.forEach(album => {
-                    album.style.transition = 'opacity 2s ease-in';
-                    album.style.opacity = '1';
-                });
+                // Fade other albums back to full visibility after 4s delay
+                setTimeout(() => {
+                    const otherAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
+                    otherAlbums.forEach(album => {
+                        album.style.transition = 'opacity 2s ease-in';
+                        album.style.opacity = '1';
+                    });
+                }, 4000);
                 
                 track8GifTimer = null;
-            }, 6700); // 6.7 seconds
+            }, 6700);
         }
 
+        /**
+         * Clears current playback state and resets UI
+         * @param {object} options - { resetAudio: bool, updateSession: bool }
+         */
         function clearCurrentPlayingState(options = {}) {
             const { resetAudio = false, updateSession = true } = options;
             if (resetAudio) {
@@ -671,114 +872,157 @@
             if (updateSession) {
                 updateMediaSessionPlaybackState('none');
             }
-            // Remove track 8 playing indicator and reset restart timer
+            // Clear track 8 indicators
             rootEl.removeAttribute('data-track-8-playing');
             track8LastRestartTime = 0;
         }
 
-        // Growth Hacker flash control - works in both light and dark mode
+        // =====================================================
+        // GROWTH HACKER FLASH - Synced text animation
+        // =====================================================
+        
+        /**
+         * Starts flashing "Growth Hacker" text in sync with BPM
+         * Flash alternates between "Growth" and "Hacker" on beat
+         * @param {number} bpm - Beats per minute for flash timing
+         */
         function startGrowthHackerFlash(bpm) {
             if (growthHackerLink) {
-                // Flash in sync with music - one flash per beat
-                const flashDuration = (60 / bpm); // Duration for one beat in seconds
+                // Calculate flash duration based on track BPM
+                const flashDuration = (60 / bpm); // One beat in seconds
                 growthHackerLink.style.setProperty('--flash-duration', `${flashDuration}s`);
                 growthHackerLink.classList.add('flashing');
             }
         }
 
+        /**
+         * Stops "Growth Hacker" text flashing animation
+         */
         function stopGrowthHackerFlash() {
             if (growthHackerLink) {
                 growthHackerLink.classList.remove('flashing');
             }
         }
 
-        // Advanced dance system with coordination patterns
-        let currentDanceStyle = 'smooth';
-        let currentCoordMode = 'independent'; // 'independent', 'sync', 'mirror', 'pairs', 'wave'
-        let styleChangeTimeout = null;
-        let coordChangeTimeout = null;
-        let hypeTimeout = null;
-        let hypeInterval = null;
+        /**
+         * Starts flashing "Hey now," text in sync with BPM
+         * @param {number} bpm - Beats per minute for flash timing
+         */
+        function startHeyNowFlash(bpm) {
+            const heyNowElement = document.querySelector('.hey-now');
+            if (heyNowElement) {
+                // Calculate flash duration based on track BPM
+                const flashDuration = (60 / bpm); // One beat in seconds
+                heyNowElement.style.setProperty('--flash-duration', `${flashDuration}s`);
+                heyNowElement.classList.add('start-flash');
+            }
+        }
+
+        /**
+         * Stops "Hey now," text flashing animation
+         */
+        function stopHeyNowFlash() {
+            const heyNowElement = document.querySelector('.hey-now');
+            if (heyNowElement) {
+                heyNowElement.classList.remove('start-flash');
+            }
+            if (heyNowFlashTimer) {
+                clearTimeout(heyNowFlashTimer);
+                heyNowFlashTimer = null;
+            }
+        }
+
+        // =====================================================
+        // DANCE SYSTEM - Album choreography with BPM sync
+        // =====================================================
         
+        // Dance state tracking
+        let currentDanceStyle = 'smooth'; // 'smooth' or 'jump'
+        let currentCoordMode = 'independent'; // 'independent', 'sync', 'mirror', 'pairs', 'wave'
+        let styleChangeTimeout = null; // Timer for style changes
+        let coordChangeTimeout = null; // Timer for coordination changes
+        let hypeTimeout = null; // Hype mode duration timer
+        let hypeInterval = null; // Hype mode schedule timer
+        
+        /**
+         * Sets coordination mode for album dancing
+         * Controls how albums sync their dance animations
+         * @param {string} mode - 'independent', 'sync', 'mirror', 'pairs', or 'wave'
+         */
         function setCoordinationMode(mode) {
             currentCoordMode = mode;
             const albums = contentItems.querySelectorAll('.content-item:not(.spinning)');
             
             if (mode === 'sync') {
-                // All dance in perfect sync - no delay
+                // Perfect synchronization - all albums move together
                 albums.forEach(album => {
                     album.style.animationDelay = '0s';
                 });
             } else if (mode === 'mirror') {
-                // Left side mirrors right side
+                // Mirrored pattern - left mirrors right
                 albums.forEach((album, index) => {
                     if (index < 4) {
-                        // Top row - left mirrors right
                         const mirrorIndex = 3 - index;
                         album.style.animationDelay = `${mirrorIndex * 0.2}s`;
                     } else {
-                        // Bottom row - left mirrors right
                         const mirrorIndex = 7 - index;
                         album.style.animationDelay = `${mirrorIndex * 0.2}s`;
                     }
                 });
             } else if (mode === 'pairs') {
-                // Adjacent pairs hop together - mad funny and vibey
+                // Adjacent pairs dance together (0&1, 2&3, 4&5, 6&7)
                 albums.forEach((album, index) => {
-                    // Pairs: 0&1, 2&3, 4&5, 6&7
                     const pairGroup = Math.floor(index / 2);
                     album.style.animationDelay = `${pairGroup * 0.25}s`;
                 });
             } else if (mode === 'wave') {
-                // Smooth wave pattern for swaying
+                // Smooth wave cascading across albums
                 albums.forEach((album, index) => {
                     album.style.animationDelay = `${index * 0.12}s`;
                 });
             } else {
-                // Independent - each has unique offset
+                // Independent - each album has unique timing
                 albums.forEach((album, index) => {
                     album.style.animationDelay = `${index * 0.15}s`;
                 });
             }
         }
         
+        /**
+         * Triggers "hype mode" - albums lean toward the playing track
+         * Creates visual focus on the currently spinning album
+         */
         function triggerHypeMode() {
-            // Find the spinning album position
             const spinningAlbum = contentItems.querySelector('.content-item.spinning');
             if (!spinningAlbum) return;
             
             const spinningIndex = Array.from(contentItems.children).indexOf(spinningAlbum);
             const albums = contentItems.querySelectorAll('.content-item:not(.spinning)');
             
-            // Determine direction for each album to lean towards the spinning one
+            // Apply directional lean classes based on position relative to spinning album
             albums.forEach((album, idx) => {
-                // Remove previous hype classes
                 album.classList.remove('hype-left', 'hype-right', 'hype-up', 'hype-down');
                 
-                // Find actual index in all albums
                 const actualIndex = Array.from(contentItems.children).indexOf(album);
                 
-                // Determine direction to lean based on position relative to spinning album
+                // Horizontal direction
                 if (actualIndex < spinningIndex) {
-                    // Album is to the left, lean right towards it
-                    album.classList.add('hype-right');
+                    album.classList.add('hype-right'); // Lean right toward spinner
                 } else if (actualIndex > spinningIndex) {
-                    // Album is to the right, lean left towards it
-                    album.classList.add('hype-left');
+                    album.classList.add('hype-left'); // Lean left toward spinner
                 }
                 
-                // Add vertical lean based on row
+                // Vertical direction (based on row)
                 if (actualIndex < 4 && spinningIndex >= 4) {
-                    album.classList.add('hype-down');
+                    album.classList.add('hype-down'); // Top row leans down
                 } else if (actualIndex >= 4 && spinningIndex < 4) {
-                    album.classList.add('hype-up');
+                    album.classList.add('hype-up'); // Bottom row leans up
                 }
             });
             
-            // Activate hype mode
+            // Enable hype mode for 4 seconds
             contentItems.classList.add('hype-mode');
             
-            // Deactivate after 4 seconds
             if (hypeTimeout) clearTimeout(hypeTimeout);
             hypeTimeout = setTimeout(() => {
                 contentItems.classList.remove('hype-mode');
@@ -788,21 +1032,30 @@
             }, 4000);
         }
         
+        /**
+         * Schedules next hype mode trigger at random interval
+         * Occurs every 24-48 beats
+         * @param {number} bpm - Beats per minute for timing
+         */
         function scheduleRandomHype(bpm) {
-            // Schedule next hype moment randomly (every 24-48 beats)
+            // Random interval: 24-48 beats
             const baseBeats = 24 + Math.floor(Math.random() * 24);
             const duration = ((60 / bpm) * 1000) * baseBeats;
             hypeInterval = setTimeout(() => {
                 triggerHypeMode();
-                scheduleRandomHype(bpm);
+                scheduleRandomHype(bpm); // Recursively schedule next
             }, duration);
         }
         
+        /**
+         * Cycles through different coordination modes
+         * Switches randomly every 12-24 beats
+         * @param {number} bpm - Beats per minute for timing
+         */
         function cycleCoordinationMode(bpm) {
-            // Cycle through coordination modes with smart transitions
             const modes = ['independent', 'sync', 'pairs', 'mirror', 'wave'];
             
-            // Pick next mode randomly but not the same as current
+            // Pick different mode from current
             let nextMode;
             do {
                 nextMode = modes[Math.floor(Math.random() * modes.length)];
@@ -810,25 +1063,35 @@
             
             setCoordinationMode(nextMode);
             
-            // Stay in each mode for 12-24 beats
+            // Schedule next change (12-24 beats)
             const baseBeats = 12 + Math.floor(Math.random() * 12);
             const duration = ((60 / bpm) * 1000) * baseBeats;
             coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), duration);
         }
         
+        /**
+         * Switches dance style between smooth and jump
+         * Changes randomly every 12-24 beats
+         * @param {number} bpm - Beats per minute for timing
+         */
         function switchDanceStyle(bpm) {
-            // Alternate between smooth and jump
+            // Toggle between smooth and jump styles
             currentDanceStyle = currentDanceStyle === 'smooth' ? 'jump' : 'smooth';
             contentItems.setAttribute('data-dance-style', currentDanceStyle);
             
-            // Random duration: 12-24 beats
+            // Schedule next switch (12-24 beats)
             const baseBeats = 12 + Math.floor(Math.random() * 12);
             const duration = ((60 / bpm) * 1000) * baseBeats;
             styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), duration);
         }
         
+        /**
+         * Starts all dance systems with BPM synchronization
+         * Initializes style changes, coordination cycling, and hype moments
+         * @param {number} bpm - Beats per minute for timing
+         */
         function startDanceStyleFluctuation(bpm) {
-            // Stop any existing timeouts
+            // Clear any existing timers
             if (styleChangeTimeout) {
                 clearTimeout(styleChangeTimeout);
                 styleChangeTimeout = null;
@@ -846,18 +1109,18 @@
                 hypeTimeout = null;
             }
             
-            // Start with smooth and independent mode
+            // Initialize with smooth style and independent coordination
             currentDanceStyle = 'smooth';
             currentCoordMode = 'independent';
             contentItems.setAttribute('data-dance-style', 'smooth');
             setCoordinationMode('independent');
             
-            // Schedule first dance style switch
+            // Schedule first style switch (12-24 beats)
             const styleBeats = 12 + Math.floor(Math.random() * 12);
             const styleDuration = ((60 / bpm) * 1000) * styleBeats;
             styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), styleDuration);
             
-            // Schedule first coordination mode switch
+            // Schedule first coordination switch (16-32 beats)
             const coordBeats = 16 + Math.floor(Math.random() * 16);
             const coordDuration = ((60 / bpm) * 1000) * coordBeats;
             coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), coordDuration);
@@ -866,6 +1129,9 @@
             scheduleRandomHype(bpm);
         }
         
+        /**
+         * Stops all dance animations and clears timers
+         */
         function stopDanceStyleFluctuation() {
             if (styleChangeTimeout) {
                 clearTimeout(styleChangeTimeout);
@@ -883,29 +1149,44 @@
                 clearTimeout(hypeTimeout);
                 hypeTimeout = null;
             }
+            // Reset to default state
             contentItems.classList.remove('hype-mode');
             contentItems.removeAttribute('data-dance-style');
             currentDanceStyle = 'smooth';
             currentCoordMode = 'independent';
         }
 
+        // =====================================================
+        // AUDIO PLAYBACK - Main music player functions
+        // =====================================================
+        
+        /**
+         * Plays audio track and handles all related UI/effects
+         * Manages play/pause toggling, track switching, and special track 8 behaviors
+         * @param {string} audioSrc - Path to audio file
+         * @param {HTMLElement} element - Album element being played
+         * @param {number} bpm - Track BPM for dance sync
+         */
         function playAudio(audioSrc, element, bpm) {
+            // Block playback if dark mode transition is pending
             if (pendingTheme === 'dark') {
                 return;
             }
-            // Initialize audio context on first user interaction
+            
             initAudioContext();
             
-            // Check if this is track 8
             const isTrack8 = audioSrc === 'assets/audio/track-08.mp3';
             
-            // If switching to a non-track-8 track while in dark mode, switch back to light
+            // Auto-switch back to light mode when playing non-track-8 in dark mode
             if (!isTrack8 && currentTheme === 'dark') {
                 applyTheme('light', { force: true });
                 stopGrowthHackerFlash();
+                
+                // Stop "Hey now," flashing
+                stopHeyNowFlash();
             }
             
-            // Stop dark mode sound effect when playing a song after transition
+            // Stop dark mode SFX if it's still playing
             const isDark = currentTheme === 'dark';
             if (isDark) {
                 try {
@@ -916,30 +1197,35 @@
                 } catch (_) {}
             }
             
-            // If clicking the same track, toggle play/pause (with special behavior for track 8)
+            // Same track clicked: toggle play/pause
             if (currentlyPlaying === audioSrc) {
                 if (!audioPlayer.paused) {
-                    // Currently playing - pause it
+                    // PAUSE: Stop playback
                     audioPlayer.pause();
                     updateMediaSessionPlaybackState('paused');
                     stopDanceStyleFluctuation();
                     stopGrowthHackerFlash();
                     clearTrack8GifTimer();
-                    // When paused, stop spinning and restore CSS rotation
                     restorePlaybackVisual(element);
-                    // Remove track 8 indicator when paused and switch back to light mode if needed
+                    
+                    // Track 8 special handling: return to light mode on pause
                     if (isTrack8) {
                         rootEl.removeAttribute('data-track-8-playing');
                         track8LastRestartTime = 0;
-                        // Switch back to light mode when track 8 is paused
                         if (currentTheme === 'dark') {
                             applyTheme('light', { force: true });
+                            
+                            // Stop "Hey now," flashing
+                            const heyNowElement = document.querySelector('.hey-now');
+                            if (heyNowElement) {
+                                heyNowElement.classList.remove('flashing');
+                            }
                         }
                     }
                 } else {
-                    // Currently paused - resume/restart
+                    // RESUME: Start playback again
                     if (isTrack8) {
-                        // For track 8, always restart from beginning when resuming
+                        // Track 8 always restarts from beginning
                         audioPlayer.currentTime = 0;
                         track8LastRestartTime = Date.now();
                     }
@@ -948,111 +1234,120 @@
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
                             updateMediaSessionPlaybackState('playing');
-                            // Set BPM for dancing animation
+                            
+                            // Start dance animations synced to BPM
                             if (bpm && contentItems) {
-                                const danceSpeed = (240 / bpm); // 4 beats in seconds
+                                const danceSpeed = (240 / bpm); // 4-beat cycle duration
                                 contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
                                 startDanceStyleFluctuation(bpm);
                                 startGrowthHackerFlash(bpm);
                             }
-                            // When playing, add spinning class and dim slightly
+                            
+                            // Visual feedback: spinning + dimmed
                             if (element) {
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
                                 
-                                // If this is track 8, start the dark mode timer
+                                // Track 8: trigger dark mode sequence
                                 if (isTrack8) {
                                     startTrack8DarkModeTransition(element);
                                 }
                             }
                         }).catch(error => {
-                            // Resume failed
+                            // Playback failed (autoplay policy, etc.)
                         });
                     }
                 }
                 return;
             }
 
-            // Reset ONLY the previous playing element (not all albums)
+            // NEW TRACK: Clean up previous track's visual state
             if (currentPlayingElement && currentPlayingElement !== element) {
                 restorePlaybackVisual(currentPlayingElement);
                 currentPlayingElement = null;
             }
 
-            // Stop currently playing audio and start new one
+            // Stop current audio completely
             if (currentlyPlaying) {
                 clearCurrentPlayingState({ resetAudio: true });
             }
             
-            // Set track 8 playing indicator if this is track 8
+            // Track 8 indicator for starfield effect
             if (isTrack8) {
                 rootEl.setAttribute('data-track-8-playing', 'true');
-                track8LastRestartTime = Date.now(); // Track when track 8 starts
+                track8LastRestartTime = Date.now();
             } else {
                 rootEl.removeAttribute('data-track-8-playing');
                 track8LastRestartTime = 0;
             }
 
-            // Set BPM for dancing animation - calculate duration for 4-beat cycle
+            // Configure dance animation timing (4-beat cycle)
             if (bpm && contentItems) {
-                const danceSpeed = (240 / bpm); // 4 beats in seconds
+                const danceSpeed = (240 / bpm);
                 contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
-                // Start dancing immediately when new track plays
                 startDanceStyleFluctuation(bpm);
                 startGrowthHackerFlash(bpm);
             }
 
-            // Find track info for Media Session API
+            // Lookup track metadata for Media Session API
             const trackInfo = listenData.find(track => track.audio === audioSrc);
             
-            // Start new audio
+            // Begin playback
             attemptAudioPlay(audioSrc, element, trackInfo);
         }
         
+        /**
+         * Attempts to play audio with retry logic
+         * Handles loading, playback errors, and visual feedback
+         * @param {string} audioSrc - Path to audio file
+         * @param {HTMLElement} element - Album element
+         * @param {object} trackInfo - Track metadata for Media Session
+         */
         function attemptAudioPlay(audioSrc, element, trackInfo) {
-            // Set audio source and properties
+            // Configure audio player
             audioPlayer.src = audioSrc;
             audioPlayer.volume = 1.0;
             audioPlayer.preload = 'auto';
             
-            // Load and play immediately
             audioPlayer.load();
             
-            // Add loading visual feedback
+            // Show loading state (dimmed album)
             if (element) {
                 element.style.opacity = '0.6';
             }
             
-            // Play as soon as possible
+            // Attempt playback
             const playPromise = audioPlayer.play();
             
             if (playPromise !== undefined) {
                 playPromise.then(() => {
+                    // Playback started successfully
                     currentlyPlaying = audioSrc;
                     currentPlayingElement = element;
                     
-                    // Update Media Session API (for lock screen controls, notifications)
+                    // Enable lock screen / notification controls
                     updateMediaSession(trackInfo);
                     
-                    // Start growth hacker flash if we have track info
+                    // Start text flash effect
                     if (trackInfo && trackInfo.bpm) {
                         startGrowthHackerFlash(trackInfo.bpm);
                     }
                     
-                    // Visual feedback for successful playback - add spinning animation and dim slightly
+                    // Visual state: spinning + dimmed
                     if (element) {
                         element.classList.add('spinning');
                         element.style.opacity = '0.8';
                         
-                        // If this is album 8, start the timer for dark mode and gif
+                        // Track 8: initiate dark mode sequence
                         if (audioSrc === 'assets/audio/track-08.mp3') {
                             startTrack8DarkModeTransition(element);
                         }
                     }
                 }).catch(error => {
-                    // Playback failed - retry once after a brief delay
+                    // Playback failed - retry once
                     setTimeout(() => {
                         audioPlayer.play().then(() => {
+                            // Retry succeeded
                             currentlyPlaying = audioSrc;
                             currentPlayingElement = element;
                             updateMediaSession(trackInfo);
@@ -1063,13 +1358,12 @@
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
                                 
-                                // If this is album 8, start the timer for dark mode and gif
                                 if (audioSrc === 'assets/audio/track-08.mp3') {
                                     startTrack8DarkModeTransition(element);
                                 }
                             }
                         }).catch(() => {
-                            // Show visual feedback that audio failed
+                            // Both attempts failed - show error state
                             if (element) {
                                 element.style.opacity = '0.5';
                                 setTimeout(() => {
@@ -1083,9 +1377,18 @@
             }
         }
         
-        // Update Media Session API for rich media controls
+        // =====================================================
+        // MEDIA SESSION API - Lock screen controls
+        // =====================================================
+        
+        /**
+         * Updates Media Session with track metadata
+         * Enables lock screen/notification controls on mobile
+         * @param {object} trackInfo - Track metadata (title, artist, artwork)
+         */
         function updateMediaSession(trackInfo) {
             if ('mediaSession' in navigator && trackInfo) {
+                // Set track metadata for lock screen display
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: trackInfo.title,
                     artist: 'Dante Lentini',
@@ -1095,7 +1398,7 @@
                     ]
                 });
                 
-                // Set up media session action handlers
+                // Register action handlers for media controls
                 navigator.mediaSession.setActionHandler('play', () => {
                     audioPlayer.play();
                 });
@@ -1108,77 +1411,100 @@
                     clearCurrentPlayingState({ resetAudio: true });
                 });
                 
-                // Update playback state
                 updateMediaSessionPlaybackState('playing');
             }
         }
         
+        /**
+         * Updates Media Session playback state
+         * @param {string} state - 'none', 'paused', or 'playing'
+         */
         function updateMediaSessionPlaybackState(state) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = state;
             }
         }
 
-        // Handle audio events
+        // =====================================================
+        // AUDIO EVENT LISTENERS - Handle playback events
+        // =====================================================
+        
+        // Track ended: return to light mode if in dark mode
         audioPlayer.addEventListener('ended', () => {
-            // If track 8 ends and we're in dark mode, switch back to light
             if (currentTheme === 'dark') {
                 applyTheme('light', { force: true });
                 stopGrowthHackerFlash();
+                
+                // Stop "Hey now," flashing
+                stopHeyNowFlash();
             }
             rootEl.removeAttribute('data-track-8-playing');
             clearCurrentPlayingState();
         });
 
+        // Playback error: cleanup and return to light mode
         audioPlayer.addEventListener('error', () => {
-            // If error occurs in dark mode, switch back to light
             if (currentTheme === 'dark') {
                 applyTheme('light', { force: true });
                 stopGrowthHackerFlash();
+                
+                // Stop "Hey now," flashing
+                stopHeyNowFlash();
             }
             rootEl.removeAttribute('data-track-8-playing');
             clearCurrentPlayingState();
         });
         
-        // Additional event listeners for better playback state management
+        // Sync Media Session state when playback starts
         audioPlayer.addEventListener('play', () => {
             updateMediaSessionPlaybackState('playing');
         });
         
+        // Sync Media Session state when playback pauses
         audioPlayer.addEventListener('pause', () => {
             if (currentlyPlaying) {
                 updateMediaSessionPlaybackState('paused');
             }
         });
         
-
-        // Dark mode toggle - opens listen albums and plays track 8
+        // =====================================================
+        // DARK MODE TOGGLE - Manual dark mode trigger
+        // =====================================================
+        
+        /**
+         * Dark mode toggle button
+         * Opens listen mode and plays track 8, which triggers dark mode
+         */
         darkToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
 
-            // If already in dark mode, switch back to light and stop track 8
+            // Already in dark mode: exit back to light
             if (currentTheme === 'dark') {
                 cancelPendingTheme();
                 applyTheme('light', { force: true });
                 stopGrowthHackerFlash();
-                // Stop track 8 if it's playing
+                
+                // Stop "Hey now," flashing
+                stopHeyNowFlash();
+                
+                // Stop track 8 if playing
                 if (currentlyPlaying === 'assets/audio/track-08.mp3') {
                     clearCurrentPlayingState({ resetAudio: true });
                 }
                 return;
             }
 
-            // Cancel any pending dark mode transition from the old method
+            // Cancel any pending transitions
             cancelPendingTheme();
 
-            // Open listen albums
+            // Open listen mode
             isButtonActive = true;
             showContent('listen');
             
-            // Wait for DOM to update, then play track 8
+            // Play track 8 after DOM update
             setTimeout(() => {
-                const track8 = listenData[7]; // Track 08
+                const track8 = listenData[7];
                 if (track8) {
                     const track8Element = contentItems.querySelector('.content-item:nth-child(8)');
                     if (track8Element) {
@@ -1188,30 +1514,43 @@
             }, 50);
         });
 
-        // Starfield animation (enabled in dark mode)
+        // =====================================================
+        // STARFIELD ANIMATION - Dark mode background effect
+        // =====================================================
+        
+        /**
+         * Starfield canvas animation with twinkling stars and shooting meteors
+         * More meteors spawn when track 8 is playing
+         */
         (function initStarfield(){
             const canvas = document.getElementById('starfield');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             let stars = [];
             let meteors = [];
+            
+            // Generate stars on resize
             function resize(){
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
+                // Create stars based on screen size (1 star per ~9000 pixels)
                 stars = Array.from({length: Math.floor((canvas.width*canvas.height)/9000)}, () => ({
                     x: Math.random()*canvas.width,
                     y: Math.random()*canvas.height,
-                    tw: Math.random()*Math.PI*2,
-                    sp: 0.5 + Math.random()*0.5,
-                    r: 0.6 + Math.random()*1.2
+                    tw: Math.random()*Math.PI*2, // Twinkle phase
+                    sp: 0.5 + Math.random()*0.5, // Twinkle speed
+                    r: 0.6 + Math.random()*1.2   // Star radius
                 }));
             }
             window.addEventListener('resize', resize);
             resize();
+            
+            // Animation loop
             function tick(){
                 if (canvas.style.display !== 'block') { requestAnimationFrame(tick); return; }
                 ctx.clearRect(0,0,canvas.width,canvas.height);
-                // twinkle stars
+                
+                // Draw twinkling stars
                 for (const s of stars){
                     s.tw += 0.02*s.sp;
                     const alpha = 0.3 + 0.7*(0.5+0.5*Math.sin(s.tw));
@@ -1220,7 +1559,8 @@
                     ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
                     ctx.fill();
                 }
-                // meteors - triple the spawn rate and allow more meteors when track 8 is playing
+                
+                // Spawn and draw meteors (more when track 8 plays)
                 const isTrack8Playing = rootEl.getAttribute('data-track-8-playing') === 'true';
                 const meteorSpawnChance = isTrack8Playing ? 0.03 : 0.01;
                 const maxMeteors = isTrack8Playing ? 6 : 2;
@@ -1230,6 +1570,7 @@
                 for (let i=meteors.length-1;i>=0;i--){
                     const m = meteors[i];
                     m.x += m.vx; m.y += m.vy; m.life -= 0.01;
+                    // Draw meteor trail with gradient
                     const grad = ctx.createLinearGradient(m.x, m.y, m.x-m.vx*6, m.y-m.vy*6);
                     grad.addColorStop(0, 'rgba(255,255,255,0.9)');
                     grad.addColorStop(1, 'rgba(255,255,255,0)');
@@ -1239,6 +1580,7 @@
                     ctx.moveTo(m.x, m.y);
                     ctx.lineTo(m.x-m.vx*6, m.y-m.vy*6);
                     ctx.stroke();
+                    // Remove if off-screen or faded
                     if (m.life<=0 || m.y>canvas.height+50) meteors.splice(i,1);
                 }
                 requestAnimationFrame(tick);
@@ -1249,7 +1591,3 @@
     </script>
 </body>
 </html>
-
-
-
-
