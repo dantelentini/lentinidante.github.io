@@ -209,20 +209,16 @@
          * Plays dark mode sound effect
          */
         function playDarkModeSfx() {
-            try {
-                sfx.currentTime = 0;
-                sfx.play().catch(() => {}); // Suppress autoplay errors
-            } catch (_) {}
+            sfx.currentTime = 0;
+            sfx.play().catch(() => {}); // Suppress autoplay errors
         }
 
         /**
          * Stops and resets dark mode sound effect
          */
         function stopDarkModeSfx() {
-            try {
-                sfx.pause();
-                sfx.currentTime = 0;
-            } catch (_) {}
+            sfx.pause();
+            sfx.currentTime = 0;
         }
 
         /**
@@ -260,16 +256,12 @@
          * Initializes and resumes Web Audio API context (handles autoplay policies)
          */
         function initAudioContext() {
-            if (!audioContext) {
-                try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    audioContext = new AudioContext();
-                } catch (e) {
-                    // Web Audio API not supported (fallback to HTML5 audio)
-                }
+            if (!audioContext && (window.AudioContext || window.webkitAudioContext)) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioContext();
             }
             // Resume if suspended due to browser autoplay policies
-            if (audioContext && audioContext.state === 'suspended') {
+            if (audioContext?.state === 'suspended') {
                 audioContext.resume();
             }
         }
@@ -366,7 +358,6 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
         
         // Track 8 special effects state
         let track8GifTimer = null; // Timer for GIF swap and dark mode trigger
-        let track8LastRestartTime = 0; // Track restart timestamp
         let heyNowFlashTimer = null; // Timer for delayed "Hey now" flashing
 
         /**
@@ -375,14 +366,14 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
          * @param {number} delayMs - Delay before flashing begins
          */
         function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
-    if (heyNowFlashTimer) {
-        clearTimeout(heyNowFlashTimer);
-    }
-    heyNowFlashTimer = setTimeout(() => {
-        startHeyNowFlash(bpm);
-        heyNowFlashTimer = null;
-    }, delayMs);
-}
+            if (heyNowFlashTimer) {
+                clearTimeout(heyNowFlashTimer);
+            }
+            heyNowFlashTimer = setTimeout(() => {
+                startHeyNowFlash(bpm);
+                heyNowFlashTimer = null;
+            }, delayMs);
+        }
         
         // =====================================================
         // AUDIO UNLOCK - Handle browser autoplay policies
@@ -688,30 +679,24 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                     contentItem.dataset.bpm = item.bpm;
                     contentItem.innerHTML = `<img src="${item.image}" alt="${item.title}" title="${item.title}">`;
                     
-                    let albumTouchHandled = false;
+                    const handleAlbumClick = (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        playAudio(item.audio, contentItem, item.bpm);
+                        isButtonActive = true;
+                    };
                     
                     // Mobile: use touchend to prevent ghost clicks
                     if (isMobile) {
+                        let albumTouchHandled = false;
                         contentItem.addEventListener('touchend', (e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            
-                            // Prevent rapid duplicate touches
                             if (albumTouchHandled) return;
                             albumTouchHandled = true;
                             setTimeout(() => { albumTouchHandled = false; }, 300);
-                            
-                            playAudio(item.audio, contentItem, item.bpm);
-                            isButtonActive = true;
+                            handleAlbumClick(e);
                         });
                     } else {
-                        // Desktop: standard click
-                        contentItem.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            playAudio(item.audio, contentItem, item.bpm);
-                            isButtonActive = true;
-                        });
+                        contentItem.addEventListener('click', handleAlbumClick);
                     }
                     
                     contentItems.appendChild(contentItem);
@@ -732,11 +717,8 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                     }
                 });
 
-                // If track 8 is in its dark-mode countdown (before the late flicker phase),
-                // reapply the dimmed opacity to non-spinning albums so they don't pop back to full
-                // when the user toggles listen off/on mid-sequence.
-                if (currentlyPlaying === 'assets/audio/track-08.mp3' &&
-                    !contentItems.classList.contains('flicker-mode')) {
+                // If track 8 is playing in its early phase (before dark mode), dim other albums
+                if (currentlyPlaying === 'assets/audio/track-08.mp3' && currentTheme !== 'dark') {
                     const allAlbums = contentItems.querySelectorAll('.content-item');
                     allAlbums.forEach(album => {
                         if (album.classList.contains('spinning')) {
@@ -755,10 +737,6 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             }
         }
 
-        /**
-         * Fades out content with smooth transition
-         * @param {number} durationMs - Fade duration in milliseconds
-         */
         /**
          * Hides all content and resets button states
          */
@@ -805,7 +783,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             const allAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
             allAlbums.forEach(album => {
                 album.style.transition = '';
-                album.style.opacity = '';
+                album.style.opacity = '1';
             });
         }
 
@@ -855,9 +833,12 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                 // Start "Growth Hacker" text flash at track 8's BPM (150)
                 startGrowthHackerFlash(150);
                 
-                // After 14s, switch other albums into beat-synced flicker mode instead of a simple fade-in
+                // After 14s, set other albums to full opacity instead of flicker mode
                 setTimeout(() => {
-                    startAlbumFlicker(150);
+                    const baseAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
+                    baseAlbums.forEach(album => {
+                        album.style.opacity = '1.0';
+                    });
                 }, 14000);
                 
                 track8GifTimer = null;
@@ -866,10 +847,10 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
 
         /**
          * Clears current playback state and resets UI
-         * @param {object} options - { resetAudio: bool, updateSession: bool }
+         * @param {object} options - { resetAudio: bool }
          */
         function clearCurrentPlayingState(options = {}) {
-            const { resetAudio = false, updateSession = true } = options;
+            const { resetAudio = false } = options;
             if (resetAudio) {
                 audioPlayer.pause();
                 audioPlayer.currentTime = 0;
@@ -881,18 +862,13 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             stopGrowthHackerFlash();
             stopAlbumFlicker();
             clearTrack8GifTimer();
-            // Cancel \"Hi,\" + car hit sequence if it was in progress
             if (hiHitTimer) {
                 clearTimeout(hiHitTimer);
                 hiHitTimer = null;
             }
             rootEl.classList.remove('hi-hit');
-            if (updateSession) {
-                updateMediaSessionPlaybackState('none');
-            }
-            // Clear track 8 indicators
+            updateMediaSessionPlaybackState('none');
             rootEl.removeAttribute('data-track-8-playing');
-            track8LastRestartTime = 0;
         }
 
         // =====================================================
@@ -1057,13 +1033,12 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
          * @param {number} bpm - Beats per minute for timing
          */
         function scheduleRandomHype(bpm) {
-            // Random interval: 24-48 beats
-            const baseBeats = 24 + Math.floor(Math.random() * 24);
-            const duration = ((60 / bpm) * 1000) * baseBeats;
+            const beatMs = (60 / bpm) * 1000;
+            const beats = 24 + Math.floor(Math.random() * 24);
             hypeInterval = setTimeout(() => {
                 triggerHypeMode();
-                scheduleRandomHype(bpm); // Recursively schedule next
-            }, duration);
+                scheduleRandomHype(bpm);
+            }, beatMs * beats);
         }
         
         /**
@@ -1082,10 +1057,9 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             
             setCoordinationMode(nextMode);
             
-            // Schedule next change (12-24 beats)
-            const baseBeats = 12 + Math.floor(Math.random() * 12);
-            const duration = ((60 / bpm) * 1000) * baseBeats;
-            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), duration);
+            const beatMs = (60 / bpm) * 1000;
+            const beats = 12 + Math.floor(Math.random() * 12);
+            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), beatMs * beats);
         }
         
         /**
@@ -1094,14 +1068,12 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
          * @param {number} bpm - Beats per minute for timing
          */
         function switchDanceStyle(bpm) {
-            // Toggle between smooth and jump styles
             currentDanceStyle = currentDanceStyle === 'smooth' ? 'jump' : 'smooth';
             contentItems.setAttribute('data-dance-style', currentDanceStyle);
             
-            // Schedule next switch (12-24 beats)
-            const baseBeats = 12 + Math.floor(Math.random() * 12);
-            const duration = ((60 / bpm) * 1000) * baseBeats;
-            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), duration);
+            const beatMs = (60 / bpm) * 1000;
+            const beats = 12 + Math.floor(Math.random() * 12);
+            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), beatMs * beats);
         }
         
         /**
@@ -1111,22 +1083,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
          */
         function startDanceStyleFluctuation(bpm) {
             // Clear any existing timers
-            if (styleChangeTimeout) {
-                clearTimeout(styleChangeTimeout);
-                styleChangeTimeout = null;
-            }
-            if (coordChangeTimeout) {
-                clearTimeout(coordChangeTimeout);
-                coordChangeTimeout = null;
-            }
-            if (hypeInterval) {
-                clearTimeout(hypeInterval);
-                hypeInterval = null;
-            }
-            if (hypeTimeout) {
-                clearTimeout(hypeTimeout);
-                hypeTimeout = null;
-            }
+            stopDanceStyleFluctuation();
             
             // Initialize with smooth style and independent coordination
             currentDanceStyle = 'smooth';
@@ -1134,15 +1091,15 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             contentItems.setAttribute('data-dance-style', 'smooth');
             setCoordinationMode('independent');
             
+            const beatMs = (60 / bpm) * 1000;
+            
             // Schedule first style switch (12-24 beats)
             const styleBeats = 12 + Math.floor(Math.random() * 12);
-            const styleDuration = ((60 / bpm) * 1000) * styleBeats;
-            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), styleDuration);
+            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), beatMs * styleBeats);
             
             // Schedule first coordination switch (16-32 beats)
             const coordBeats = 16 + Math.floor(Math.random() * 16);
-            const coordDuration = ((60 / bpm) * 1000) * coordBeats;
-            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), coordDuration);
+            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), beatMs * coordBeats);
             
             // Schedule first hype moment
             scheduleRandomHype(bpm);
@@ -1152,27 +1109,16 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
          * Stops all dance animations and clears timers
          */
         function stopDanceStyleFluctuation() {
-            if (styleChangeTimeout) {
-                clearTimeout(styleChangeTimeout);
-                styleChangeTimeout = null;
-            }
-            if (coordChangeTimeout) {
-                clearTimeout(coordChangeTimeout);
-                coordChangeTimeout = null;
-            }
-            if (hypeInterval) {
-                clearTimeout(hypeInterval);
-                hypeInterval = null;
-            }
-            if (hypeTimeout) {
-                clearTimeout(hypeTimeout);
-                hypeTimeout = null;
-            }
+            [styleChangeTimeout, coordChangeTimeout, hypeInterval, hypeTimeout].forEach(timer => {
+                if (timer) clearTimeout(timer);
+            });
+            styleChangeTimeout = coordChangeTimeout = hypeInterval = hypeTimeout = null;
+            
             if (flickerInterval) {
                 clearInterval(flickerInterval);
                 flickerInterval = null;
             }
-            // Reset to default state
+            
             contentItems.classList.remove('hype-mode');
             contentItems.removeAttribute('data-dance-style');
             currentDanceStyle = 'smooth';
@@ -1188,20 +1134,16 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
          * @param {number} bpm - Beats per minute for timing
          */
         function startAlbumFlicker(bpm) {
-            // Clear any existing flicker loop
             if (flickerInterval) {
                 clearInterval(flickerInterval);
-                flickerInterval = null;
             }
-
             if (!contentItems) return;
 
             const beatMs = (60 / bpm) * 1000;
             contentItems.classList.add('flicker-mode');
 
-            // Set the base opacity to 60% when flicker starts
-            const baseAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
-            baseAlbums.forEach(album => {
+            // Set base opacity when flicker starts
+            contentItems.querySelectorAll('.content-item:not(.spinning)').forEach(album => {
                 album.style.opacity = '0.6';
             });
 
@@ -1209,35 +1151,27 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                 const albums = Array.from(contentItems.querySelectorAll('.content-item:not(.spinning)'));
                 if (!albums.length) return;
 
-                // Some beats: no flicker at all for negative space (but less often now)
+                // Occasionally skip beat for negative space
                 if (Math.random() < 0.1) {
                     albums.forEach(a => a.classList.remove('flicker-pulse'));
                     return;
                 }
 
-                // Randomly pick 2–4 albums to flicker on this beat (if available)
-                const minCount = Math.min(2, albums.length);
-                const maxCount = Math.min(4, albums.length);
-                const count = minCount + Math.floor(Math.random() * (maxCount - minCount + 1));
-
-                // Clear any previous manual flicker classes
+                // Pick 2-4 random albums to flicker
+                const count = Math.min(albums.length, 2 + Math.floor(Math.random() * 3));
                 albums.forEach(a => a.classList.remove('flicker-pulse'));
 
-                // Shuffle and choose a subset
+                // Shuffle and select subset
                 for (let i = albums.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [albums[i], albums[j]] = [albums[j], albums[i]];
                 }
-                const chosen = albums.slice(0, count);
-                chosen.forEach(album => {
-                    // Random offset within the beat window so pulses feel scattered
+                
+                albums.slice(0, count).forEach(album => {
                     const jitter = beatMs * 0.6 * Math.random();
                     setTimeout(() => {
                         album.classList.add('flicker-pulse');
-                        // Remove class after a very quick pulse
-                        setTimeout(() => {
-                            album.classList.remove('flicker-pulse');
-                        }, beatMs * 0.3);
+                        setTimeout(() => album.classList.remove('flicker-pulse'), beatMs * 0.3);
                     }, jitter);
                 });
             }, beatMs);
@@ -1291,14 +1225,9 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             }
             
             // Stop dark mode SFX if it's still playing
-            const isDark = currentTheme === 'dark';
-            if (isDark) {
-                try {
-                    if (!sfx.paused) {
-                        sfx.pause();
-                        sfx.currentTime = 0;
-                    }
-                } catch (_) {}
+            if (currentTheme === 'dark' && !sfx.paused) {
+                sfx.pause();
+                sfx.currentTime = 0;
             }
             
             // Same track clicked: toggle play/pause
@@ -1315,15 +1244,9 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                     // Track 8 special handling: return to light mode on pause
                     if (isTrack8) {
                         rootEl.removeAttribute('data-track-8-playing');
-                        track8LastRestartTime = 0;
                         if (currentTheme === 'dark') {
                             applyTheme('light', { force: true });
-                            
-                            // Stop "Hey now," flashing
-                            const heyNowElement = document.querySelector('.hey-now');
-                            if (heyNowElement) {
-                                heyNowElement.classList.remove('flashing');
-                            }
+                            stopHeyNowFlash();
                         }
                     }
                 } else {
@@ -1331,7 +1254,6 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                     if (isTrack8) {
                         // Track 8 always restarts from beginning
                         audioPlayer.currentTime = 0;
-                        track8LastRestartTime = Date.now();
                     }
                     
                     const playPromise = audioPlayer.play();
@@ -1379,10 +1301,8 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             // Track 8 indicator for starfield effect
             if (isTrack8) {
                 rootEl.setAttribute('data-track-8-playing', 'true');
-                track8LastRestartTime = Date.now();
             } else {
                 rootEl.removeAttribute('data-track-8-playing');
-                track8LastRestartTime = 0;
             }
 
             // Configure dance animation timing (4-beat cycle)
@@ -1533,31 +1453,22 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
         // AUDIO EVENT LISTENERS - Handle playback events
         // =====================================================
         
-        // Track ended: return to light mode if in dark mode
-        audioPlayer.addEventListener('ended', () => {
+        /**
+         * Handles audio playback ending (track end or error)
+         */
+        function handleAudioEnd() {
             if (currentTheme === 'dark') {
                 applyTheme('light', { force: true });
                 stopGrowthHackerFlash();
-                
-                // Stop "Hey now," flashing
                 stopHeyNowFlash();
             }
             rootEl.removeAttribute('data-track-8-playing');
             clearCurrentPlayingState();
-        });
+        }
 
-        // Playback error: cleanup and return to light mode
-        audioPlayer.addEventListener('error', () => {
-            if (currentTheme === 'dark') {
-                applyTheme('light', { force: true });
-                stopGrowthHackerFlash();
-                
-                // Stop "Hey now," flashing
-                stopHeyNowFlash();
-            }
-            rootEl.removeAttribute('data-track-8-playing');
-            clearCurrentPlayingState();
-        });
+        // Track ended or error: return to light mode
+        audioPlayer.addEventListener('ended', handleAudioEnd);
+        audioPlayer.addEventListener('error', handleAudioEnd);
         
         // Sync Media Session state when playback starts
         audioPlayer.addEventListener('play', () => {
@@ -1637,13 +1548,13 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             function resize(){
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
-                // Create stars based on screen size (1 star per ~9000 pixels)
-                stars = Array.from({length: Math.floor((canvas.width*canvas.height)/9000)}, () => ({
-                    x: Math.random()*canvas.width,
-                    y: Math.random()*canvas.height,
-                    tw: Math.random()*Math.PI*2, // Twinkle phase
-                    sp: 0.5 + Math.random()*0.5, // Twinkle speed
-                    r: 0.6 + Math.random()*1.2   // Star radius
+                const starCount = Math.floor((canvas.width * canvas.height) / 9000);
+                stars = Array.from({length: starCount}, () => ({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    tw: Math.random() * Math.PI * 2,
+                    sp: 0.5 + Math.random() * 0.5,
+                    r: 0.6 + Math.random() * 1.2
                 }));
             }
             window.addEventListener('resize', resize);
@@ -1651,16 +1562,19 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             
             // Animation loop
             function tick(){
-                if (canvas.style.display !== 'block') { requestAnimationFrame(tick); return; }
-                ctx.clearRect(0,0,canvas.width,canvas.height);
+                if (canvas.style.display !== 'block') {
+                    requestAnimationFrame(tick);
+                    return;
+                }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
                 // Draw twinkling stars
                 for (const s of stars){
-                    s.tw += 0.02*s.sp;
-                    const alpha = 0.3 + 0.7*(0.5+0.5*Math.sin(s.tw));
+                    s.tw += 0.02 * s.sp;
+                    const alpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(s.tw));
                     ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
                     ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 
@@ -1668,24 +1582,38 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                 const isTrack8Playing = rootEl.getAttribute('data-track-8-playing') === 'true';
                 const meteorSpawnChance = isTrack8Playing ? 0.03 : 0.01;
                 const maxMeteors = isTrack8Playing ? 6 : 2;
-                if (Math.random()<meteorSpawnChance && meteors.length<maxMeteors){
-                    meteors.push({x: Math.random()*canvas.width, y: -20, vx: -6-Math.random()*4, vy: 10+Math.random()*6, life: 1});
+                
+                if (Math.random() < meteorSpawnChance && meteors.length < maxMeteors){
+                    meteors.push({
+                        x: Math.random() * canvas.width,
+                        y: -20,
+                        vx: -6 - Math.random() * 4,
+                        vy: 10 + Math.random() * 6,
+                        life: 1
+                    });
                 }
-                for (let i=meteors.length-1;i>=0;i--){
+                
+                for (let i = meteors.length - 1; i >= 0; i--){
                     const m = meteors[i];
-                    m.x += m.vx; m.y += m.vy; m.life -= 0.01;
+                    m.x += m.vx;
+                    m.y += m.vy;
+                    m.life -= 0.01;
+                    
                     // Draw meteor trail with gradient
-                    const grad = ctx.createLinearGradient(m.x, m.y, m.x-m.vx*6, m.y-m.vy*6);
+                    const grad = ctx.createLinearGradient(m.x, m.y, m.x - m.vx * 6, m.y - m.vy * 6);
                     grad.addColorStop(0, 'rgba(255,255,255,0.9)');
                     grad.addColorStop(1, 'rgba(255,255,255,0)');
                     ctx.strokeStyle = grad;
                     ctx.lineWidth = 2;
                     ctx.beginPath();
                     ctx.moveTo(m.x, m.y);
-                    ctx.lineTo(m.x-m.vx*6, m.y-m.vy*6);
+                    ctx.lineTo(m.x - m.vx * 6, m.y - m.vy * 6);
                     ctx.stroke();
+                    
                     // Remove if off-screen or faded
-                    if (m.life<=0 || m.y>canvas.height+50) meteors.splice(i,1);
+                    if (m.life <= 0 || m.y > canvas.height + 50) {
+                        meteors.splice(i, 1);
+                    }
                 }
                 requestAnimationFrame(tick);
             }
