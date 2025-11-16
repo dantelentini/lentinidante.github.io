@@ -10,14 +10,14 @@
     <link rel="stylesheet" href="assets/css/styles.css">
     
     <!-- Preload album artwork for instant display -->
-    <link rel="preload" as="image" href="assets/images/albums/album-01.jpg">
-    <link rel="preload" as="image" href="assets/images/albums/album-02.jpg">
-    <link rel="preload" as="image" href="assets/images/albums/album-03.jpg">
-    <link rel="preload" as="image" href="assets/images/albums/album-04.jpg">
-    <link rel="preload" as="image" href="assets/images/albums/album-05.jpg">
-    <link rel="preload" as="image" href="assets/images/albums/album-06.jpg">
-    <link rel="preload" as="image" href="assets/images/albums/album-07.jpg">
-    <link rel="preload" as="image" href="assets/images/albums/album-08.jpg">
+    <link rel="preload" as="image" href="assets/images/albums/album-01.webp">
+    <link rel="preload" as="image" href="assets/images/albums/album-02.webp">
+    <link rel="preload" as="image" href="assets/images/albums/album-03.webp">
+    <link rel="preload" as="image" href="assets/images/albums/album-04.webp">
+    <link rel="preload" as="image" href="assets/images/albums/album-05.webp">
+    <link rel="preload" as="image" href="assets/images/albums/album-06.webp">
+    <link rel="preload" as="image" href="assets/images/albums/album-07.webp">
+    <link rel="preload" as="image" href="assets/images/albums/album-08.webp">
     <link rel="preload" as="image" href="assets/images/albums/album-08-edit.gif">
 </head>
 <body>
@@ -208,14 +208,14 @@
 
         // Content data - only listen has visual content
         const listenData = [
-            { image: 'assets/images/albums/album-01.jpg', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
-            { image: 'assets/images/albums/album-02.jpg', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 140 },
-            { image: 'assets/images/albums/album-03.jpg', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
-            { image: 'assets/images/albums/album-04.jpg', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 119 },
-            { image: 'assets/images/albums/album-05.jpg', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 138 },
-            { image: 'assets/images/albums/album-06.jpg', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
-            { image: 'assets/images/albums/album-07.jpg', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 128 },
-            { image: 'assets/images/albums/album-08.jpg', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 97, gifImage: 'assets/images/albums/album-08-edit.gif' }
+            { image: 'assets/images/albums/album-01.webp', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
+            { image: 'assets/images/albums/album-02.webp', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 140 },
+            { image: 'assets/images/albums/album-03.webp', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
+            { image: 'assets/images/albums/album-04.webp', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 119 },
+            { image: 'assets/images/albums/album-05.webp', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 138 },
+            { image: 'assets/images/albums/album-06.webp', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
+            { image: 'assets/images/albums/album-07.webp', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 128 },
+            { image: 'assets/images/albums/album-08.webp', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 97, gifImage: 'assets/images/albums/album-08-edit.gif' }
         ];
 
         // Preload all album images and GIF for instant appearance
@@ -566,10 +566,10 @@
             element.style.opacity = '';
             element.style.transform = '';
             
-            // If this is album 8, restore the jpg version
+            // If this is album 8, restore the webp version
             const img = element.querySelector('img');
             if (img && img.src.includes('album-08-edit.gif')) {
-                img.src = 'assets/images/albums/album-08.jpg';
+                img.src = 'assets/images/albums/album-08.webp';
             }
         }
 
