@@ -43,11 +43,12 @@
         </div>
         
         <div class="h1-container">
-            <h1>Hi,</h1>
+            <h1 class="hi-text">Hi,</h1>
             <h1 class="hey-now">
                 <span class="word-hey">Hey</span>
                 <span class="word-now">now</span><span class="word-comma">,</span>
             </h1>
+            <img src="assets/images/waymo.png" alt="Green car illustration" class="hi-car">
         </div>
         <p>
             I like to <button id="read-btn">read</button>, <button id="write-btn">write</button>, and <button id="listen-btn">listen</button>.
@@ -90,6 +91,7 @@
         const THEME_KEY = 'theme-preference';
         const THEME_COLORS = { light: '#0064e6', dark: '#000000' };
         const DARK_MODE_DELAY_MS = 6300;
+        const HI_HIT_LEAD_MS = 3000; // \"Hi,\" gets hit this many ms before dark mode
         
         // Dark mode sound effect setup
         const sfx = new Audio('assets/audio/dark-mode.mp3');
@@ -104,6 +106,7 @@
         let currentTheme = null; // Current active theme ('light' or 'dark')
         let pendingTheme = null; // Theme scheduled to activate
         let themeTransitionTimer = null; // Timer for delayed theme transitions
+        let hiHitTimer = null; // Timer for \"Hi,\" + car hit animation
         
         // Initialize with light theme on page load
         applyTheme('light', { skipAudio: true });
@@ -149,6 +152,12 @@
 
             currentTheme = next;
 
+            // Clear any pending \"Hi,\" hit timer when theme actually changes
+            if (hiHitTimer) {
+                clearTimeout(hiHitTimer);
+                hiHitTimer = null;
+            }
+
         if (next === 'dark') {
                 // Dark mode: instant transition
                 rootEl.classList.remove('transitioning-to-light');
@@ -161,6 +170,8 @@
                 // Light mode: smooth fade transition
                 rootEl.classList.add('transitioning-to-light');
                 rootEl.removeAttribute('data-theme');
+                // Reset \"Hi,\" hit state when returning to light mode
+                rootEl.classList.remove('hi-hit');
                 if (starCanvas) {
                     // Fade out starfield over 800ms
                     starCanvas.style.opacity = '0';
@@ -218,33 +229,17 @@
                 clearTimeout(themeTransitionTimer);
                 themeTransitionTimer = null;
             }
+            if (hiHitTimer) {
+                clearTimeout(hiHitTimer);
+                hiHitTimer = null;
+            }
             
             // Stop audio if transitioning to dark mode
             if (stopAudio && pendingTheme === 'dark') {
                 stopDarkModeSfx();
             }
             pendingTheme = null;
-        }
-
-        /**
-         * Initiates timed transition to dark mode with audio
-         */
-        function startDarkModeTransition() {
-            cancelPendingTheme();
-            pendingTheme = 'dark';
-            syncSystemChrome('dark');
-            playDarkModeSfx();
-            
-            // Apply dark mode after audio plays (6.3s)
-            themeTransitionTimer = setTimeout(() => {
-                cancelPendingTheme({ stopAudio: false });
-                applyTheme('dark', { skipAudio: true });
-                
-                // Sync "Growth Hacker" text flash with 150 BPM
-                if (typeof startGrowthHackerFlash !== 'undefined') {
-                    startGrowthHackerFlash(150);
-                }
-            }, DARK_MODE_DELAY_MS);
+            rootEl.classList.remove('hi-hit');
         }
 
         // =====================================================
@@ -319,14 +314,12 @@
             audioToPreload.forEach(src => {
                 const audio = new Audio();
                 audio.preload = 'auto';
-                audio.load();
                 audio.src = src;
+                audio.load();
             });
             
             // Preload dark mode sound effect
             sfx.load();
-            
-            console.log('🚀 All assets preloading for instant experience!');
         })();
 
         // =====================================================
@@ -742,15 +735,6 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
          * Fades out content with smooth transition
          * @param {number} durationMs - Fade duration in milliseconds
          */
-        function fadeOutContent(durationMs = 600) {
-            if (!contentItems.classList.contains('active')) return;
-            contentItems.classList.add('fade-out');
-            setTimeout(() => {
-                hideContent();
-                contentItems.classList.remove('fade-out');
-            }, durationMs);
-        }
-
         /**
          * Hides all content and resets button states
          */
@@ -812,6 +796,13 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
             // Schedule "Hey now," flashing 19 seconds after trigger
             scheduleHeyNowFlash(150, 19000);
 
+            // Schedule \"Hi,\" + car hit 3 seconds before dark mode kicks in (6.7s)
+            const TRACK8_DARK_MODE_MS = 6700;
+            const hitDelay = Math.max(0, TRACK8_DARK_MODE_MS - HI_HIT_LEAD_MS);
+            hiHitTimer = setTimeout(() => {
+                rootEl.classList.add('hi-hit');
+            }, hitDelay);
+
             // Maintain track 8 at full opacity during transition
             if (element) {
                 element.style.opacity = '1';
@@ -840,14 +831,14 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
                 // Start "Growth Hacker" text flash at track 8's BPM (150)
                 startGrowthHackerFlash(150);
                 
-                // Fade other albums back to full visibility after 12s delay
+                // Fade other albums back to full visibility after 14s delay
                 setTimeout(() => {
                     const otherAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
                     otherAlbums.forEach(album => {
                         album.style.transition = 'opacity 2s ease-in';
                         album.style.opacity = '1';
                     });
-                }, 12000);
+                }, 14000);
                 
                 track8GifTimer = null;
             }, 6700);
@@ -869,6 +860,12 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
             stopDanceStyleFluctuation();
             stopGrowthHackerFlash();
             clearTrack8GifTimer();
+            // Cancel \"Hi,\" + car hit sequence if it was in progress
+            if (hiHitTimer) {
+                clearTimeout(hiHitTimer);
+                hiHitTimer = null;
+            }
+            rootEl.classList.remove('hi-hit');
             if (updateSession) {
                 updateMediaSessionPlaybackState('none');
             }
@@ -1394,7 +1391,7 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
                     artist: 'Dante Lentini',
                     album: 'My Playlist',
                     artwork: [
-                        { src: trackInfo.image, sizes: '512x512', type: 'image/jpeg' }
+                        { src: trackInfo.image, sizes: '512x512', type: 'image/webp' }
                     ]
                 });
                 
