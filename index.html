@@ -12,6 +12,10 @@
     <link rel="preload" as="style" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/styles.css">
     
+    <!-- Preload fonts so text renders instantly -->
+    <link rel="preload" as="font" href="assets/fonts/family-regular.woff2" type="font/woff2" crossorigin>
+    <link rel="preload" as="font" href="assets/fonts/family-bold.woff2" type="font/woff2" crossorigin>
+
     <!-- Preload album artwork for instant display -->
     <link rel="preload" as="image" href="assets/images/albums/album_1.webp" fetchpriority="high">
     <link rel="preload" as="image" href="assets/images/albums/album_2.webp" fetchpriority="high">
@@ -22,13 +26,17 @@
     <link rel="preload" as="image" href="assets/images/albums/album_7.webp" fetchpriority="high">
     <link rel="preload" as="image" href="assets/images/albums/album_8.webp" fetchpriority="high">
     <link rel="preload" as="image" href="assets/images/albums/album_8_edit.gif" fetchpriority="high">
-    
-    <!-- Preload all audio files for instant playback -->
+    <link rel="preload" as="image" href="assets/images/waymo.webp" fetchpriority="high">
+
+    <!-- Preload all audio files for instant playback (dark mode + all tracks) -->
     <link rel="preload" as="audio" href="assets/audio/dark-mode.mp3" fetchpriority="high">
     <link rel="preload" as="audio" href="assets/audio/track-01.mp3">
+    <link rel="preload" as="audio" href="assets/audio/track-02.mp3">
     <link rel="preload" as="audio" href="assets/audio/track-03.mp3">
+    <link rel="preload" as="audio" href="assets/audio/track-04.mp3">
     <link rel="preload" as="audio" href="assets/audio/track-05.mp3">
     <link rel="preload" as="audio" href="assets/audio/track-06.mp3">
+    <link rel="preload" as="audio" href="assets/audio/track-07.mp3">
     <link rel="preload" as="audio" href="assets/audio/track-08.mp3">
 </head>
 <body>
@@ -48,7 +56,7 @@
                 <span class="word-hey">Hey</span>
                 <span class="word-now">now</span><span class="word-comma">,</span>
             </h1>
-            <img src="assets/images/waymo.png" alt="Green car illustration" class="hi-car">
+            <img src="assets/images/waymo.webp" alt="Green car illustration" class="hi-car">
         </div>
         <p>
             I like to <button id="read-btn">read</button>, <button id="write-btn">write</button>, and <button id="listen-btn">listen</button>.
