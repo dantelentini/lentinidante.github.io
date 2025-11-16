@@ -7,18 +7,29 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" id="apple-status-bar">
     <meta name="theme-color" content="#0064e6" id="theme-color-meta">
     <title>Dante Lentini</title>
+    
+    <!-- Preload critical CSS with high priority -->
+    <link rel="preload" as="style" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/styles.css">
     
     <!-- Preload album artwork for instant display -->
-    <link rel="preload" as="image" href="assets/images/albums/album-01.webp">
-    <link rel="preload" as="image" href="assets/images/albums/album-02.webp">
-    <link rel="preload" as="image" href="assets/images/albums/album-03.webp">
-    <link rel="preload" as="image" href="assets/images/albums/album-04.webp">
-    <link rel="preload" as="image" href="assets/images/albums/album-05.webp">
-    <link rel="preload" as="image" href="assets/images/albums/album-06.webp">
-    <link rel="preload" as="image" href="assets/images/albums/album-07.webp">
-    <link rel="preload" as="image" href="assets/images/albums/album-08.webp">
-    <link rel="preload" as="image" href="assets/images/albums/album-08-edit.gif">
+    <link rel="preload" as="image" href="assets/images/albums/album_1.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/album_2.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/album_3.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/album_4.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/album_5.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/album_6.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/album_7.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/album_8.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/album_8_edit.gif" fetchpriority="high">
+    
+    <!-- Preload all audio files for instant playback -->
+    <link rel="preload" as="audio" href="assets/audio/dark-mode.mp3" fetchpriority="high">
+    <link rel="preload" as="audio" href="assets/audio/track-01.mp3">
+    <link rel="preload" as="audio" href="assets/audio/track-03.mp3">
+    <link rel="preload" as="audio" href="assets/audio/track-05.mp3">
+    <link rel="preload" as="audio" href="assets/audio/track-06.mp3">
+    <link rel="preload" as="audio" href="assets/audio/track-08.mp3">
 </head>
 <body>
     <main>
@@ -208,34 +219,50 @@
 
         // Content data - only listen has visual content
         const listenData = [
-            { image: 'assets/images/albums/album-01.webp', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
-            { image: 'assets/images/albums/album-02.webp', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 95 },
-            { image: 'assets/images/albums/album-03.webp', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
-            { image: 'assets/images/albums/album-04.webp', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 124 },
-            { image: 'assets/images/albums/album-05.webp', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 138 },
-            { image: 'assets/images/albums/album-06.webp', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
-            { image: 'assets/images/albums/album-07.webp', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 78 },
-            { image: 'assets/images/albums/album-08.webp', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 150, gifImage: 'assets/images/albums/album-08-edit.gif' }
+            { image: 'assets/images/albums/album_1.webp', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
+            { image: 'assets/images/albums/album_2.webp', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 95 },
+            { image: 'assets/images/albums/album_3.webp', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
+            { image: 'assets/images/albums/album_4.webp', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 124 },
+            { image: 'assets/images/albums/album_5.webp', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 138 },
+            { image: 'assets/images/albums/album_6.webp', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
+            { image: 'assets/images/albums/album_7.webp', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 78 },
+            { image: 'assets/images/albums/album_8.webp', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 150, gifImage: 'assets/images/albums/album_8_edit.gif' }
         ];
 
-        // Preload all album images and GIF for instant appearance
-        (function preloadImages() {
+        // Aggressively preload ALL images and audio for instant, flawless experience
+        (function preloadAllAssets() {
+            // Preload all album cover images
             const imagesToPreload = [];
+            const audioToPreload = [];
             
-            // Add all album cover images
+            // Collect all assets from listenData
             listenData.forEach(track => {
                 imagesToPreload.push(track.image);
+                audioToPreload.push(track.audio);
                 // Add GIF if present
                 if (track.gifImage) {
                     imagesToPreload.push(track.gifImage);
                 }
             });
             
-            // Preload each image
+            // Preload each image immediately
             imagesToPreload.forEach(src => {
                 const img = new Image();
                 img.src = src;
             });
+            
+            // Aggressively preload all audio files with metadata
+            audioToPreload.forEach(src => {
+                const audio = new Audio();
+                audio.preload = 'auto'; // Force full download
+                audio.load(); // Start loading immediately
+                audio.src = src;
+            });
+            
+            // Also ensure dark mode sound is ready
+            sfx.load();
+            
+            console.log('🚀 All assets preloading for instant experience!');
         })();
 
         // DOM elements
@@ -568,8 +595,8 @@
             
             // If this is album 8, restore the webp version
             const img = element.querySelector('img');
-            if (img && img.src.includes('album-08-edit.gif')) {
-                img.src = 'assets/images/albums/album-08.webp';
+            if (img && img.src.includes('album_8_edit.gif')) {
+                img.src = 'assets/images/albums/album_8.webp';
             }
         }
 
@@ -608,7 +635,7 @@
                 if (element) {
                     const img = element.querySelector('img');
                     if (img) {
-                        img.src = 'assets/images/albums/album-08-edit.gif';
+                        img.src = 'assets/images/albums/album_8_edit.gif';
                     }
                 }
                 
