@@ -44,6 +44,7 @@
     --content-shadow-strong: rgba(0, 17, 51, 0.55); /* Hovered album shadows */
     --button-active-fg: #0064e6;                 /* Active button text color */
     --link-color: #ffffff;                       /* Link color */
+    --hey-rise-duration: 15s;                    /* Duration for "Hey now" rise (slower by +4s total) */
     color-scheme: light;
 }
 
@@ -256,15 +257,19 @@ h1 {
 /* "Hey now," text - hidden in light mode, rises in dark mode */
 h1.hey-now {
     opacity: 0;
-    transform: translate3d(-1px, 108vh, 0) scale(0.97) rotate(-4deg);
+    /* Start almost at the viewport edge so it’s visible immediately */
+    transform: translate3d(-1px, 100vh, 0) scale(0.97) rotate(-4deg);
     pointer-events: none;
     z-index: 10;
     position: relative;
 }
 
-/* Animate "Hey now," to rise when dark mode activates */
-[data-theme="dark"] h1.hey-now {
-    animation: heyZeroGravity var(--hey-rise-duration, 11s) linear forwards;
+/* Animate "Hey now," to rise, starting even earlier before the screen goes black.
+   The JS adds .hi-hit shortly before dark mode; with a -3s delay here,
+   the animation behaves as if it started ~3s earlier than the hit. */
+.hi-hit h1.hey-now {
+    animation: heyZeroGravity var(--hey-rise-duration, 15s) linear forwards;
+    animation-delay: -3s;
 }
 
 /* Hey now text should match body text color for proper flash effect */
@@ -273,31 +278,32 @@ h1.hey-now span {
     color: var(--fg);
 }
 
-/* Flashing animations - Start at 13s, alternating pattern with Growth and Hacker */
+/* Flashing animations layered on top of existing drift/float, no pause */
 [data-theme="dark"] .hey-now.start-flash .word-hey {
+    /* Keep the original drift + float timings, just add the flash */
     animation:
-        heyDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        heyDrift var(--hey-rise-duration, 15s) ease-in-out forwards,
         heyFloatLoop 5.5s ease-in-out infinite,
         flashHacker var(--flash-duration, 0.4s) ease-in-out infinite;
-    animation-delay: 0s, var(--hey-rise-duration, 11s), 0s;
+    animation-delay: 0s, 0.25s, 0s;
     animation-fill-mode: forwards, both, none;
 }
 
 [data-theme="dark"] .hey-now.start-flash .word-now {
     animation:
-        nowDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        nowDrift var(--hey-rise-duration, 15s) ease-in-out forwards,
         nowFloatLoop 6s ease-in-out infinite,
         flashGrowth var(--flash-duration, 0.4s) ease-in-out infinite;
-    animation-delay: 0s, var(--hey-rise-duration, 11s), 0s;
+    animation-delay: 0s, 0.35s, 0s;
     animation-fill-mode: forwards, both, none;
 }
 
 [data-theme="dark"] .hey-now.start-flash .word-comma {
     animation:
-        commaDrift var(--hey-rise-duration, 11s) ease-in-out forwards,
+        commaDrift var(--hey-rise-duration, 15s) ease-in-out forwards,
         commaFloatLoop 4.5s ease-in-out infinite,
         flashGrowth var(--flash-duration, 0.4s) ease-in-out infinite;
-    animation-delay: 0s, var(--hey-rise-duration, 11s), 0s;
+    animation-delay: 0s, 0.2s, 0s;
     animation-fill-mode: forwards, both, none;
 }
 
@@ -400,8 +406,10 @@ h1.hey-now span {
 
 @keyframes heyZeroGravity {
     0% {
-        opacity: 0;
-        transform: translate3d(-1px, 108vh, 0) scale(0.97) rotate(-4deg);
+        /* Make it visible immediately when dark mode starts */
+        opacity: 1;
+        /* Start right at the bottom of the screen */
+        transform: translate3d(-1px, 100vh, 0) scale(0.97) rotate(-4deg);
     }
     10% {
         opacity: 0.9;
@@ -761,6 +769,57 @@ button:active {
 .content-item.spinning {
     animation: spinInPlace 8s linear infinite;
     animation-delay: 0s !important;
+}
+
+/* =============================================================
+   FLICKER MODE - Beat-synced chaotic flashing for other albums
+   ============================================================= */
+
+/* Base state for flicker mode: allow CSS to modulate opacity */
+.content-items.flicker-mode .content-item:not(.spinning) {
+    /* Baseline ~60% opacity while in flicker mode */
+    opacity: 0.6;
+    transition: opacity 0.12s ease-out, transform 0.12s ease-out;
+}
+
+/* Keyframe for a sharp flicker pulse (brightness + slight pop) */
+@keyframes albumFlickerPulse {
+    0% {
+        /* Start from the 60% baseline */
+        opacity: 0.6;
+        transform: translate3d(0, 0, 0) rotate(var(--item-rotation, 0deg)) scale(1);
+        box-shadow: 0 8px 32px var(--content-shadow);
+    }
+    18% {
+        /* First lift toward full brightness */
+        opacity: 0.95;
+        transform: translate3d(0, -4px, 0) rotate(calc(var(--item-rotation, 0deg) + 1.5deg)) scale(1.04);
+        box-shadow: 0 0 20px var(--content-shadow-strong);
+    }
+    32% {
+        /* Slide back a bit for a breathing effect */
+        opacity: 0.75;
+        transform: translate3d(2px, 1px, 0) rotate(calc(var(--item-rotation, 0deg) - 1deg)) scale(0.99);
+        box-shadow: 0 4px 18px var(--content-shadow);
+    }
+    55% {
+        /* Second, softer pop that actually hits 100% */
+        opacity: 1;
+        transform: translate3d(-2px, -3px, 0) rotate(calc(var(--item-rotation, 0deg) + 2deg)) scale(1.05);
+        box-shadow: 0 0 24px var(--content-shadow-strong);
+    }
+    100% {
+        /* Return to the 60% baseline */
+        opacity: 0.6;
+        transform: translate3d(0, 0, 0) rotate(var(--item-rotation, 0deg)) scale(1);
+        box-shadow: 0 6px 22px var(--content-shadow);
+    }
+}
+
+/* JS toggles this class per beat on random albums to make them flash */
+.content-items.flicker-mode .content-item.flicker-pulse:not(.spinning) {
+    /* Fast, slightly elastic pulse for more vibe */
+    animation: albumFlickerPulse 0.26s cubic-bezier(0.25, 0.8, 0.3, 1) both;
 }
 
 /* Dance style: Smooth - Hypnotic sway and flow */
