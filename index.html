@@ -40,7 +40,7 @@
             <a href="http://thingsivechangedmymindon.com" target="_blank" id="write-link">thingsivechangedmymindon.com</a>
         </div>
         <p>
-            I'm a <a href="https://dollarhomepage.com/" target="_blank" id="growth-hacker-link" class="growth-hacker-link">Growth Hacker</a>. In my past, I<br>
+            I'm a <a href="https://dollarhomepage.com/" target="_blank" id="growth-hacker-link" class="growth-hacker-link"><span class="word-growth">Growth</span> <span class="word-hacker">Hacker</span></a>. In my past, I<br>
             left college, made <a href="https://www.tiktok.com/@thesitesupply" target="_blank" class="white">tiktoks</a> and joined<br>
             <a href="https://www.ycombinator.com/companies/hyper" target="_blank" class="white">startups</a>— all of which led me to SF,<br>
             where I'm now at <a href="https://f.inc/" target="_blank" class="white-bold">Founders, Inc.</a>
@@ -183,7 +183,7 @@
                 
                 // Start flashing with dark mode audio BPM after theme is applied
                 if (typeof startGrowthHackerFlash !== 'undefined') {
-                    startGrowthHackerFlash(118);
+                    startGrowthHackerFlash(150);
                 }
             }, DARK_MODE_DELAY_MS);
         }
@@ -209,13 +209,13 @@
         // Content data - only listen has visual content
         const listenData = [
             { image: 'assets/images/albums/album-01.webp', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
-            { image: 'assets/images/albums/album-02.webp', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 140 },
+            { image: 'assets/images/albums/album-02.webp', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 95 },
             { image: 'assets/images/albums/album-03.webp', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
-            { image: 'assets/images/albums/album-04.webp', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 119 },
+            { image: 'assets/images/albums/album-04.webp', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 124 },
             { image: 'assets/images/albums/album-05.webp', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 138 },
             { image: 'assets/images/albums/album-06.webp', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
-            { image: 'assets/images/albums/album-07.webp', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 128 },
-            { image: 'assets/images/albums/album-08.webp', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 97, gifImage: 'assets/images/albums/album-08-edit.gif' }
+            { image: 'assets/images/albums/album-07.webp', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 78 },
+            { image: 'assets/images/albums/album-08.webp', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 150, gifImage: 'assets/images/albums/album-08-edit.gif' }
         ];
 
         // Preload all album images and GIF for instant appearance
@@ -616,7 +616,7 @@
                 applyTheme('dark', { skipAudio: true });
                 
                 // Start flashing with track 8 BPM
-                startGrowthHackerFlash(97);
+                startGrowthHackerFlash(150);
                 
                 // Restore other albums to full opacity after dark mode activates
                 const otherAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
