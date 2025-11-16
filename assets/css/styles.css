@@ -608,8 +608,36 @@ button:active {
     text-decoration: underline;
 }
 
-/* Flashing animation - Light mode (flash whiter with glow) */
-@keyframes flashWhite {
+/* Flashing animation for "Growth" - flashes on beats 1 and 3 */
+@keyframes flashGrowth {
+    0%, 15% {
+        color: inherit;
+        text-shadow: none;
+    }
+    25% {
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                     0 0 30px rgba(255, 255, 255, 0.6),
+                     0 0 40px rgba(255, 255, 255, 0.4);
+    }
+    35%, 65% {
+        color: inherit;
+        text-shadow: none;
+    }
+    75% {
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                     0 0 30px rgba(255, 255, 255, 0.6),
+                     0 0 40px rgba(255, 255, 255, 0.4);
+    }
+    85%, 100% {
+        color: inherit;
+        text-shadow: none;
+    }
+}
+
+/* Flashing animation for "Hacker" - flashes on beats 2 and 4 (offset) */
+@keyframes flashHacker {
     0%, 40% {
         color: inherit;
         text-shadow: none;
@@ -620,98 +648,34 @@ button:active {
                      0 0 30px rgba(255, 255, 255, 0.6),
                      0 0 40px rgba(255, 255, 255, 0.4);
     }
-    60%, 100% {
+    60%, 90% {
         color: inherit;
         text-shadow: none;
     }
-}
-
-/* Flashing animation - Dark mode (Subtle pastel concert vibes with gradients) */
-@keyframes flashRainbow {
-    0% {
-        color: #c8b5e0;
-        text-shadow: 
-            0 0 20px rgba(200, 181, 224, 0.4),
-            0 0 40px rgba(200, 181, 224, 0.2),
-            0 0 60px rgba(180, 160, 210, 0.15);
-        filter: hue-rotate(0deg) saturate(0.9);
-    }
-    12.5% {
-        color: #d4c4f0;
-        text-shadow: 
-            0 0 25px rgba(212, 196, 240, 0.5),
-            0 0 45px rgba(190, 170, 230, 0.3),
-            0 0 65px rgba(170, 150, 220, 0.2);
-        filter: hue-rotate(10deg) saturate(1);
-    }
-    25% {
-        color: #b8d4f5;
-        text-shadow: 
-            0 0 20px rgba(184, 212, 245, 0.45),
-            0 0 40px rgba(160, 200, 240, 0.25),
-            0 0 60px rgba(140, 180, 230, 0.15);
-        filter: hue-rotate(20deg) saturate(0.95);
-    }
-    37.5% {
-        color: #c4e5f5;
-        text-shadow: 
-            0 0 25px rgba(196, 229, 245, 0.5),
-            0 0 45px rgba(176, 215, 240, 0.3),
-            0 0 65px rgba(156, 200, 230, 0.2);
-        filter: hue-rotate(30deg) saturate(1);
-    }
-    50% {
-        color: #d4f0e8;
-        text-shadow: 
-            0 0 20px rgba(212, 240, 232, 0.4),
-            0 0 40px rgba(190, 230, 220, 0.25),
-            0 0 60px rgba(170, 220, 210, 0.15);
-        filter: hue-rotate(40deg) saturate(0.9);
-    }
-    62.5% {
-        color: #f5e6d8;
-        text-shadow: 
-            0 0 25px rgba(245, 230, 216, 0.45),
-            0 0 45px rgba(235, 220, 206, 0.3),
-            0 0 65px rgba(225, 210, 196, 0.2);
-        filter: hue-rotate(50deg) saturate(0.95);
-    }
-    75% {
-        color: #f5d4d8;
-        text-shadow: 
-            0 0 20px rgba(245, 212, 216, 0.5),
-            0 0 40px rgba(240, 200, 210, 0.3),
-            0 0 60px rgba(235, 190, 205, 0.2);
-        filter: hue-rotate(60deg) saturate(1);
-    }
-    87.5% {
-        color: #e8c8e8;
-        text-shadow: 
-            0 0 25px rgba(232, 200, 232, 0.45),
-            0 0 45px rgba(220, 185, 220, 0.25),
-            0 0 65px rgba(210, 170, 210, 0.15);
-        filter: hue-rotate(70deg) saturate(0.95);
-    }
     100% {
-        color: #c8b5e0;
-        text-shadow: 
-            0 0 20px rgba(200, 181, 224, 0.4),
-            0 0 40px rgba(200, 181, 224, 0.2),
-            0 0 60px rgba(180, 160, 210, 0.15);
-        filter: hue-rotate(0deg) saturate(0.9);
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                     0 0 30px rgba(255, 255, 255, 0.6),
+                     0 0 40px rgba(255, 255, 255, 0.4);
     }
 }
 
-/* Apply flashing in light mode */
-.growth-hacker-link.flashing {
-    animation: flashWhite var(--flash-duration, 2s) ease-in-out infinite;
+/* Apply alternating flash pattern to the words */
+.growth-hacker-link.flashing .word-growth {
+    animation: flashGrowth var(--flash-duration, 2s) ease-in-out infinite;
 }
 
-/* Apply vibey pastel flashing in dark mode */
-[data-theme="dark"] .growth-hacker-link.flashing {
-    animation: flashRainbow var(--flash-duration, 2s) ease-in-out infinite;
-    font-weight: 500;
-    transition: all 0.3s ease;
+.growth-hacker-link.flashing .word-hacker {
+    animation: flashHacker var(--flash-duration, 2s) ease-in-out infinite;
+}
+
+/* Same pattern works in dark mode */
+[data-theme="dark"] .growth-hacker-link.flashing .word-growth {
+    animation: flashGrowth var(--flash-duration, 2s) ease-in-out infinite;
+}
+
+[data-theme="dark"] .growth-hacker-link.flashing .word-hacker {
+    animation: flashHacker var(--flash-duration, 2s) ease-in-out infinite;
 }
 
 /* White links - no underline */
