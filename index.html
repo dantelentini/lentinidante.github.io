@@ -99,7 +99,7 @@
         const THEME_KEY = 'theme-preference';
         const THEME_COLORS = { light: '#0064e6', dark: '#000000' };
         const DARK_MODE_DELAY_MS = 6300;
-        const HI_HIT_LEAD_MS = 3000; // \"Hi,\" gets hit this many ms before dark mode
+        const HI_HIT_LEAD_MS = 2000; // \"Hi,\" gets hit this many ms before dark mode (now 2s before)
         
         // Dark mode sound effect setup
         const sfx = new Audio('assets/audio/dark-mode.mp3');
@@ -374,7 +374,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
          * @param {number} bpm - Beats per minute for flash timing
          * @param {number} delayMs - Delay before flashing begins
          */
-function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
+        function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
     if (heyNowFlashTimer) {
         clearTimeout(heyNowFlashTimer);
     }
@@ -732,6 +732,22 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
                     }
                 });
 
+                // If track 8 is in its dark-mode countdown (before the late flicker phase),
+                // reapply the dimmed opacity to non-spinning albums so they don't pop back to full
+                // when the user toggles listen off/on mid-sequence.
+                if (currentlyPlaying === 'assets/audio/track-08.mp3' &&
+                    !contentItems.classList.contains('flicker-mode')) {
+                    const allAlbums = contentItems.querySelectorAll('.content-item');
+                    allAlbums.forEach(album => {
+                        if (album.classList.contains('spinning')) {
+                            album.style.opacity = '1';
+                        } else {
+                            album.style.transition = 'opacity 3s ease-out';
+                            album.style.opacity = '0.15';
+                        }
+                    });
+                }
+
                 contentItems.setAttribute('data-mode', 'listen');
                 contentItems.classList.add('active');
             } else {
@@ -801,7 +817,7 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
         function startTrack8DarkModeTransition(element) {
             clearTrack8GifTimer();
             
-            // Schedule "Hey now," flashing 19 seconds after trigger
+            // Schedule "Hey now," flashing ~19 seconds after trigger
             scheduleHeyNowFlash(150, 19000);
 
             // Schedule \"Hi,\" + car hit 3 seconds before dark mode kicks in (6.7s)
@@ -839,13 +855,9 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
                 // Start "Growth Hacker" text flash at track 8's BPM (150)
                 startGrowthHackerFlash(150);
                 
-                // Fade other albums back to full visibility after 14s delay
+                // After 14s, switch other albums into beat-synced flicker mode instead of a simple fade-in
                 setTimeout(() => {
-                    const otherAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
-                    otherAlbums.forEach(album => {
-                        album.style.transition = 'opacity 2s ease-in';
-                        album.style.opacity = '1';
-                    });
+                    startAlbumFlicker(150);
                 }, 14000);
                 
                 track8GifTimer = null;
@@ -867,6 +879,7 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
             currentPlayingElement = null;
             stopDanceStyleFluctuation();
             stopGrowthHackerFlash();
+            stopAlbumFlicker();
             clearTrack8GifTimer();
             // Cancel \"Hi,\" + car hit sequence if it was in progress
             if (hiHitTimer) {
@@ -948,6 +961,7 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
         let coordChangeTimeout = null; // Timer for coordination changes
         let hypeTimeout = null; // Hype mode duration timer
         let hypeInterval = null; // Hype mode schedule timer
+        let flickerInterval = null; // Beat-synced album flicker timer
         
         /**
          * Sets coordination mode for album dancing
@@ -1154,11 +1168,96 @@ function scheduleHeyNowFlash(bpm = 150, delayMs = 19000) {
                 clearTimeout(hypeTimeout);
                 hypeTimeout = null;
             }
+            if (flickerInterval) {
+                clearInterval(flickerInterval);
+                flickerInterval = null;
+            }
             // Reset to default state
             contentItems.classList.remove('hype-mode');
             contentItems.removeAttribute('data-dance-style');
             currentDanceStyle = 'smooth';
             currentCoordMode = 'independent';
+        }
+
+        // =====================================================
+        // ALBUM FLICKER MODE - Beat-synced sporadic flashing
+        // =====================================================
+
+        /**
+         * Starts sporadic, beat-synced flicker on non-spinning albums
+         * @param {number} bpm - Beats per minute for timing
+         */
+        function startAlbumFlicker(bpm) {
+            // Clear any existing flicker loop
+            if (flickerInterval) {
+                clearInterval(flickerInterval);
+                flickerInterval = null;
+            }
+
+            if (!contentItems) return;
+
+            const beatMs = (60 / bpm) * 1000;
+            contentItems.classList.add('flicker-mode');
+
+            // Set the base opacity to 60% when flicker starts
+            const baseAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
+            baseAlbums.forEach(album => {
+                album.style.opacity = '0.6';
+            });
+
+            flickerInterval = setInterval(() => {
+                const albums = Array.from(contentItems.querySelectorAll('.content-item:not(.spinning)'));
+                if (!albums.length) return;
+
+                // Some beats: no flicker at all for negative space (but less often now)
+                if (Math.random() < 0.1) {
+                    albums.forEach(a => a.classList.remove('flicker-pulse'));
+                    return;
+                }
+
+                // Randomly pick 2–4 albums to flicker on this beat (if available)
+                const minCount = Math.min(2, albums.length);
+                const maxCount = Math.min(4, albums.length);
+                const count = minCount + Math.floor(Math.random() * (maxCount - minCount + 1));
+
+                // Clear any previous manual flicker classes
+                albums.forEach(a => a.classList.remove('flicker-pulse'));
+
+                // Shuffle and choose a subset
+                for (let i = albums.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [albums[i], albums[j]] = [albums[j], albums[i]];
+                }
+                const chosen = albums.slice(0, count);
+                chosen.forEach(album => {
+                    // Random offset within the beat window so pulses feel scattered
+                    const jitter = beatMs * 0.6 * Math.random();
+                    setTimeout(() => {
+                        album.classList.add('flicker-pulse');
+                        // Remove class after a very quick pulse
+                        setTimeout(() => {
+                            album.classList.remove('flicker-pulse');
+                        }, beatMs * 0.3);
+                    }, jitter);
+                });
+            }, beatMs);
+        }
+
+        /**
+         * Stops album flicker mode and restores normal opacity
+         */
+        function stopAlbumFlicker() {
+            if (flickerInterval) {
+                clearInterval(flickerInterval);
+                flickerInterval = null;
+            }
+            if (!contentItems) return;
+            contentItems.classList.remove('flicker-mode');
+            const albums = contentItems.querySelectorAll('.content-item');
+            albums.forEach(album => {
+                album.classList.remove('flicker-pulse');
+                album.style.opacity = '';
+            });
         }
 
         // =====================================================
