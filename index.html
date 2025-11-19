@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default" id="apple-status-bar">
     <meta name="theme-color" content="#0064e6" id="theme-color-meta">
@@ -13,8 +14,8 @@
     <link rel="stylesheet" href="assets/css/styles.css">
     
     <!-- Preload fonts so text renders instantly -->
-    <link rel="preload" as="font" href="assets/fonts/family-regular.woff2" type="font/woff2" crossorigin>
-    <link rel="preload" as="font" href="assets/fonts/family-bold.woff2" type="font/woff2" crossorigin>
+    <link rel="preload" as="font" href="assets/fonts/family-regular.woff2" type="font/woff2" crossorigin fetchpriority="high">
+    <link rel="preload" as="font" href="assets/fonts/family-bold.woff2" type="font/woff2" crossorigin fetchpriority="high">
 
     <!-- Preload album artwork for instant display -->
     <link rel="preload" as="image" href="assets/images/albums/album_1.webp" fetchpriority="high">
@@ -28,16 +29,15 @@
     <link rel="preload" as="image" href="assets/images/albums/album_8_edit.gif" fetchpriority="high">
     <link rel="preload" as="image" href="assets/images/waymo.webp" fetchpriority="high">
 
-    <!-- Preload all audio files for instant playback (dark mode + all tracks) -->
-    <link rel="preload" as="audio" href="assets/audio/dark-mode.mp3" fetchpriority="high">
-    <link rel="preload" as="audio" href="assets/audio/track-01.mp3">
-    <link rel="preload" as="audio" href="assets/audio/track-02.mp3">
-    <link rel="preload" as="audio" href="assets/audio/track-03.mp3">
-    <link rel="preload" as="audio" href="assets/audio/track-04.mp3">
-    <link rel="preload" as="audio" href="assets/audio/track-05.mp3">
-    <link rel="preload" as="audio" href="assets/audio/track-06.mp3">
-    <link rel="preload" as="audio" href="assets/audio/track-07.mp3">
-    <link rel="preload" as="audio" href="assets/audio/track-08.mp3">
+    <!-- Preload all audio files for instant playback (most popular tracks first) -->
+    <link rel="preload" as="fetch" href="assets/audio/track-01.mp3" type="audio/mpeg" crossorigin fetchpriority="high">
+    <link rel="preload" as="fetch" href="assets/audio/track-08.mp3" type="audio/mpeg" crossorigin fetchpriority="high">
+    <link rel="preload" as="fetch" href="assets/audio/track-02.mp3" type="audio/mpeg" crossorigin>
+    <link rel="preload" as="fetch" href="assets/audio/track-03.mp3" type="audio/mpeg" crossorigin>
+    <link rel="preload" as="fetch" href="assets/audio/track-04.mp3" type="audio/mpeg" crossorigin>
+    <link rel="preload" as="fetch" href="assets/audio/track-05.mp3" type="audio/mpeg" crossorigin>
+    <link rel="preload" as="fetch" href="assets/audio/track-06.mp3" type="audio/mpeg" crossorigin>
+    <link rel="preload" as="fetch" href="assets/audio/track-07.mp3" type="audio/mpeg" crossorigin>
 </head>
 <body>
     <main>
@@ -102,7 +102,7 @@
         const HI_HIT_LEAD_MS = 2000; // \"Hi,\" gets hit this many ms before dark mode (now 2s before)
         
         // Dark mode sound effect setup
-        const sfx = new Audio('assets/audio/dark-mode.mp3');
+        const sfx = new Audio('assets/audio/track-08.mp3');
         sfx.preload = 'auto';
         sfx.crossOrigin = 'anonymous';
         sfx.volume = 1.0;
