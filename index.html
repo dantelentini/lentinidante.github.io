@@ -353,7 +353,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
         let heyNowFlashTimer = null; // Timer for delayed "Hey now" flashing
         
         // Orbit state
-        let currentOrbitDirection = 1; // 1 for clockwise, -1 for counterclockwise
+        let currentOrbitDirection = -1; // 1 for clockwise, -1 for counterclockwise
         let lastPlayedTrack = null; // Tracks the last played track to detect changes
         let orbitAnimationId = null; // RequestAnimationFrame ID
         let orbitRotation = 0; // Current rotation angle in degrees
@@ -661,6 +661,10 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
 
             // Listen mode: render album grid
             if (mode === 'listen') {
+                // Clear any lingering flicker mode or other classes
+                contentItems.classList.remove('flicker-mode');
+                contentItems.removeAttribute('data-dance-style');
+                
                 // Only recreate albums if not already in listen mode
                 const needsRecreation = !wasAlreadyInListenMode || contentItems.children.length === 0;
                 
@@ -706,10 +710,16 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                     
                     contentItems.appendChild(contentItem);
                     
+                    // Always ensure clean opacity state for new discs
+                    contentItem.style.opacity = '';
+                    contentItem.style.transition = '';
+                    
                     // Restore playback state if this track is currently playing
                     if (currentlyPlaying === item.audio && !audioPlayer.paused) {
                         contentItem.classList.add('spinning');
-                        contentItem.style.opacity = '0.8';
+                        // Set BPM-synced flash duration (same as Growth Hacker text)
+                        const flashDuration = item.bpm ? (60 / item.bpm) : 0.5;
+                        contentItem.style.setProperty('--flash-duration', `${flashDuration}s`);
                         currentPlayingElement = contentItem;
                     }
                 });
@@ -756,6 +766,11 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
          */
         function hideContent() {
             contentItems.classList.remove('active');
+            // Clear flicker mode and dance styles
+            contentItems.classList.remove('flicker-mode');
+            contentItems.removeAttribute('data-dance-style');
+            contentItems.style.transform = ''; // Clear any rotation
+            
             // Clear album elements from DOM to prevent memory bloat
             if (contentItems) {
                 contentItems.innerHTML = '';
@@ -819,9 +834,9 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                 rootEl.classList.add('hi-hit');
             }, hitDelay);
 
-            // Maintain track 8 at full opacity during transition
+            // Track 8 opacity is handled by the CSS animation (no inline style needed)
             if (element) {
-                element.style.opacity = '1';
+                // Opacity controlled by CSS animation
             }
             
             // Gradually fade out other albums over 3 seconds
@@ -1143,8 +1158,11 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             }
             
             lastOrbitTime = null;
-            isHoveringDisc = false;
-            orbitSpeedMultiplier = 1;
+            // Only reset hover state and multiplier if completely stopping (not pausing)
+            if (!keepPosition) {
+                isHoveringDisc = false;
+                orbitSpeedMultiplier = 1;
+            }
             audioPlaybackRate = 1;
         }
 
@@ -1192,8 +1210,13 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                     stopAlbumOrbit(true); // Keep position - freeze in place
                     clearTrack8GifTimer(); // Cancel dark mode transition if in progress
                     
-                    // Keep spinning class but pause rotation
-                    // restorePlaybackVisual(element); // Don't restore - keep visual state
+                    // Pause the opacity animation by removing spinning class
+                    if (element) {
+                        element.classList.remove('spinning');
+                        // Lock opacity at current computed value to freeze the animation
+                        const computedOpacity = window.getComputedStyle(element).opacity;
+                        element.style.opacity = computedOpacity;
+                    }
                     
                     // Clean up hype mode classes
                     if (contentItems) {
@@ -1246,10 +1269,14 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                                 startAlbumOrbit(bpm, audioSrc);
                             }
                             
-                            // Visual feedback: spinning + dimmed
+                            // Visual feedback: spinning + restore opacity animation
                             if (element) {
                                 element.classList.add('spinning');
-                                element.style.opacity = '0.8';
+                                // Set BPM-synced flash duration (same as Growth Hacker text)
+                                const flashDuration = bpm ? (60 / bpm) : 0.5;
+                                element.style.setProperty('--flash-duration', `${flashDuration}s`);
+                                // Clear inline opacity so CSS animation can work
+                                element.style.opacity = '';
                                 
                                 // Track 8: restart dark mode sequence from beginning
                                 if (isTrack8) {
@@ -1320,7 +1347,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             
             // Show loading state (dimmed album)
             if (element) {
-                element.style.opacity = '0.6';
+                element.style.opacity = '0.6'; // Only for loading, will be removed when spinning starts
             }
             
             // Attempt playback
@@ -1344,7 +1371,11 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                     // Visual state: spinning + dimmed
                     if (element) {
                         element.classList.add('spinning');
-                        element.style.opacity = '0.8';
+                        // Set BPM-synced flash duration (same as Growth Hacker text)
+                        const flashDuration = trackInfo && trackInfo.bpm ? (60 / trackInfo.bpm) : 0.5;
+                        element.style.setProperty('--flash-duration', `${flashDuration}s`);
+                        // Clear inline opacity so CSS animation can work
+                        element.style.opacity = '';
                         
                         // Track 8: initiate dark mode sequence
                         if (audioSrc === 'assets/audio/track-08.mp3') {
@@ -1365,7 +1396,11 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                             }
                             if (element) {
                                 element.classList.add('spinning');
-                                element.style.opacity = '0.8';
+                                // Set BPM-synced flash duration (same as Growth Hacker text)
+                                const flashDuration = trackInfo && trackInfo.bpm ? (60 / trackInfo.bpm) : 0.5;
+                                element.style.setProperty('--flash-duration', `${flashDuration}s`);
+                                // Clear inline opacity so CSS animation can work
+                                element.style.opacity = '';
                                 
                                 if (audioSrc === 'assets/audio/track-08.mp3') {
                                     startTrack8DarkModeTransition(element);
@@ -1458,7 +1493,8 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                 stopHeyNowFlash();
             }
             rootEl.removeAttribute('data-track-8-playing');
-            clearCurrentPlayingState();
+            // Stop orbit and reset rotation so next track starts fresh
+            clearCurrentPlayingState({ resetAudio: false, keepOrbit: false });
         }
 
         // Track ended or error: return to light mode
