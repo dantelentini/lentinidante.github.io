@@ -193,6 +193,7 @@ h1 {
     margin-bottom: 0.3em;
     overflow: visible;
     position: relative;
+    z-index: 10; /* Above the album discs */
 }
 
 .h1-container h1 {
@@ -544,6 +545,12 @@ p {
     line-height: 1.4;
 }
 
+/* First paragraph (with buttons) should be above album discs */
+main > p:first-of-type {
+    position: relative;
+    z-index: 10;
+}
+
 .white {
     color: var(--fg-strong);
 }
@@ -660,7 +667,8 @@ button:active {
     height: 67px;
     overflow: visible;
     cursor: pointer;
-    transition: all 0.3s ease;
+    opacity: 1; /* Default to full opacity */
+    transition: transform 0.3s ease; /* Don't transition opacity - it interferes with animation */
     pointer-events: all;
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
     touch-action: manipulation; /* Optimize touch interactions */
@@ -835,6 +843,30 @@ button:active {
     25% { transform: rotate(-7deg) translate(4px, -3px); }
     50% { transform: rotate(-4deg) translate(-3px, 4px); }
     75% { transform: rotate(-6deg) translate(3px, -2px); }
+}
+
+/* =============================================================
+   SPINNING ALBUM - BPM-synced opacity pulse (matches Growth Hacker pattern)
+   ============================================================= */
+
+/* Playing album pulses opacity once per beat */
+.content-item.spinning {
+    animation: spinningBeatPulse var(--flash-duration, 0.4s) ease-out infinite !important;
+}
+
+@keyframes spinningBeatPulse {
+    0% {
+        opacity: 1;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    40% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 /* =============================================================
