@@ -17,16 +17,15 @@
     <link rel="preload" as="font" href="assets/fonts/family-regular.woff2" type="font/woff2" crossorigin fetchpriority="high">
     <link rel="preload" as="font" href="assets/fonts/family-bold.woff2" type="font/woff2" crossorigin fetchpriority="high">
 
-    <!-- Preload album artwork for instant display -->
-    <link rel="preload" as="image" href="assets/images/albums/album_1.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/images/albums/album_2.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/images/albums/album_3.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/images/albums/album_4.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/images/albums/album_5.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/images/albums/album_6.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/images/albums/album_7.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/images/albums/album_8.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/images/albums/album_8_edit.gif" fetchpriority="high">
+    <!-- Preload disc artwork for instant display -->
+    <link rel="preload" as="image" href="assets/images/albums/disc1.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/disc2.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/disc3.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/disc4.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/disc5.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/disc6.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/disc7.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/images/albums/disc8.webp" fetchpriority="high">
     <link rel="preload" as="image" href="assets/images/waymo.webp" fetchpriority="high">
 
     <!-- Preload all audio files for instant playback (most popular tracks first) -->
@@ -268,16 +267,16 @@
         // CONTENT DATA - Track information for music player
         // =====================================================
         
-        // Album covers, audio files, and BPM for each track
+        // Minecraft disc covers, audio files, and BPM for each track
         const listenData = [
-            { image: 'assets/images/albums/album_1.webp', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
-            { image: 'assets/images/albums/album_2.webp', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 95 },
-            { image: 'assets/images/albums/album_3.webp', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
-            { image: 'assets/images/albums/album_4.webp', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 124 },
-            { image: 'assets/images/albums/album_5.webp', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 130 },
-            { image: 'assets/images/albums/album_6.webp', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
-            { image: 'assets/images/albums/album_7.webp', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 78 },
-            { image: 'assets/images/albums/album_8.webp', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 150, gifImage: 'assets/images/albums/album_8_edit.gif' }
+            { image: 'assets/images/albums/disc1.webp', title: 'Track 01', audio: 'assets/audio/track-01.mp3', bpm: 125 },
+            { image: 'assets/images/albums/disc2.webp', title: 'Track 02', audio: 'assets/audio/track-02.mp3', bpm: 95 },
+            { image: 'assets/images/albums/disc3.webp', title: 'Track 03', audio: 'assets/audio/track-03.mp3', bpm: 140 },
+            { image: 'assets/images/albums/disc4.webp', title: 'Track 04', audio: 'assets/audio/track-04.mp3', bpm: 124 },
+            { image: 'assets/images/albums/disc5.webp', title: 'Track 05', audio: 'assets/audio/track-05.mp3', bpm: 130 },
+            { image: 'assets/images/albums/disc6.webp', title: 'Track 06', audio: 'assets/audio/track-06.mp3', bpm: 138 },
+            { image: 'assets/images/albums/disc7.webp', title: 'Track 07', audio: 'assets/audio/track-07.mp3', bpm: 78 },
+            { image: 'assets/images/albums/disc8.webp', title: 'Track 08', audio: 'assets/audio/track-08.mp3', bpm: 150 }
         ];
 
         // =====================================================
@@ -296,10 +295,6 @@
             listenData.forEach(track => {
                 imagesToPreload.push(track.image);
                 audioToPreload.push(track.audio);
-                // Include GIF variants (e.g., track 8)
-                if (track.gifImage) {
-                    imagesToPreload.push(track.gifImage);
-                }
             });
             
             // Preload all images by creating Image objects
@@ -349,7 +344,6 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
         // Device and interaction state
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         let audioUnlocked = false; // Whether user has interacted (for autoplay)
-        let hasClickedListenBefore = false; // First-time listen auto-play flag
         let isReturningFromBackground = false; // Prevent auto-actions when returning to tab
         let lastButtonClickTime = 0; // Debounce timestamp
         let isProcessingButtonClick = false; // Prevent rapid clicks
@@ -357,6 +351,17 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
         // Track 8 special effects state
         let track8GifTimer = null; // Timer for GIF swap and dark mode trigger
         let heyNowFlashTimer = null; // Timer for delayed "Hey now" flashing
+        
+        // Orbit state
+        let currentOrbitDirection = 1; // 1 for clockwise, -1 for counterclockwise
+        let lastPlayedTrack = null; // Tracks the last played track to detect changes
+        let orbitAnimationId = null; // RequestAnimationFrame ID
+        let orbitRotation = 0; // Current rotation angle in degrees
+        let orbitSpeed = 0; // Degrees per millisecond
+        let lastOrbitTime = null; // Timestamp of last orbit update
+        let isHoveringDisc = false; // Whether user is hovering over any disc
+        let orbitSpeedMultiplier = 1; // Speed multiplier for hover effect
+        let audioPlaybackRate = 1; // Current audio playback rate
 
         /**
          * Schedules "Hey now," flashing to start after a delay
@@ -514,7 +519,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
         
         /**
          * Handles click/touch on "listen" button
-         * Shows albums and auto-plays track 1 on first click
+         * Shows albums (user manually clicks to play)
          */
         function handleListenButton(e) {
             e.stopPropagation();
@@ -524,27 +529,8 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             if (currentMode === 'listen' && isButtonActive) {
                 hideContent();
             } else {
-                // Auto-play track 1 ONLY if all conditions met:
-                // - First time clicking listen button
-                // - Not returning from background tab
-                // - Not in dark mode
-                // - Track 8 not currently playing
-                const shouldAutoPlay = !hasClickedListenBefore && 
-                                      !isReturningFromBackground && 
-                                      currentTheme !== 'dark' && 
-                                      currentlyPlaying !== 'assets/audio/track-08.mp3';
-                
                 isButtonActive = true;
                 showContent('listen');
-                
-                if (shouldAutoPlay) {
-                    hasClickedListenBefore = true;
-                    const firstAlbum = contentItems.querySelector('.content-item:first-child');
-                    if (firstAlbum && listenData[0]) {
-                        const track = listenData[0];
-                        playAudio(track.audio, firstAlbum, track.bpm);
-                    }
-                }
             }
         }
         
@@ -653,6 +639,9 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             // Clear any lingering transition classes to prevent race conditions
             rootEl.classList.remove('transitioning-to-light');
             
+            // Check if we need to recreate albums BEFORE updating currentMode
+            const wasAlreadyInListenMode = currentMode === 'listen' && mode === 'listen';
+            
             // Update button states
             [readBtn, writeBtn, listenBtn].forEach(btn => btn.classList.remove('active'));
             document.getElementById(mode + '-btn').classList.add('active');
@@ -672,9 +661,13 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
 
             // Listen mode: render album grid
             if (mode === 'listen') {
-                contentItems.innerHTML = '';
+                // Only recreate albums if not already in listen mode
+                const needsRecreation = !wasAlreadyInListenMode || contentItems.children.length === 0;
+                
+                if (needsRecreation) {
+                    contentItems.innerHTML = '';
 
-                listenData.forEach((item, index) => {
+                    listenData.forEach((item, index) => {
                     const contentItem = document.createElement('div');
                     contentItem.className = 'content-item';
                     contentItem.dataset.bpm = item.bpm;
@@ -700,6 +693,15 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                         });
                     } else {
                         contentItem.addEventListener('click', handleAlbumClick);
+                        
+                        // Desktop: add hover effect to slow down orbit
+                        contentItem.addEventListener('mouseenter', () => {
+                            isHoveringDisc = true;
+                        });
+                        
+                        contentItem.addEventListener('mouseleave', () => {
+                            isHoveringDisc = false;
+                        });
                     }
                     
                     contentItems.appendChild(contentItem);
@@ -709,16 +711,9 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                         contentItem.classList.add('spinning');
                         contentItem.style.opacity = '0.8';
                         currentPlayingElement = contentItem;
-                        
-                        // Track 8 in dark mode: show animated GIF
-                        if (item.gifImage && currentTheme === 'dark') {
-                            const img = contentItem.querySelector('img');
-                            if (img) {
-                                img.src = item.gifImage;
-                            }
-                        }
                     }
                 });
+                }
 
                 // If track 8 is playing, restore appropriate album opacity based on playback phase
                 if (currentlyPlaying === 'assets/audio/track-08.mp3') {
@@ -787,11 +782,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             element.style.opacity = '';
             element.style.transform = '';
             
-            // Track 8: restore static WebP image (check for GIF in any form)
-            const img = element.querySelector('img');
-            if (img && (img.src.includes('album_8_edit.gif') || img.src.includes('album_8_edit'))) {
-                img.src = 'assets/images/albums/album_8.webp';
-            }
+            // No special handling needed for track 8 anymore
         }
 
         /**
@@ -840,16 +831,8 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                 album.style.opacity = '0.15';
             });
             
-            // After 6.7 seconds: swap to GIF and activate dark mode
+            // After 6.7 seconds: activate dark mode
             track8GifTimer = setTimeout(() => {
-                // Swap album art to animated GIF
-                if (element) {
-                    const img = element.querySelector('img');
-                    if (img) {
-                        img.src = 'assets/images/albums/album_8_edit.gif';
-                    }
-                }
-                
                 // Trigger dark mode (no audio, since track is playing)
                 applyTheme('dark', { skipAudio: true });
                 
@@ -870,10 +853,10 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
 
         /**
          * Clears current playback state and resets UI
-         * @param {object} options - { resetAudio: bool }
+         * @param {object} options - { resetAudio: bool, keepOrbit: bool }
          */
         function clearCurrentPlayingState(options = {}) {
-            const { resetAudio = false } = options;
+            const { resetAudio = false, keepOrbit = false } = options;
             if (resetAudio && audioPlayer) {
                 audioPlayer.pause();
                 audioPlayer.currentTime = 0;
@@ -881,10 +864,16 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             restorePlaybackVisual(currentPlayingElement);
             currentlyPlaying = null;
             currentPlayingElement = null;
-            stopDanceStyleFluctuation();
             stopGrowthHackerFlash();
             stopHeyNowFlash();
             stopAlbumFlicker();
+            
+            // Only stop orbit if not switching tracks (to prevent flicker)
+            // When stopping completely (not switching), reset position
+            if (!keepOrbit) {
+                stopAlbumOrbit(false); // Reset position when fully stopping
+            }
+            
             clearTrack8GifTimer();
             if (hiHitTimer) {
                 clearTimeout(hiHitTimer);
@@ -961,213 +950,10 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
         }
 
         // =====================================================
-        // DANCE SYSTEM - Album choreography with BPM sync
+        // FLICKER SYSTEM - Album visual effects
         // =====================================================
         
-        // Dance state tracking
-        let currentDanceStyle = 'smooth'; // 'smooth' or 'jump'
-        let currentCoordMode = 'independent'; // 'independent', 'sync', 'mirror', 'pairs', 'wave'
-        let styleChangeTimeout = null; // Timer for style changes
-        let coordChangeTimeout = null; // Timer for coordination changes
-        let hypeTimeout = null; // Hype mode duration timer
-        let hypeInterval = null; // Hype mode schedule timer
         let flickerInterval = null; // Beat-synced album flicker timer
-        
-        /**
-         * Sets coordination mode for album dancing
-         * Controls how albums sync their dance animations
-         * @param {string} mode - 'independent', 'sync', 'mirror', 'pairs', or 'wave'
-         */
-        function setCoordinationMode(mode) {
-            currentCoordMode = mode;
-            const albums = contentItems.querySelectorAll('.content-item:not(.spinning)');
-            
-            if (mode === 'sync') {
-                // Perfect synchronization - all albums move together
-                albums.forEach(album => {
-                    album.style.animationDelay = '0s';
-                });
-            } else if (mode === 'mirror') {
-                // Mirrored pattern - left mirrors right
-                albums.forEach((album, index) => {
-                    if (index < 4) {
-                        const mirrorIndex = 3 - index;
-                        album.style.animationDelay = `${mirrorIndex * 0.2}s`;
-                    } else {
-                        const mirrorIndex = 7 - index;
-                        album.style.animationDelay = `${mirrorIndex * 0.2}s`;
-                    }
-                });
-            } else if (mode === 'pairs') {
-                // Adjacent pairs dance together (0&1, 2&3, 4&5, 6&7)
-                albums.forEach((album, index) => {
-                    const pairGroup = Math.floor(index / 2);
-                    album.style.animationDelay = `${pairGroup * 0.25}s`;
-                });
-            } else if (mode === 'wave') {
-                // Smooth wave cascading across albums
-                albums.forEach((album, index) => {
-                    album.style.animationDelay = `${index * 0.12}s`;
-                });
-            } else {
-                // Independent - each album has unique timing
-                albums.forEach((album, index) => {
-                    album.style.animationDelay = `${index * 0.15}s`;
-                });
-            }
-        }
-        
-        /**
-         * Triggers "hype mode" - albums lean toward the playing track
-         * Creates visual focus on the currently spinning album
-         */
-        function triggerHypeMode() {
-            const spinningAlbum = contentItems.querySelector('.content-item.spinning');
-            if (!spinningAlbum) return;
-            
-            const spinningIndex = Array.from(contentItems.children).indexOf(spinningAlbum);
-            const albums = contentItems.querySelectorAll('.content-item:not(.spinning)');
-            
-            // Apply directional lean classes based on position relative to spinning album
-            albums.forEach((album, idx) => {
-                album.classList.remove('hype-left', 'hype-right', 'hype-up', 'hype-down');
-                
-                const actualIndex = Array.from(contentItems.children).indexOf(album);
-                
-                // Horizontal direction
-                if (actualIndex < spinningIndex) {
-                    album.classList.add('hype-right'); // Lean right toward spinner
-                } else if (actualIndex > spinningIndex) {
-                    album.classList.add('hype-left'); // Lean left toward spinner
-                }
-                
-                // Vertical direction (based on row)
-                if (actualIndex < 4 && spinningIndex >= 4) {
-                    album.classList.add('hype-down'); // Top row leans down
-                } else if (actualIndex >= 4 && spinningIndex < 4) {
-                    album.classList.add('hype-up'); // Bottom row leans up
-                }
-            });
-            
-            // Enable hype mode for 4 seconds
-            contentItems.classList.add('hype-mode');
-            
-            if (hypeTimeout) clearTimeout(hypeTimeout);
-            hypeTimeout = setTimeout(() => {
-                contentItems.classList.remove('hype-mode');
-                albums.forEach(album => {
-                    album.classList.remove('hype-left', 'hype-right', 'hype-up', 'hype-down');
-                });
-            }, 4000);
-        }
-        
-        /**
-         * Schedules next hype mode trigger at random interval
-         * Occurs every 24-48 beats
-         * @param {number} bpm - Beats per minute for timing
-         */
-        function scheduleRandomHype(bpm) {
-            const beatMs = (60 / bpm) * 1000;
-            const beats = 24 + Math.floor(Math.random() * 24);
-            hypeInterval = setTimeout(() => {
-                triggerHypeMode();
-                scheduleRandomHype(bpm);
-            }, beatMs * beats);
-        }
-        
-        /**
-         * Cycles through different coordination modes
-         * Switches randomly every 12-24 beats
-         * @param {number} bpm - Beats per minute for timing
-         */
-        function cycleCoordinationMode(bpm) {
-            const modes = ['independent', 'sync', 'pairs', 'mirror', 'wave'];
-            
-            // Pick different mode from current
-            let nextMode;
-            do {
-                nextMode = modes[Math.floor(Math.random() * modes.length)];
-            } while (nextMode === currentCoordMode);
-            
-            setCoordinationMode(nextMode);
-            
-            const beatMs = (60 / bpm) * 1000;
-            const beats = 12 + Math.floor(Math.random() * 12);
-            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), beatMs * beats);
-        }
-        
-        /**
-         * Switches dance style between smooth and jump
-         * Changes randomly every 12-24 beats
-         * @param {number} bpm - Beats per minute for timing
-         */
-        function switchDanceStyle(bpm) {
-            currentDanceStyle = currentDanceStyle === 'smooth' ? 'jump' : 'smooth';
-            contentItems.setAttribute('data-dance-style', currentDanceStyle);
-            
-            const beatMs = (60 / bpm) * 1000;
-            const beats = 12 + Math.floor(Math.random() * 12);
-            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), beatMs * beats);
-        }
-        
-        /**
-         * Starts all dance systems with BPM synchronization
-         * Initializes style changes, coordination cycling, and hype moments
-         * @param {number} bpm - Beats per minute for timing
-         */
-        function startDanceStyleFluctuation(bpm) {
-            // Clear any existing timers
-            stopDanceStyleFluctuation();
-            
-            // Initialize with smooth style and independent coordination
-            currentDanceStyle = 'smooth';
-            currentCoordMode = 'independent';
-            contentItems.setAttribute('data-dance-style', 'smooth');
-            setCoordinationMode('independent');
-            
-            const beatMs = (60 / bpm) * 1000;
-            
-            // Schedule first style switch (12-24 beats)
-            const styleBeats = 12 + Math.floor(Math.random() * 12);
-            styleChangeTimeout = setTimeout(() => switchDanceStyle(bpm), beatMs * styleBeats);
-            
-            // Schedule first coordination switch (16-32 beats)
-            const coordBeats = 16 + Math.floor(Math.random() * 16);
-            coordChangeTimeout = setTimeout(() => cycleCoordinationMode(bpm), beatMs * coordBeats);
-            
-            // Schedule first hype moment
-            scheduleRandomHype(bpm);
-        }
-        
-        /**
-         * Stops all dance animations and clears timers
-         */
-        function stopDanceStyleFluctuation() {
-            [styleChangeTimeout, coordChangeTimeout, hypeInterval, hypeTimeout].forEach(timer => {
-                if (timer) clearTimeout(timer);
-            });
-            styleChangeTimeout = coordChangeTimeout = hypeInterval = hypeTimeout = null;
-            
-            if (flickerInterval) {
-                clearInterval(flickerInterval);
-                flickerInterval = null;
-            }
-            
-            contentItems.classList.remove('hype-mode');
-            contentItems.removeAttribute('data-dance-style');
-            
-            // Clean up all dance-related classes and inline styles from albums
-            if (contentItems) {
-                const allAlbums = contentItems.querySelectorAll('.content-item');
-                allAlbums.forEach(album => {
-                    album.classList.remove('hype-left', 'hype-right', 'hype-up', 'hype-down');
-                    album.style.animationDelay = '';
-                });
-            }
-            
-            currentDanceStyle = 'smooth';
-            currentCoordMode = 'independent';
-        }
 
         // =====================================================
         // ALBUM FLICKER MODE - Beat-synced sporadic flashing
@@ -1244,6 +1030,125 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
         }
 
         // =====================================================
+        // ORBIT SYSTEM - Circular album movement with JS
+        // =====================================================
+        
+        /**
+         * Updates orbit rotation on each frame
+         */
+        function updateOrbit(timestamp) {
+            if (!contentItems || !lastOrbitTime) {
+                lastOrbitTime = timestamp;
+                orbitAnimationId = requestAnimationFrame(updateOrbit);
+                return;
+            }
+            
+            const deltaTime = timestamp - lastOrbitTime;
+            lastOrbitTime = timestamp;
+            
+            // Smoothly transition speed multiplier for hover effect
+            const targetMultiplier = isHoveringDisc ? 0.25 : 1;
+            orbitSpeedMultiplier += (targetMultiplier - orbitSpeedMultiplier) * 0.1;
+            
+            // Smoothly transition audio playback rate
+            const targetPlaybackRate = isHoveringDisc ? 0.8 : 1;
+            audioPlaybackRate += (targetPlaybackRate - audioPlaybackRate) * 0.1;
+            
+            // Apply playback rate to audio if playing
+            if (audioPlayer && !audioPlayer.paused && currentlyPlaying) {
+                audioPlayer.playbackRate = audioPlaybackRate;
+            }
+            
+            // Update rotation based on speed, direction, and hover multiplier
+            orbitRotation += orbitSpeed * deltaTime * currentOrbitDirection * orbitSpeedMultiplier;
+            
+            // Keep rotation in 0-360 range for performance
+            if (orbitRotation > 360) orbitRotation -= 360;
+            if (orbitRotation < 0) orbitRotation += 360;
+            
+            // Apply rotation to container
+            if (contentItems) {
+                contentItems.style.transform = `rotate(${orbitRotation}deg)`;
+                
+                // Counter-rotate images so discs stay upright while container orbits
+                // The disc containers keep their individual tilts from CSS
+                const images = contentItems.querySelectorAll('.content-item img');
+                images.forEach(img => {
+                    img.style.transform = `rotate(${-orbitRotation}deg)`;
+                });
+            }
+            
+            orbitAnimationId = requestAnimationFrame(updateOrbit);
+        }
+        
+        /**
+         * Starts circular orbit animation for albums
+         * @param {number} bpm - Beats per minute to calculate orbit speed
+         * @param {string} audioSrc - Audio source to detect track changes
+         */
+        function startAlbumOrbit(bpm, audioSrc) {
+            if (!contentItems) return;
+            
+            // If switching to a different track, reverse direction
+            if (lastPlayedTrack && lastPlayedTrack !== audioSrc) {
+                currentOrbitDirection = -currentOrbitDirection;
+            }
+            lastPlayedTrack = audioSrc;
+            
+            // Calculate orbit speed based on BPM
+            // Slower BPM = slower orbit. Formula: one full rotation every X beats
+            const beatsPerRotation = 32;
+            const secondsPerBeat = 60 / bpm;
+            const orbitDuration = beatsPerRotation * secondsPerBeat; // seconds for full rotation
+            
+            // Calculate degrees per millisecond
+            orbitSpeed = 360 / (orbitDuration * 1000);
+            
+            // Reset playback rate to normal when starting new track
+            if (audioPlayer) {
+                audioPlayer.playbackRate = 1;
+            }
+            audioPlaybackRate = 1;
+            
+            // Start animation loop if not already running
+            if (!orbitAnimationId) {
+                lastOrbitTime = null;
+                orbitAnimationId = requestAnimationFrame(updateOrbit);
+            }
+        }
+        
+        /**
+         * Stops album orbit animation
+         * @param {boolean} keepPosition - If true, freeze in place instead of resetting
+         */
+        function stopAlbumOrbit(keepPosition = false) {
+            if (orbitAnimationId) {
+                cancelAnimationFrame(orbitAnimationId);
+                orbitAnimationId = null;
+            }
+            
+            // If not keeping position, reset transforms
+            if (!keepPosition && contentItems) {
+                contentItems.style.transform = '';
+                const images = contentItems.querySelectorAll('.content-item img');
+                images.forEach(img => {
+                    img.style.transform = '';
+                });
+            }
+            // If keeping position, orbit stays frozen at current rotation
+            
+            // Reset audio playback rate to normal
+            if (audioPlayer && !audioPlayer.paused) {
+                audioPlayer.playbackRate = 1;
+            }
+            
+            lastOrbitTime = null;
+            isHoveringDisc = false;
+            orbitSpeedMultiplier = 1;
+            audioPlaybackRate = 1;
+        }
+
+        // =====================================================
         // AUDIO PLAYBACK - Main music player functions
         // =====================================================
         
@@ -1280,13 +1185,15 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             // Same track clicked: toggle play/pause
             if (currentlyPlaying === audioSrc) {
                 if (!audioPlayer.paused) {
-                    // PAUSE: Stop playback
+                    // PAUSE: Freeze everything in place
                     audioPlayer.pause();
                     updateMediaSessionPlaybackState('paused');
-                    stopDanceStyleFluctuation();
                     stopGrowthHackerFlash();
-                    clearTrack8GifTimer();
-                    restorePlaybackVisual(element);
+                    stopAlbumOrbit(true); // Keep position - freeze in place
+                    clearTrack8GifTimer(); // Cancel dark mode transition if in progress
+                    
+                    // Keep spinning class but pause rotation
+                    // restorePlaybackVisual(element); // Don't restore - keep visual state
                     
                     // Clean up hype mode classes
                     if (contentItems) {
@@ -1297,19 +1204,35 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                         contentItems.classList.remove('hype-mode');
                     }
                     
-                    // Track 8 special handling: return to light mode on pause
+                    // Track 8 special handling: cancel dark mode transition if not yet active
                     if (isTrack8) {
-                        rootEl.removeAttribute('data-track-8-playing');
-                        if (currentTheme === 'dark') {
-                            applyTheme('light', { force: true });
-                            stopHeyNowFlash();
+                        // Cancel the Hi hit animation if pending
+                        if (hiHitTimer) {
+                            clearTimeout(hiHitTimer);
+                            hiHitTimer = null;
+                            rootEl.classList.remove('hi-hit');
                         }
+                        
+                        // If dark mode hasn't activated yet, keep in light mode
+                        // If already in dark mode, stay in dark mode while paused
+                        if (currentTheme !== 'dark') {
+                            rootEl.removeAttribute('data-track-8-playing');
+                        }
+                        
+                        // Stop "Hey now" flashing
+                        stopHeyNowFlash();
                     }
                 } else {
                     // RESUME: Start playback again
                     if (isTrack8) {
-                        // Track 8 always restarts from beginning
+                        // Track 8 always restarts from beginning when resumed
                         audioPlayer.currentTime = 0;
+                        
+                        // Return to light mode first so dark mode transition can restart
+                        if (currentTheme === 'dark') {
+                            applyTheme('light', { force: true, skipAudio: true });
+                        }
+                        rootEl.setAttribute('data-track-8-playing', 'true');
                     }
                     
                     const playPromise = audioPlayer.play();
@@ -1317,12 +1240,10 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                         playPromise.then(() => {
                             updateMediaSessionPlaybackState('playing');
                             
-                            // Start dance animations synced to BPM
+                            // Start text flash effects synced to BPM
                             if (bpm && contentItems) {
-                                const danceSpeed = (240 / bpm); // 4-beat cycle duration
-                                contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
-                                startDanceStyleFluctuation(bpm);
                                 startGrowthHackerFlash(bpm);
+                                startAlbumOrbit(bpm, audioSrc);
                             }
                             
                             // Visual feedback: spinning + dimmed
@@ -1330,7 +1251,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                                 element.classList.add('spinning');
                                 element.style.opacity = '0.8';
                                 
-                                // Track 8: trigger dark mode sequence
+                                // Track 8: restart dark mode sequence from beginning
                                 if (isTrack8) {
                                     startTrack8DarkModeTransition(element);
                                 }
@@ -1349,9 +1270,9 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                 currentPlayingElement = null;
             }
 
-            // Stop current audio completely
+            // Stop current audio completely (but keep orbit running for smooth transition)
             if (currentlyPlaying) {
-                clearCurrentPlayingState({ resetAudio: true });
+                clearCurrentPlayingState({ resetAudio: true, keepOrbit: true });
             }
             
             // Track 8 indicator for starfield effect
@@ -1361,12 +1282,10 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                 rootEl.removeAttribute('data-track-8-playing');
             }
 
-            // Configure dance animation timing (4-beat cycle)
+            // Start text flash effects and orbit synced to BPM
             if (bpm && contentItems) {
-                const danceSpeed = (240 / bpm);
-                contentItems.style.setProperty('--dance-duration', `${danceSpeed}s`);
-                startDanceStyleFluctuation(bpm);
                 startGrowthHackerFlash(bpm);
+                startAlbumOrbit(bpm, audioSrc);
             }
 
             // Lookup track metadata for Media Session API
@@ -1392,6 +1311,11 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
             audioPlayer.volume = 1.0;
             audioPlayer.preload = 'auto';
             
+            // Enable pitch preservation for natural-sounding slowdown on hover
+            audioPlayer.preservesPitch = true;
+            audioPlayer.mozPreservesPitch = true;  // Firefox
+            audioPlayer.webkitPreservesPitch = true;  // Safari
+            
             audioPlayer.load();
             
             // Show loading state (dimmed album)
@@ -1411,9 +1335,10 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                     // Enable lock screen / notification controls
                     updateMediaSession(trackInfo);
                     
-                    // Start text flash effect
+                    // Start text flash effect and orbit
                     if (trackInfo && trackInfo.bpm) {
                         startGrowthHackerFlash(trackInfo.bpm);
+                        startAlbumOrbit(trackInfo.bpm, audioSrc);
                     }
                     
                     // Visual state: spinning + dimmed
@@ -1436,6 +1361,7 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
                             updateMediaSession(trackInfo);
                             if (trackInfo && trackInfo.bpm) {
                                 startGrowthHackerFlash(trackInfo.bpm);
+                                startAlbumOrbit(trackInfo.bpm, audioSrc);
                             }
                             if (element) {
                                 element.classList.add('spinning');
@@ -1698,3 +1624,4 @@ const growthHackerLink = document.getElementById('growth-hacker-link');
     </script>
 </body>
 </html>
+
