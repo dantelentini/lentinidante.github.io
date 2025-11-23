@@ -32,28 +32,45 @@
 
 /* Light mode (default) */
 :root {
-    --bg: #0064e6;                              /* Bright blue background */
-    --fg: #c2f6ff;                              /* Light cyan text */
-    --fg-muted: rgba(255, 255, 255, 0.9);      /* Muted white text */
-    --fg-strong: #ffffff;                       /* Pure white for emphasis */
-    --surface-raised: rgba(255, 255, 255, 0.08); /* Subtle surface elevation */
-    --surface-hover: rgba(255, 255, 255, 0.2);   /* Hover state for surfaces */
-    --button-active-fg: #0064e6;                 /* Active button text color */
-    --link-color: #ffffff;                       /* Link color */
-    --hey-rise-duration: 15s;                    /* Duration for "Hey now" rise (slower by +4s total) */
+    --bg: #0064e6;
+    /* Bright blue background */
+    --fg: #c2f6ff;
+    /* Light cyan text */
+    --fg-muted: rgba(255, 255, 255, 0.9);
+    /* Muted white text */
+    --fg-strong: #ffffff;
+    /* Pure white for emphasis */
+    --surface-raised: rgba(255, 255, 255, 0.08);
+    /* Subtle surface elevation */
+    --surface-hover: rgba(255, 255, 255, 0.2);
+    /* Hover state for surfaces */
+    --button-active-fg: #0064e6;
+    /* Active button text color */
+    --link-color: #ffffff;
+    /* Link color */
+    --hey-rise-duration: 15s;
+    /* Duration for "Hey now" rise (slower by +4s total) */
     color-scheme: light;
 }
 
 /* Dark mode (activated by track 8) */
 [data-theme="dark"] {
-    --bg: #000000;                              /* Pure black background */
-    --fg: #c8d1dc;                              /* Light gray text */
-    --fg-muted: rgba(255, 255, 255, 0.85);     /* Slightly dimmed white */
-    --fg-strong: #ffffff;                       /* Pure white for emphasis */
-    --surface-raised: rgba(255, 255, 255, 0.08); /* Subtle surface elevation */
-    --surface-hover: rgba(255, 255, 255, 0.24);  /* Brighter hover state */
-    --button-active-fg: #000000;                 /* Active button text (black on white) */
-    --link-color: #ffffff;                       /* Link color */
+    --bg: #000000;
+    /* Pure black background */
+    --fg: #c8d1dc;
+    /* Light gray text */
+    --fg-muted: rgba(255, 255, 255, 0.85);
+    /* Slightly dimmed white */
+    --fg-strong: #ffffff;
+    /* Pure white for emphasis */
+    --surface-raised: rgba(255, 255, 255, 0.08);
+    /* Subtle surface elevation */
+    --surface-hover: rgba(255, 255, 255, 0.24);
+    /* Brighter hover state */
+    --button-active-fg: #000000;
+    /* Active button text (black on white) */
+    --link-color: #ffffff;
+    /* Link color */
     color-scheme: dark;
 }
 
@@ -75,7 +92,8 @@ html {
     overflow: hidden;
     background-color: var(--bg);
     min-height: 100vh;
-    min-height: -webkit-fill-available; /* iOS Safari compatibility */
+    min-height: -webkit-fill-available;
+    /* iOS Safari compatibility */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -193,7 +211,8 @@ h1 {
     margin-bottom: 0.3em;
     overflow: visible;
     position: relative;
-    z-index: 10; /* Above the album discs */
+    z-index: 10;
+    /* Above the album discs */
 }
 
 .h1-container h1 {
@@ -252,10 +271,11 @@ h1 {
 /* "Hey now," text - hidden in light mode, rises in dark mode */
 h1.hey-now {
     opacity: 0;
-    /* Start almost at the viewport edge so it’s visible immediately */
+    /* Start almost at the viewport edge so it's visible immediately */
     transform: translate3d(-1px, 100vh, 0) scale(0.97) rotate(-4deg);
     pointer-events: none;
-    z-index: 10;
+    z-index: 100;
+    /* Above all other content including buttons */
     position: relative;
 }
 
@@ -357,14 +377,17 @@ h1.hey-now span {
         opacity: 1;
         transform: translateX(0);
     }
+
     30% {
         opacity: 1;
         transform: translateX(-4px) rotate(-2deg);
     }
+
     55% {
         opacity: 1;
         transform: translateX(-14vw) rotate(-6deg);
     }
+
     100% {
         opacity: 0;
         transform: translateX(-120vw) rotate(-12deg);
@@ -377,22 +400,27 @@ h1.hey-now span {
         opacity: 1;
         transform: translate3d(120vw, -70%, 0);
     }
+
     25% {
         /* smooth early approach */
         transform: translate3d(40vw, -70%, 0);
     }
+
     45% {
         /* getting closer to the \"Hi,\" */
         transform: translate3d(10vw, -70%, 0);
     }
+
     60% {
         /* impact zone – nose of car overlapping the \"Hi,\" */
         transform: translate3d(-22vw, -70%, 0);
     }
+
     78% {
         /* easing out of impact before accelerating off */
         transform: translate3d(-50vw, -70%, 0);
     }
+
     100% {
         /* fully past the left edge, well off-screen */
         transform: translate3d(-140vw, -70%, 0);
@@ -406,23 +434,29 @@ h1.hey-now span {
         /* Start right at the bottom of the screen */
         transform: translate3d(-1px, 100vh, 0) scale(0.97) rotate(-4deg);
     }
+
     10% {
         opacity: 0.9;
         transform: translate3d(-0.8px, 90vh, 0) scale(0.975) rotate(-3deg);
     }
+
     30% {
         opacity: 1;
         transform: translate3d(-0.4px, 65vh, 0) scale(0.99) rotate(-1.5deg);
     }
+
     60% {
         transform: translate3d(1px, 40vh, 0) scale(1.01) rotate(0.5deg);
     }
+
     85% {
         transform: translate3d(0.4px, 16vh, 0) scale(1.02) rotate(-0.15deg);
     }
+
     92% {
         transform: translate3d(0.2px, 10vh, 0) scale(1.02) rotate(-0.08deg);
     }
+
     100% {
         opacity: 1;
         transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
@@ -433,18 +467,23 @@ h1.hey-now span {
     0% {
         transform: translate3d(-26px, 34px, 0) rotate(-20deg);
     }
+
     20% {
         transform: translate3d(-14px, 18px, 0) rotate(-12deg);
     }
+
     40% {
         transform: translate3d(10px, 10px, 0) rotate(7deg);
     }
+
     60% {
         transform: translate3d(-8px, -2px, 0) rotate(-6deg);
     }
+
     80% {
         transform: translate3d(6px, -6px, 0) rotate(4deg);
     }
+
     100% {
         transform: translate3d(0, 0, 0) rotate(0deg);
     }
@@ -454,18 +493,23 @@ h1.hey-now span {
     0% {
         transform: translate3d(22px, 30px, 0) rotate(16deg);
     }
+
     25% {
         transform: translate3d(12px, 16px, 0) rotate(10deg);
     }
+
     50% {
         transform: translate3d(-10px, 4px, 0) rotate(-8deg);
     }
+
     70% {
         transform: translate3d(6px, -5px, 0) rotate(4deg);
     }
+
     90% {
         transform: translate3d(-4px, -3px, 0) rotate(-2deg);
     }
+
     100% {
         transform: translate3d(0, 0, 0) rotate(0deg);
     }
@@ -475,15 +519,19 @@ h1.hey-now span {
     0% {
         transform: translate3d(10px, 24px, 0) rotate(30deg) scale(0.86);
     }
+
     25% {
         transform: translate3d(6px, 16px, 0) rotate(18deg) scale(0.92);
     }
+
     55% {
         transform: translate3d(-6px, 4px, 0) rotate(-10deg) scale(1.08);
     }
+
     80% {
         transform: translate3d(4px, -4px, 0) rotate(4deg) scale(1.02);
     }
+
     100% {
         transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
     }
@@ -493,15 +541,19 @@ h1.hey-now span {
     0% {
         transform: translate3d(-4px, 2px, 0) rotate(-3deg);
     }
+
     25% {
         transform: translate3d(3px, -4px, 0) rotate(4deg);
     }
+
     50% {
         transform: translate3d(-2px, -5px, 0) rotate(-2deg);
     }
+
     75% {
         transform: translate3d(4px, 3px, 0) rotate(3deg);
     }
+
     100% {
         transform: translate3d(-3px, 1px, 0) rotate(-1deg);
     }
@@ -511,15 +563,19 @@ h1.hey-now span {
     0% {
         transform: translate3d(3px, -1px, 0) rotate(2.5deg);
     }
+
     30% {
         transform: translate3d(-3.5px, 2px, 0) rotate(-3deg);
     }
+
     60% {
         transform: translate3d(3px, 3px, 0) rotate(2deg);
     }
+
     90% {
         transform: translate3d(-2px, -2.5px, 0) rotate(-1.5deg);
     }
+
     100% {
         transform: translate3d(2px, 0.5px, 0) rotate(1deg);
     }
@@ -529,12 +585,15 @@ h1.hey-now span {
     0% {
         transform: translate3d(1.8px, 0.6px, 0) rotate(2deg);
     }
+
     35% {
         transform: translate3d(-1.5px, -1.8px, 0) rotate(-3deg);
     }
+
     65% {
         transform: translate3d(2.1px, 1.6px, 0) rotate(2.2deg);
     }
+
     100% {
         transform: translate3d(-1px, -0.8px, 0) rotate(-1.2deg);
     }
@@ -546,7 +605,7 @@ p {
 }
 
 /* First paragraph (with buttons) should be above album discs */
-main > p:first-of-type {
+main>p:first-of-type {
     position: relative;
     z-index: 10;
 }
@@ -589,37 +648,87 @@ main > p:first-of-type {
 }
 
 /* =============================================================
-   BUTTONS - Interactive button styles
+   BUTTONS - Windows 95 style interactive buttons
    ============================================================= */
 button {
-    all: revert;
+    background: #c0c0c0;
+    border: none;
+    padding: 2px 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Tahoma", "Arial", sans-serif;
+    font-size: 14px;
+    color: #000000;
     cursor: pointer;
-    transition: opacity 0.3s ease;
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-    touch-action: manipulation; /* Optimize touch interactions */
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    /* Remove tap highlight on mobile */
+    touch-action: manipulation;
+    /* Optimize touch interactions */
+    transition: none;
+    /* Remove transitions for instant Windows feel */
+
+    /* Classic Windows 95 beveled border */
+    box-shadow:
+        inset -1px -1px 0px 0px #000000,
+        inset 1px 1px 0px 0px #ffffff,
+        inset -2px -2px 0px 0px #808080,
+        inset 2px 2px 0px 0px #dfdfdf;
 }
 
 button:focus {
-    outline: none;
+    outline: 1px dotted #000000;
+    outline-offset: -4px;
 }
 
-button:hover {
-    opacity: 0.8;
+/* Hover effect for non-active buttons */
+button:not(.active):hover {
+    background: #d4d4d4 !important;
 }
 
 button.active {
-    background-color: var(--fg-strong);
-    color: var(--button-active-fg);
+    background: #c0c0c0 !important;
+    /* Inverted shadow for "pressed" look */
+    box-shadow:
+        inset 1px 1px 0px 0px #000000,
+        inset -1px -1px 0px 0px #ffffff,
+        inset 2px 2px 0px 0px #808080,
+        inset -2px -2px 0px 0px #dfdfdf !important;
+    /* Slight offset to simulate being pressed */
+    padding: 3px 7px 1px 9px !important;
+    /* Show dotted outline for active state too */
+    outline: 1px dotted #000000 !important;
+    outline-offset: -4px !important;
 }
 
 /* Active state for mobile touch */
-button:active {
-    opacity: 0.6;
+button:active:not(.active) {
+    box-shadow:
+        inset 1px 1px 0px 0px #000000,
+        inset -1px -1px 0px 0px #ffffff,
+        inset 2px 2px 0px 0px #808080,
+        inset -2px -2px 0px 0px #dfdfdf;
+    padding: 3px 7px 1px 9px;
 }
 
-/* Ensure buttons are visible in dark mode */
-[data-theme="dark"] button:not(.active) {
-    color: var(--fg);
+/* Ensure buttons maintain style in dark mode */
+[data-theme="dark"] button {
+    background: #c0c0c0 !important;
+    color: #000000;
+}
+
+[data-theme="dark"] button:not(.active):hover {
+    background: #d4d4d4 !important;
+}
+
+[data-theme="dark"] button.active {
+    background: #c0c0c0 !important;
+    box-shadow:
+        inset 1px 1px 0px 0px #000000,
+        inset -1px -1px 0px 0px #ffffff,
+        inset 2px 2px 0px 0px #808080,
+        inset -2px -2px 0px 0px #dfdfdf !important;
+    padding: 3px 7px 1px 9px !important;
+    outline: 1px dotted #000000 !important;
+    outline-offset: -4px !important;
 }
 
 /* =============================================================
@@ -663,17 +772,23 @@ button:active {
 
 .content-item {
     position: absolute;
-    width: 100px;
-    height: 67px;
+    width: 80px;
+    height: 54px;
     overflow: visible;
     cursor: pointer;
-    opacity: 1; /* Default to full opacity */
-    transition: transform 0.3s ease; /* Don't transition opacity - it interferes with animation */
+    opacity: 1;
+    /* Default to full opacity */
+    transition: transform 0.3s ease;
+    /* Don't transition opacity - it interferes with animation */
     pointer-events: all;
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-    touch-action: manipulation; /* Optimize touch interactions */
-    will-change: transform, opacity; /* Optimize for animations */
-    backface-visibility: hidden; /* Prevent flickering on mobile */
+    -webkit-tap-highlight-color: transparent;
+    /* Remove tap highlight on mobile */
+    touch-action: manipulation;
+    /* Optimize touch interactions */
+    will-change: transform, opacity;
+    /* Optimize for animations */
+    backface-visibility: hidden;
+    /* Prevent flickering on mobile */
 }
 
 .content-item:hover {
@@ -696,8 +811,8 @@ button:active {
 /* Adjusted for 100x67px discs (centered vertically) */
 /* Top (0 degrees) */
 .content-items[data-mode="listen"] .content-item:nth-child(1) {
-    top: calc(50% - 283.5px);
-    left: calc(50% - 50px);
+    top: calc(50% - 327px);
+    left: calc(50% - 40px);
     --item-rotation: -6deg;
     --angle: 0deg;
     transform: rotate(-6deg);
@@ -706,8 +821,8 @@ button:active {
 
 /* Top-right (45 degrees) */
 .content-items[data-mode="listen"] .content-item:nth-child(2) {
-    top: calc(50% - 195.5px);
-    left: calc(50% + 162px);
+    top: calc(50% - 239px);
+    left: calc(50% + 172px);
     --item-rotation: 1deg;
     --angle: 45deg;
     transform: rotate(1deg);
@@ -716,8 +831,8 @@ button:active {
 
 /* Right (90 degrees) */
 .content-items[data-mode="listen"] .content-item:nth-child(3) {
-    top: calc(50% - 33.5px);
-    left: calc(50% + 250px);
+    top: calc(50% - 27px);
+    left: calc(50% + 260px);
     --item-rotation: -4deg;
     --angle: 90deg;
     transform: rotate(-4deg);
@@ -726,8 +841,8 @@ button:active {
 
 /* Bottom-right (135 degrees) */
 .content-items[data-mode="listen"] .content-item:nth-child(4) {
-    top: calc(50% + 178.5px);
-    left: calc(50% + 162px);
+    top: calc(50% + 185px);
+    left: calc(50% + 172px);
     --item-rotation: 8deg;
     --angle: 135deg;
     transform: rotate(8deg);
@@ -736,8 +851,8 @@ button:active {
 
 /* Bottom (180 degrees) */
 .content-items[data-mode="listen"] .content-item:nth-child(5) {
-    top: calc(50% + 266.5px);
-    left: calc(50% - 50px);
+    top: calc(50% + 273px);
+    left: calc(50% - 40px);
     --item-rotation: 7deg;
     --angle: 180deg;
     transform: rotate(7deg);
@@ -746,8 +861,8 @@ button:active {
 
 /* Bottom-left (225 degrees) */
 .content-items[data-mode="listen"] .content-item:nth-child(6) {
-    top: calc(50% + 178.5px);
-    left: calc(50% - 262px);
+    top: calc(50% + 185px);
+    left: calc(50% - 252px);
     --item-rotation: -3deg;
     --angle: 225deg;
     transform: rotate(-3deg);
@@ -756,8 +871,8 @@ button:active {
 
 /* Left (270 degrees) */
 .content-items[data-mode="listen"] .content-item:nth-child(7) {
-    top: calc(50% - 33.5px);
-    left: calc(50% - 350px);
+    top: calc(50% - 27px);
+    left: calc(50% - 340px);
     --item-rotation: 5deg;
     --angle: 270deg;
     transform: rotate(5deg);
@@ -766,8 +881,8 @@ button:active {
 
 /* Top-left (315 degrees) */
 .content-items[data-mode="listen"] .content-item:nth-child(8) {
-    top: calc(50% - 195.5px);
-    left: calc(50% - 262px);
+    top: calc(50% - 239px);
+    left: calc(50% - 252px);
     --item-rotation: -5deg;
     --angle: 315deg;
     transform: rotate(-5deg);
@@ -790,59 +905,163 @@ button:active {
 
 /* Floating animations - each disc drifts slightly in space */
 @keyframes floatDisc1 {
-    0%, 100% { transform: rotate(-6deg) translate(0, 0); }
-    25% { transform: rotate(-4deg) translate(-3px, -5px); }
-    50% { transform: rotate(-7deg) translate(2px, -3px); }
-    75% { transform: rotate(-5deg) translate(-2px, 4px); }
+
+    0%,
+    100% {
+        transform: rotate(-6deg) translate(0, 0);
+    }
+
+    25% {
+        transform: rotate(-4deg) translate(-3px, -5px);
+    }
+
+    50% {
+        transform: rotate(-7deg) translate(2px, -3px);
+    }
+
+    75% {
+        transform: rotate(-5deg) translate(-2px, 4px);
+    }
 }
 
 @keyframes floatDisc2 {
-    0%, 100% { transform: rotate(1deg) translate(0, 0); }
-    30% { transform: rotate(3deg) translate(4px, -4px); }
-    60% { transform: rotate(-1deg) translate(-3px, 3px); }
-    80% { transform: rotate(2deg) translate(3px, -2px); }
+
+    0%,
+    100% {
+        transform: rotate(1deg) translate(0, 0);
+    }
+
+    30% {
+        transform: rotate(3deg) translate(4px, -4px);
+    }
+
+    60% {
+        transform: rotate(-1deg) translate(-3px, 3px);
+    }
+
+    80% {
+        transform: rotate(2deg) translate(3px, -2px);
+    }
 }
 
 @keyframes floatDisc3 {
-    0%, 100% { transform: rotate(-4deg) translate(0, 0); }
-    20% { transform: rotate(-2deg) translate(-4px, 3px); }
-    50% { transform: rotate(-5deg) translate(3px, -4px); }
-    70% { transform: rotate(-3deg) translate(-2px, 2px); }
+
+    0%,
+    100% {
+        transform: rotate(-4deg) translate(0, 0);
+    }
+
+    20% {
+        transform: rotate(-2deg) translate(-4px, 3px);
+    }
+
+    50% {
+        transform: rotate(-5deg) translate(3px, -4px);
+    }
+
+    70% {
+        transform: rotate(-3deg) translate(-2px, 2px);
+    }
 }
 
 @keyframes floatDisc4 {
-    0%, 100% { transform: rotate(8deg) translate(0, 0); }
-    35% { transform: rotate(6deg) translate(4px, 4px); }
-    65% { transform: rotate(9deg) translate(-3px, -3px); }
-    85% { transform: rotate(7deg) translate(2px, -4px); }
+
+    0%,
+    100% {
+        transform: rotate(8deg) translate(0, 0);
+    }
+
+    35% {
+        transform: rotate(6deg) translate(4px, 4px);
+    }
+
+    65% {
+        transform: rotate(9deg) translate(-3px, -3px);
+    }
+
+    85% {
+        transform: rotate(7deg) translate(2px, -4px);
+    }
 }
 
 @keyframes floatDisc5 {
-    0%, 100% { transform: rotate(7deg) translate(0, 0); }
-    25% { transform: rotate(5deg) translate(-3px, 4px); }
-    55% { transform: rotate(8deg) translate(4px, -2px); }
-    75% { transform: rotate(6deg) translate(-2px, -3px); }
+
+    0%,
+    100% {
+        transform: rotate(7deg) translate(0, 0);
+    }
+
+    25% {
+        transform: rotate(5deg) translate(-3px, 4px);
+    }
+
+    55% {
+        transform: rotate(8deg) translate(4px, -2px);
+    }
+
+    75% {
+        transform: rotate(6deg) translate(-2px, -3px);
+    }
 }
 
 @keyframes floatDisc6 {
-    0%, 100% { transform: rotate(-3deg) translate(0, 0); }
-    30% { transform: rotate(-1deg) translate(3px, -4px); }
-    60% { transform: rotate(-4deg) translate(-4px, 3px); }
-    80% { transform: rotate(-2deg) translate(2px, 2px); }
+
+    0%,
+    100% {
+        transform: rotate(-3deg) translate(0, 0);
+    }
+
+    30% {
+        transform: rotate(-1deg) translate(3px, -4px);
+    }
+
+    60% {
+        transform: rotate(-4deg) translate(-4px, 3px);
+    }
+
+    80% {
+        transform: rotate(-2deg) translate(2px, 2px);
+    }
 }
 
 @keyframes floatDisc7 {
-    0%, 100% { transform: rotate(5deg) translate(0, 0); }
-    20% { transform: rotate(7deg) translate(-3px, -3px); }
-    50% { transform: rotate(4deg) translate(4px, 4px); }
-    70% { transform: rotate(6deg) translate(-2px, 3px); }
+
+    0%,
+    100% {
+        transform: rotate(5deg) translate(0, 0);
+    }
+
+    20% {
+        transform: rotate(7deg) translate(-3px, -3px);
+    }
+
+    50% {
+        transform: rotate(4deg) translate(4px, 4px);
+    }
+
+    70% {
+        transform: rotate(6deg) translate(-2px, 3px);
+    }
 }
 
 @keyframes floatDisc8 {
-    0%, 100% { transform: rotate(-5deg) translate(0, 0); }
-    25% { transform: rotate(-7deg) translate(4px, -3px); }
-    50% { transform: rotate(-4deg) translate(-3px, 4px); }
-    75% { transform: rotate(-6deg) translate(3px, -2px); }
+
+    0%,
+    100% {
+        transform: rotate(-5deg) translate(0, 0);
+    }
+
+    25% {
+        transform: rotate(-7deg) translate(4px, -3px);
+    }
+
+    50% {
+        transform: rotate(-4deg) translate(-3px, 4px);
+    }
+
+    75% {
+        transform: rotate(-6deg) translate(3px, -2px);
+    }
 }
 
 /* =============================================================
@@ -858,12 +1077,15 @@ button:active {
     0% {
         opacity: 1;
     }
+
     20% {
         opacity: 0.8;
     }
+
     40% {
         opacity: 1;
     }
+
     100% {
         opacity: 1;
     }
@@ -887,21 +1109,25 @@ button:active {
         opacity: 0.6;
         transform: translate3d(0, 0, 0) rotate(var(--item-rotation, 0deg)) scale(1);
     }
+
     18% {
         /* First lift toward full brightness */
         opacity: 0.95;
         transform: translate3d(0, -4px, 0) rotate(calc(var(--item-rotation, 0deg) + 1.5deg)) scale(1.04);
     }
+
     32% {
         /* Slide back a bit for a breathing effect */
         opacity: 0.75;
         transform: translate3d(2px, 1px, 0) rotate(calc(var(--item-rotation, 0deg) - 1deg)) scale(0.99);
     }
+
     55% {
         /* Second, softer pop that actually hits 100% */
         opacity: 1;
         transform: translate3d(-2px, -3px, 0) rotate(calc(var(--item-rotation, 0deg) + 2deg)) scale(1.05);
     }
+
     100% {
         /* Return to the 60% baseline */
         opacity: 0.6;
@@ -929,63 +1155,63 @@ button:active {
         padding-left: max(20px, env(safe-area-inset-left));
         padding-right: max(20px, env(safe-area-inset-right));
     }
-    
+
     /* Larger discs for easier tapping */
     .content-item {
-        width: 110px;
-        height: 74px;
+        width: 80px;
+        height: 54px;
     }
-    
+
     /* Circular layout for tablets - 280px radius */
     /* Adjusted for 110x74px discs */
     /* Top */
     .content-items[data-mode="listen"] .content-item:nth-child(1) {
-        top: calc(50% - 267px);
-        left: calc(50% - 55px);
+        top: calc(50% - 307px);
+        left: calc(50% - 40px);
     }
-    
+
     /* Top-right */
     .content-items[data-mode="listen"] .content-item:nth-child(2) {
-        top: calc(50% - 181px);
-        left: calc(50% + 143px);
+        top: calc(50% - 225px);
+        left: calc(50% + 158px);
     }
-    
+
     /* Right */
     .content-items[data-mode="listen"] .content-item:nth-child(3) {
-        top: calc(50% - 37px);
-        left: calc(50% + 225px);
+        top: calc(50% - 27px);
+        left: calc(50% + 240px);
     }
-    
+
     /* Bottom-right */
     .content-items[data-mode="listen"] .content-item:nth-child(4) {
-        top: calc(50% + 161px);
-        left: calc(50% + 143px);
+        top: calc(50% + 171px);
+        left: calc(50% + 158px);
     }
-    
+
     /* Bottom */
     .content-items[data-mode="listen"] .content-item:nth-child(5) {
-        top: calc(50% + 243px);
-        left: calc(50% - 55px);
+        top: calc(50% + 253px);
+        left: calc(50% - 40px);
     }
-    
+
     /* Bottom-left */
     .content-items[data-mode="listen"] .content-item:nth-child(6) {
-        top: calc(50% + 161px);
-        left: calc(50% - 253px);
+        top: calc(50% + 171px);
+        left: calc(50% - 238px);
     }
-    
+
     /* Left */
     .content-items[data-mode="listen"] .content-item:nth-child(7) {
-        top: calc(50% - 37px);
-        left: calc(50% - 335px);
+        top: calc(50% - 27px);
+        left: calc(50% - 320px);
     }
-    
+
     /* Top-left */
     .content-items[data-mode="listen"] .content-item:nth-child(8) {
-        top: calc(50% - 181px);
-        left: calc(50% - 253px);
+        top: calc(50% - 225px);
+        left: calc(50% - 238px);
     }
-    
+
 }
 
 /* Small phones - Maximum optimization */
@@ -997,63 +1223,63 @@ button:active {
         padding-left: max(15px, env(safe-area-inset-left));
         padding-right: max(15px, env(safe-area-inset-right));
     }
-    
+
     /* Maximum touch target size for tiny screens */
     .content-item {
-        width: 120px;
-        height: 80px;
+        width: 80px;
+        height: 54px;
     }
-    
+
     /* Circular layout for mobile - 260px radius */
     /* Adjusted for 120x80px discs */
     /* Top */
     .content-items[data-mode="listen"] .content-item:nth-child(1) {
-        top: calc(50% - 220px);
-        left: calc(50% - 60px);
+        top: calc(50% - 287px);
+        left: calc(50% - 40px);
     }
-    
+
     /* Top-right */
     .content-items[data-mode="listen"] .content-item:nth-child(2) {
-        top: calc(50% - 144px);
-        left: calc(50% + 124px);
+        top: calc(50% - 211px);
+        left: calc(50% + 144px);
     }
-    
+
     /* Right */
     .content-items[data-mode="listen"] .content-item:nth-child(3) {
-        top: calc(50% - 40px);
-        left: calc(50% + 200px);
+        top: calc(50% - 27px);
+        left: calc(50% + 220px);
     }
-    
+
     /* Bottom-right */
     .content-items[data-mode="listen"] .content-item:nth-child(4) {
-        top: calc(50% + 124px);
-        left: calc(50% + 124px);
+        top: calc(50% + 157px);
+        left: calc(50% + 144px);
     }
-    
+
     /* Bottom */
     .content-items[data-mode="listen"] .content-item:nth-child(5) {
-        top: calc(50% + 200px);
-        left: calc(50% - 60px);
+        top: calc(50% + 233px);
+        left: calc(50% - 40px);
     }
-    
+
     /* Bottom-left */
     .content-items[data-mode="listen"] .content-item:nth-child(6) {
-        top: calc(50% + 124px);
-        left: calc(50% - 244px);
+        top: calc(50% + 157px);
+        left: calc(50% - 224px);
     }
-    
+
     /* Left */
     .content-items[data-mode="listen"] .content-item:nth-child(7) {
-        top: calc(50% - 40px);
-        left: calc(50% - 320px);
+        top: calc(50% - 27px);
+        left: calc(50% - 300px);
     }
-    
+
     /* Top-left */
     .content-items[data-mode="listen"] .content-item:nth-child(8) {
-        top: calc(50% - 144px);
-        left: calc(50% - 244px);
+        top: calc(50% - 211px);
+        left: calc(50% - 224px);
     }
-    
+
 }
 
 /* =============================================================
@@ -1097,6 +1323,210 @@ button:active {
 }
 
 /* =============================================================
+   SPEED SLIDER & NOW PLAYING - Listen mode controls
+   ============================================================= */
+
+#speed-slider-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+    width: 270px;
+    max-width: calc(100vw - 100px);
+}
+
+#speed-slider-container.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.media-controls {
+    display: flex;
+    gap: 0;
+    align-items: center;
+}
+
+.media-btn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #c0c0c0;
+    border: none;
+    /* Classic Windows 95 button bevel */
+    box-shadow:
+        inset 1px 1px 0px 0px #ffffff,
+        inset -1px -1px 0px 0px #404040,
+        inset -2px -2px 0px 0px #808080,
+        1px 1px 2px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    color: #000000;
+}
+
+.media-btn:active,
+.media-btn.active {
+    /* Pressed state */
+    box-shadow:
+        inset 1px 1px 0px 0px #404040,
+        inset -1px -1px 0px 0px #ffffff,
+        inset 2px 2px 0px 0px #808080;
+    padding-top: 2px;
+    padding-left: 2px;
+    background: #c0c0c0;
+}
+
+.media-btn svg {
+    pointer-events: none;
+}
+
+.media-btn.pulse-red {
+    animation: pulseRed 0.3s ease-in-out;
+}
+
+@keyframes pulseRed {
+
+    0%,
+    100% {
+        background: #c0c0c0;
+        box-shadow:
+            inset 1px 1px 0px 0px #ffffff,
+            inset -1px -1px 0px 0px #404040,
+            inset -2px -2px 0px 0px #808080,
+            1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    50% {
+        background: #ff0000;
+        box-shadow:
+            0 0 10px #ff0000,
+            inset 1px 1px 0px 0px #ff8888,
+            inset -1px -1px 0px 0px #cc0000,
+            inset -2px -2px 0px 0px #aa0000;
+    }
+}
+
+/* Now Playing Marquee */
+#now-playing-text {
+    flex: 1;
+    height: 20px;
+    overflow: hidden;
+    position: relative;
+    background: #000000;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Tahoma", "Arial", sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    white-space: nowrap;
+    padding: 0;
+    box-shadow:
+        inset -1px -1px 0px 0px #808080,
+        inset 1px 1px 0px 0px #000000;
+}
+
+/* TICKER: Wrapper animates, items sit inside */
+#now-playing-text .ticker-wrapper {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: marqueeScrollRTL 8s linear infinite;
+}
+
+#now-playing-text .ticker-wrapper.paused {
+    animation-play-state: paused !important;
+}
+
+#now-playing-text .ticker-item {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+#now-playing-text span.idle-state {
+    animation: blinkIdle 1s ease-in-out infinite;
+    transform: translateX(0);
+    padding-left: 10px;
+    display: block;
+}
+
+@keyframes blinkIdle {
+
+    0%,
+    49% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0.2;
+    }
+}
+
+/* TICKER: Left to right - enters from left, exits right */
+@keyframes marqueeScrollLTR {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0%);
+    }
+}
+
+/* TICKER: Right to left - enters from right, exits left */
+@keyframes marqueeScrollRTL {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+
+/* Fade gradients on both sides */
+
+
+/* Dark mode media buttons */
+[data-theme="dark"] .media-btn {
+    background: #808080;
+    color: #000000;
+    box-shadow:
+        inset 1px 1px 0px 0px #c0c0c0,
+        inset -1px -1px 0px 0px #000000,
+        inset -2px -2px 0px 0px #404040,
+        1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .media-btn:active,
+[data-theme="dark"] .media-btn.active {
+    background: #808080;
+    box-shadow:
+        inset 1px 1px 0px 0px #000000,
+        inset -1px -1px 0px 0px #c0c0c0,
+        inset 2px 2px 0px 0px #404040;
+}
+
+[data-theme="dark"] #now-playing-text {
+    background: #000000;
+    color: #ffffff;
+}
+
+[data-theme="dark"] #now-playing-text::before {
+    background: linear-gradient(to right, #000000, transparent);
+}
+
+[data-theme="dark"] #now-playing-text::after {
+    background: linear-gradient(to left, #000000, transparent);
+}
+
+/* =============================================================
    GROWTH HACKER FLASH - BPM-synced text animation
    ============================================================= */
 
@@ -1113,27 +1543,35 @@ button:active {
 
 /* "Growth" flashes on beats 1 and 3 */
 @keyframes flashGrowth {
-    0%, 15% {
+
+    0%,
+    15% {
         color: inherit;
         text-shadow: none;
     }
+
     25% {
         color: #ffffff;
         text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-                     0 0 30px rgba(255, 255, 255, 0.6),
-                     0 0 40px rgba(255, 255, 255, 0.4);
+            0 0 30px rgba(255, 255, 255, 0.6),
+            0 0 40px rgba(255, 255, 255, 0.4);
     }
-    35%, 65% {
+
+    35%,
+    65% {
         color: inherit;
         text-shadow: none;
     }
+
     75% {
         color: #ffffff;
         text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-                     0 0 30px rgba(255, 255, 255, 0.6),
-                     0 0 40px rgba(255, 255, 255, 0.4);
+            0 0 30px rgba(255, 255, 255, 0.6),
+            0 0 40px rgba(255, 255, 255, 0.4);
     }
-    85%, 100% {
+
+    85%,
+    100% {
         color: inherit;
         text-shadow: none;
     }
@@ -1141,25 +1579,31 @@ button:active {
 
 /* "Hacker" flashes on beats 2 and 4 (offset from "Growth") */
 @keyframes flashHacker {
-    0%, 40% {
+
+    0%,
+    40% {
         color: inherit;
         text-shadow: none;
     }
+
     50% {
         color: #ffffff;
         text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-                     0 0 30px rgba(255, 255, 255, 0.6),
-                     0 0 40px rgba(255, 255, 255, 0.4);
+            0 0 30px rgba(255, 255, 255, 0.6),
+            0 0 40px rgba(255, 255, 255, 0.4);
     }
-    60%, 90% {
+
+    60%,
+    90% {
         color: inherit;
         text-shadow: none;
     }
+
     100% {
         color: #ffffff;
         text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-                     0 0 30px rgba(255, 255, 255, 0.6),
-                     0 0 40px rgba(255, 255, 255, 0.4);
+            0 0 30px rgba(255, 255, 255, 0.6),
+            0 0 40px rgba(255, 255, 255, 0.4);
     }
 }
 
