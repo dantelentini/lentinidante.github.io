@@ -391,12 +391,14 @@
 
         // Content display state
         let currentMode = null; // Current active mode: 'read', 'write', or 'listen'
-        let isButtonActive = false; // Whether a button is "locked" active (vs hover)
-        let lockedButton = null; // Which button is locked active ('read', 'write', or 'listen')
+        let isButtonActive = false; // Track if a button is currently active
+        let lockedButton = null; // Which button is locked (read/write/listen)
+        let slowmoDisabled = false; // Track if slowmo is disabled during Track 8 transition
 
         // Audio playback state
         let currentlyPlaying = null; // Currently playing audio source
         let currentPlayingElement = null; // DOM element of playing album
+        let currentBpm = null; // BPM of currently playing track
 
         // Device and interaction state
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -502,6 +504,14 @@
         slowmoBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             e.preventDefault();
+
+            // If disabled via flag, pulse red and return
+            if (slowmoDisabled) {
+                slowmoBtn.classList.add('pulse-red');
+                setTimeout(() => slowmoBtn.classList.remove('pulse-red'), 300);
+                return;
+            }
+
             const isSlow = slowmoBtn.classList.toggle('active');
             basePlaybackRate = isSlow ? 0.7 : 1.0;
 
@@ -524,9 +534,30 @@
                     playAudio(firstTrack.audio, firstElement, firstTrack.bpm);
                 }
             } else if (audioPlayer.paused) {
+                // RESUME
                 audioPlayer.play();
+                // Resume orbit
+                if (currentBpm) {
+                    startAlbumOrbit(currentBpm, currentlyPlaying);
+                }
+                // Resume spinning
+                if (currentPlayingElement) {
+                    currentPlayingElement.classList.add('spinning');
+                    currentPlayingElement.style.opacity = '';
+                }
             } else {
+                // PAUSE
                 audioPlayer.pause();
+                // Stop orbit
+                stopAlbumOrbit(true);
+                // Cancel Track 8 transition if in progress
+                clearTrack8GifTimer();
+                // Stop spinning
+                if (currentPlayingElement) {
+                    currentPlayingElement.classList.remove('spinning');
+                    const computedOpacity = window.getComputedStyle(currentPlayingElement).opacity;
+                    currentPlayingElement.style.opacity = computedOpacity;
+                }
             }
         });
 
@@ -552,23 +583,41 @@
 
         // Sync Play/Pause Icon with Audio State
         if (audioPlayer) {
+            // Sync play/pause icons with audio state
             audioPlayer.addEventListener('play', () => {
                 playIcon.style.display = 'none';
                 pauseIcon.style.display = 'block';
-                // Resume marquee
-                if (nowPlayingText) {
-                    const wrapper = nowPlayingText.querySelector('.ticker-wrapper');
-                    if (wrapper) wrapper.classList.remove('paused');
+                // Resume marquee animation
+                const tickerWrapper = nowPlayingText.querySelector('.ticker-wrapper');
+                if (tickerWrapper) {
+                    tickerWrapper.style.animationPlayState = 'running';
+                }
+                // Resume orbit
+                if (currentBpm) {
+                    startAlbumOrbit(currentBpm, currentlyPlaying);
+                }
+                // Resume spinning
+                if (currentPlayingElement) {
+                    currentPlayingElement.classList.add('spinning');
+                    currentPlayingElement.style.opacity = '';
                 }
             });
 
             audioPlayer.addEventListener('pause', () => {
                 playIcon.style.display = 'block';
                 pauseIcon.style.display = 'none';
-                // Pause marquee
-                if (nowPlayingText) {
-                    const wrapper = nowPlayingText.querySelector('.ticker-wrapper');
-                    if (wrapper) wrapper.classList.add('paused');
+                // Pause marquee animation
+                const tickerWrapper = nowPlayingText.querySelector('.ticker-wrapper');
+                if (tickerWrapper) {
+                    tickerWrapper.style.animationPlayState = 'paused';
+                }
+                // Stop orbit
+                stopAlbumOrbit(true);
+                // Stop spinning
+                if (currentPlayingElement) {
+                    currentPlayingElement.classList.remove('spinning');
+                    const computedOpacity = window.getComputedStyle(currentPlayingElement).opacity;
+                    currentPlayingElement.style.opacity = computedOpacity;
                 }
             });
 
@@ -1029,6 +1078,9 @@
                 album.style.transition = '';
                 album.style.opacity = '1';
             });
+
+            // Re-enable slowmo button when Track 8 sequence is cancelled
+            slowmoDisabled = false;
         }
 
         /**
@@ -1038,6 +1090,18 @@
          */
         function startTrack8DarkModeTransition(element) {
             clearTrack8GifTimer();
+
+            // Disable slowmo button during transition and remove active state
+            slowmoDisabled = true;
+            slowmoBtn.classList.remove('active');
+            // Reset playback rate to 1.0 if it was slowed down
+            if (basePlaybackRate !== 1.0) {
+                basePlaybackRate = 1.0;
+                if (audioPlayer) {
+                    audioPlayer.playbackRate = 1.0;
+                }
+                updatePlaybackEffects();
+            }
 
             // Schedule "Hey now," flashing ~19 seconds after trigger
             scheduleHeyNowFlash(150, 19000);
@@ -1069,12 +1133,15 @@
                 // Start "Growth Hacker" text flash at track 8's BPM (150)
                 startGrowthHackerFlash(150);
 
-                // After 14s, set other albums to full opacity instead of flicker mode
+                // After 14s, set other albums to full opacity and re-enable slowmo button
                 setTimeout(() => {
                     const baseAlbums = contentItems.querySelectorAll('.content-item:not(.spinning)');
                     baseAlbums.forEach(album => {
                         album.style.opacity = '1.0';
                     });
+
+                    // Re-enable slowmo button after albums are back
+                    slowmoDisabled = false;
                 }, 14000);
 
                 track8GifTimer = null;
@@ -1386,10 +1453,7 @@
             const isTrack8 = audioSrc === 'assets/audio/track-08.mp3';
 
             // Cancel any pending dark mode transitions
-            if (track8GifTimer) {
-                clearTimeout(track8GifTimer);
-                track8GifTimer = null;
-            }
+            clearTrack8GifTimer();
             if (hiHitTimer) {
                 clearTimeout(hiHitTimer);
                 hiHitTimer = null;
@@ -1405,6 +1469,8 @@
                 applyTheme('light', { force: true });
                 stopGrowthHackerFlash();
                 stopHeyNowFlash();
+                // Re-enable slowmo button when exiting dark mode
+                slowmoDisabled = false;
             }
 
             // Stop dark mode SFX if it's still playing
@@ -1591,6 +1657,7 @@
                     // Playback started successfully
                     currentlyPlaying = audioSrc;
                     currentPlayingElement = element;
+                    currentBpm = trackInfo ? trackInfo.bpm : null;
 
                     // Update now playing text - perfect endless ticker
                     if (trackInfo && nowPlayingText) {
@@ -1632,6 +1699,7 @@
                             // Retry succeeded
                             currentlyPlaying = audioSrc;
                             currentPlayingElement = element;
+                            currentBpm = trackInfo ? trackInfo.bpm : null;
 
                             // Update now playing text - perfect endless ticker
                             if (trackInfo && nowPlayingText) {
